@@ -41,6 +41,11 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-ibm-plex-sans-thai);
+  --color-primary: #006765;
+  --color-secondary: #B2BB1E;
+  --color-primary-action: #004F4F;
 }
 
 :root {
@@ -119,4 +124,15 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ibm-plex-sans-thai), 'IBM Plex Sans Thai', sans-serif;
 }

@@ -1,0 +1,43 @@
+{
+//   // ไม่แสดงโฟลเดอร์ที่ไม่จำเป็นใน Explorer
+//   "files.exclude": {
+//     "**/.next": true,
+//     "**/node_modules": true,
+//     "**/dist": true,
+//     "**/build": true
+//   },
+
+  // ไม่ search ข้ามโฟลเดอร์พวกนี้
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true
+  },
+
+  // ไม่ watch การเปลี่ยนแปลงไฟล์พวกนี้ ลด CPU/RAM
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+
+  // IntelliSense ไม่ต้องตามไฟล์ใหญ่ ๆ พวกนี้
+  "typescript.tsserver.exclude": [
+    "**/.next",
+    "**/node_modules",
+    "**/dist",
+    "**/build"
+  ],
+
+  // กำหนดให้ format เร็วขึ้น (แนะนำถ้าใช้ Prettier)
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // ปรับ performance ของ TypeScript/JavaScript
+  "javascript.suggest.completeFunctionCalls": true,
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "dotenv.enableAutocloaking": false
+}
