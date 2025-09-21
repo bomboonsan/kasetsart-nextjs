@@ -33,6 +33,18 @@ const GET_USER_PROFILE = gql`
       avatar {
         url
       }
+      academic_types {
+        documentId
+      }
+    }
+  }
+`;
+
+const GET_ACADEMIC_TYPES = gql`
+  query AcademicTypes {
+    academicTypes {
+      name
+      documentId
     }
   }
 `;
@@ -53,7 +65,7 @@ export default function ProfileEditPage() {
         firstNameEN: '',
         lastNameEN: '',
         highDegree: '',
-        academic_type: '',
+        academic_types: '',
         participation_type: '',
         email: '',
         telephoneNo: '',
@@ -77,17 +89,30 @@ export default function ProfileEditPage() {
         skip: !userDocumentId,
     });
 
+    const { data: academicTypesData } = useQuery(GET_ACADEMIC_TYPES);
+    const academicTypesOptions = academicTypesData?.academicTypes || [];
+
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
 
     useEffect(() => {
         if (profileData && profileData.usersPermissionsUser) {
             const profile = profileData.usersPermissionsUser;
-            const initialData = Object.keys(profile).reduce((acc, key) => {
+            const initialData = {};
+
+            for (const key in profile) {
+                if (key === '__typename' || key === 'avatar' || key === 'academic_types') continue;
                 if (profile[key] !== null && profile[key] !== undefined) {
-                    acc[key] = profile[key];
+                    initialData[key] = profile[key];
                 }
-                return acc;
-            }, {});
+            }
+
+            const selectedAcademicTypes = profile.academic_types;
+            if (selectedAcademicTypes && selectedAcademicTypes.length > 0) {
+                initialData.academic_types = selectedAcademicTypes[0].documentId;
+            } else {
+                initialData.academic_types = '';
+            }
+
             setFormData(prev => ({ ...prev, ...initialData }));
 
             if (profile.avatar && profile.avatar.url) {
@@ -166,6 +191,10 @@ export default function ProfileEditPage() {
             highDegree: formData.highDegree,
         };
 
+        if (formData.academic_types) {
+            payload.academic_types = [formData.academic_types];
+        }
+
         if (uploadedAvatarId) {
             payload.avatar = uploadedAvatarId;
         }
@@ -189,7 +218,7 @@ export default function ProfileEditPage() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-             <Block>
+            <Block>
                 <h2 className="text-lg font-semibold mb-4">Profile Image</h2>
                 <div className="flex items-center gap-6">
                     <Image
@@ -238,7 +267,7 @@ export default function ProfileEditPage() {
                         <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* <FieldSelect label="ประเภทอาจารย์" value={formData.academic_type} onChange={(value) => handleInputChange('academic_type', value)} options={[{ value: '', label: 'เลือกประเภทอาจารย์' }, ...academicTypes.map(at => ({ value: at.id, label: at.name }))]} /> */}
+                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.documentId, label: at.name }))} />
                         {/* <FieldSelect label="ประเภทการเข้าร่วม" value={formData.participation_type} onChange={(value) => handleInputChange('participation_type', value)} options={[{ value: '', label: 'เลือกประเภทการเข้าร่วม' }, ...participationTypes.map(pt => ({ value: pt.id, label: pt.name }))]} /> */}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
