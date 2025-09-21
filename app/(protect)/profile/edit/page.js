@@ -40,15 +40,6 @@ const GET_USER_PROFILE = gql`
   }
 `;
 
-const GET_ACADEMIC_TYPES = gql`
-  query AcademicTypes {
-    academicTypes {
-      name
-      documentId
-    }
-  }
-`;
-
 const UPDATE_USER_PROFILE = gql`
   mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
     updateUsersPermissionsUser(id: $id, data: $data) {
@@ -77,6 +68,7 @@ export default function ProfileEditPage() {
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const fileInputRef = useRef(null);
+    const [academicTypesOptions, setAcademicTypesOptions] = useState([]);
 
     const { data: meData, loading: meLoading } = useQuery(GET_ME, {
         skip: status !== 'authenticated',
@@ -89,13 +81,34 @@ export default function ProfileEditPage() {
         skip: !userDocumentId,
     });
 
-    const { data: academicTypesData } = useQuery(GET_ACADEMIC_TYPES);
-    const academicTypesOptions = academicTypesData?.academicTypes || [];
-
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
 
+    // Fetch Academic Types using REST API
     useEffect(() => {
-        if (profileData && profileData.usersPermissionsUser) {
+        if (status === 'authenticated') {
+            const fetchAcademicTypes = async () => {
+                const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+                const token = session?.jwt;
+                try {
+                    const res = await fetch(`${strapiUrl}/api/academic-types?populate=*`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    if (!res.ok) throw new Error('Failed to fetch academic types');
+                    const json = await res.json();
+                    setAcademicTypesOptions(json.data || []);
+                } catch (e) {
+                    console.error("Could not fetch academic types:", e);
+                }
+            };
+            fetchAcademicTypes();
+        }
+    }, [status, session]);
+
+    // Set initial form data once profile and options are loaded
+    useEffect(() => {
+        if (profileData && profileData.usersPermissionsUser && academicTypesOptions.length > 0) {
             const profile = profileData.usersPermissionsUser;
             const initialData = {};
 
@@ -108,9 +121,11 @@ export default function ProfileEditPage() {
 
             const selectedAcademicTypes = profile.academic_types;
             if (selectedAcademicTypes && selectedAcademicTypes.length > 0) {
-                initialData.academic_types = selectedAcademicTypes[0].documentId;
-            } else {
-                initialData.academic_types = '';
+                const selectedDocId = selectedAcademicTypes[0].documentId;
+                const matchingType = academicTypesOptions.find(t => t.documentId === selectedDocId);
+                if (matchingType) {
+                    initialData.academic_types = matchingType.id;
+                }
             }
 
             setFormData(prev => ({ ...prev, ...initialData }));
@@ -120,7 +135,7 @@ export default function ProfileEditPage() {
                 setPreviewUrl(strapiUrl + profile.avatar.url);
             }
         }
-    }, [profileData]);
+    }, [profileData, academicTypesOptions]);
 
     const handleInputChange = (field, value) => {
         if (field === 'telephoneNo') {
@@ -189,11 +204,8 @@ export default function ProfileEditPage() {
             email: formData.email,
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
+            academic_types: formData.academic_types,
         };
-
-        if (formData.academic_types) {
-            payload.academic_types = [formData.academic_types];
-        }
 
         if (uploadedAvatarId) {
             payload.avatar = uploadedAvatarId;
@@ -267,7 +279,7 @@ export default function ProfileEditPage() {
                         <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.documentId, label: at.name }))} />
+                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.id, label: at.name }))} />
                         {/* <FieldSelect label="ประเภทการเข้าร่วม" value={formData.participation_type} onChange={(value) => handleInputChange('participation_type', value)} options={[{ value: '', label: 'เลือกประเภทการเข้าร่วม' }, ...participationTypes.map(pt => ({ value: pt.id, label: pt.name }))]} /> */}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
