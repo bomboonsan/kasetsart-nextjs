@@ -3,13 +3,13 @@ import Block from "@/components/layout/Block";
 import FieldInput from "@/components/myui/FieldInput";
 import FieldSelect from "@/components/myui/FieldSelect";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 
-// GraphQL query to get user profile
 const GET_ME = gql`
   query GetMe {
     me {
@@ -30,6 +30,9 @@ const GET_USER_PROFILE = gql`
       academicPosition
       highDegree
       telephoneNo
+      avatar {
+        url
+      }
     }
   }
 `;
@@ -59,18 +62,19 @@ export default function ProfileEditPage() {
         faculty: '',
         organization: '',
     });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const fileInputRef = useRef(null);
 
-    // 1. Get documentId from 'me' query
     const { data: meData, loading: meLoading } = useQuery(GET_ME, {
         skip: status !== 'authenticated',
     });
     const userDocumentId = meData?.me?.documentId;
     const userId = session?.user?.id;
 
-    // 2. Get full user profile using the documentId
     const { loading, error, data: profileData, refetch } = useQuery(GET_USER_PROFILE, {
         variables: { documentId: userDocumentId },
-        skip: !userDocumentId, // Skip if we don't have documentId yet
+        skip: !userDocumentId,
     });
 
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
@@ -85,6 +89,11 @@ export default function ProfileEditPage() {
                 return acc;
             }, {});
             setFormData(prev => ({ ...prev, ...initialData }));
+
+            if (profile.avatar && profile.avatar.url) {
+                const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+                setPreviewUrl(strapiUrl + profile.avatar.url);
+            }
         }
     }, [profileData]);
 
@@ -103,9 +112,48 @@ export default function ProfileEditPage() {
         }
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userId) return;
+
+        let uploadedAvatarId = null;
+
+        if (avatarFile) {
+            const uploadFormData = new FormData();
+            uploadFormData.append('files', avatarFile);
+
+            const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+            const token = session?.jwt;
+
+            try {
+                const uploadRes = await fetch(`${strapiUrl}/api/upload`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: uploadFormData,
+                });
+
+                if (!uploadRes.ok) {
+                    const errorBody = await uploadRes.json();
+                    throw new Error(errorBody.error?.message || 'Failed to upload image');
+                }
+
+                const uploadData = await uploadRes.json();
+                uploadedAvatarId = uploadData[0].id;
+            } catch (uploadError) {
+                alert(`Error uploading image: ${uploadError.message}`);
+                return;
+            }
+        }
 
         const payload = {
             firstNameTH: formData.firstNameTH,
@@ -117,6 +165,10 @@ export default function ProfileEditPage() {
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
         };
+
+        if (uploadedAvatarId) {
+            payload.avatar = uploadedAvatarId;
+        }
 
         try {
             await updateProfile({
@@ -135,10 +187,32 @@ export default function ProfileEditPage() {
     if (meLoading || (loading && !profileData)) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
 
-
-
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
+             <Block>
+                <h2 className="text-lg font-semibold mb-4">Profile Image</h2>
+                <div className="flex items-center gap-6">
+                    <Image
+                        src={previewUrl || '/profile-placeholder.svg'}
+                        alt="Profile Avatar"
+                        width={96}
+                        height={96}
+                        className="rounded-full object-cover bg-gray-200"
+                        unoptimized
+                    />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="image/png, image/jpeg, image/gif"
+                    />
+                    <Button type="button" onClick={() => fileInputRef.current.click()}>
+                        Change Image
+                    </Button>
+                </div>
+            </Block>
+
             <Block>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-lg font-semibold">Edit Profile</h2>
