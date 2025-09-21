@@ -35,15 +35,15 @@ const GET_USER_PROFILE = gql`
 `;
 
 const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($documentId: ID!, $data: UsersPermissionsUserInput!) {
-    updateUsersPermissionsUser(documentId: $documentId, data: $data) {
-      username
+  mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
+    updateUsersPermissionsUser(id: $id, data: $data) {
+      __typename
     }
   }
 `;
 
 export default function ProfileEditPage() {
-    const { status } = useSession();
+    const { data: session, status } = useSession();
     const [formData, setFormData] = useState({
         firstNameTH: '',
         lastNameTH: '',
@@ -65,21 +65,15 @@ export default function ProfileEditPage() {
         skip: status !== 'authenticated',
     });
     const userDocumentId = meData?.me?.documentId;
+    const userId = session?.user?.id;
 
     // 2. Get full user profile using the documentId
-    const { loading, error, data: profileData } = useQuery(GET_USER_PROFILE, {
+    const { loading, error, data: profileData, refetch } = useQuery(GET_USER_PROFILE, {
         variables: { documentId: userDocumentId },
         skip: !userDocumentId, // Skip if we don't have documentId yet
     });
 
-    const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE, {
-        onCompleted: () => {
-            alert('Profile updated successfully!');
-        },
-        refetchQueries: [
-            { query: GET_USER_PROFILE, variables: { documentId: userDocumentId } }
-        ]
-    });
+    const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
 
     useEffect(() => {
         if (profileData && profileData.usersPermissionsUser) {
@@ -95,12 +89,23 @@ export default function ProfileEditPage() {
     }, [profileData]);
 
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        if (field === 'telephoneNo') {
+            const numericValue = value.replace(/[^0-9]/g, '');
+            setFormData(prev => ({ ...prev, [field]: numericValue.slice(0, 10) }));
+        } else if (field === 'firstNameEN' || field === 'lastNameEN') {
+            const englishOnlyValue = value.replace(/[^a-zA-Z ]/g, '');
+            setFormData(prev => ({ ...prev, [field]: englishOnlyValue }));
+        } else if (field === 'firstNameTH' || field === 'lastNameTH') {
+            const thaiOnlyValue = value.replace(/[^ก-๙ ]/g, '');
+            setFormData(prev => ({ ...prev, [field]: thaiOnlyValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!userDocumentId) return;
+        if (!userId) return;
 
         const payload = {
             firstNameTH: formData.firstNameTH,
@@ -116,12 +121,13 @@ export default function ProfileEditPage() {
         try {
             await updateProfile({
                 variables: {
-                    documentId: userDocumentId,
+                    id: userId,
                     data: payload
                 }
             });
+            alert('Profile updated successfully!');
+            refetch();
         } catch (err) {
-            // console.error("Error updating profile:", err);
             alert(`Failed to update profile: ${err.message}`);
         }
     };
@@ -130,7 +136,6 @@ export default function ProfileEditPage() {
     if (error) return <p>Error loading profile: {error.message}</p>;
 
 
-    console.log("Form Data:", formData);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
