@@ -121,13 +121,16 @@ export default function ProfileEditPage() {
                 }
             });
         } catch (err) {
-            console.error("Error updating profile:", err);
+            // console.error("Error updating profile:", err);
             alert(`Failed to update profile: ${err.message}`);
         }
     };
 
     if (meLoading || (loading && !profileData)) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
+
+
+    console.log("Form Data:", formData);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -140,20 +143,20 @@ export default function ProfileEditPage() {
                 </div>
                 <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="ชื่อ" value={formData.firstNameTH || ''} onChange={(value) => handleInputChange('firstNameTH', value)} placeholder="กรุณาระบุชื่อ" />
-                        <FieldInput label="นามสกุล" value={formData.lastNameTH || ''} onChange={(value) => handleInputChange('lastNameTH', value)} placeholder="กรุณาระบุนามสกุล" />
+                        <FieldInput label="ชื่อ" value={formData.firstNameTH || ''} onChange={(e) => handleInputChange('firstNameTH', e.target.value)} placeholder="กรุณาระบุชื่อ" />
+                        <FieldInput label="นามสกุล" value={formData.lastNameTH || ''} onChange={(e) => handleInputChange('lastNameTH', e.target.value)} placeholder="กรุณาระบุนามสกุล" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="First Name" value={formData.firstNameEN || ''} onChange={(value) => handleInputChange('firstNameEN', value)} placeholder="First name in English" />
-                        <FieldInput label="Last Name" value={formData.lastNameEN || ''} onChange={(value) => handleInputChange('lastNameEN', value)} placeholder="Last name in English" />
+                        <FieldInput label="First Name" value={formData.firstNameEN || ''} onChange={(e) => handleInputChange('firstNameEN', e.target.value)} placeholder="First name in English" />
+                        <FieldInput label="Last Name" value={formData.lastNameEN || ''} onChange={(e) => handleInputChange('lastNameEN', e.target.value)} placeholder="Last name in English" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="เบอร์ติดต่อ" value={formData.phone || ''} onChange={(value) => handleInputChange('phone', value)} placeholder="" />
-                        <FieldInput label="อีเมล" type="email" value={formData.email || ''} onChange={(value) => handleInputChange('email', value)} placeholder="กรุณาระบุอีเมล" />
+                        <FieldInput label="เบอร์ติดต่อ" value={formData.telephoneNo || ''} onChange={(e) => handleInputChange('telephoneNo', e.target.value)} placeholder="" />
+                        <FieldInput label="อีเมล" type="email" value={formData.email || ''} onChange={(e) => handleInputChange('email', e.target.value)} placeholder="กรุณาระบุอีเมล" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="ตำแหน่งทางวิชาการ" value={formData.academicPosition || ''} onChange={(value) => handleInputChange('academicPosition', value)} placeholder="" />
-                        <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(value) => handleInputChange('highDegree', value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
+                        <FieldInput label="ตำแหน่งทางวิชาการ" value={formData.academicPosition || ''} onChange={(e) => handleInputChange('academicPosition', e.target.value)} placeholder="" />
+                        <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* <FieldSelect label="ประเภทอาจารย์" value={formData.academic_type} onChange={(value) => handleInputChange('academic_type', value)} options={[{ value: '', label: 'เลือกประเภทอาจารย์' }, ...academicTypes.map(at => ({ value: at.id, label: at.name }))]} /> */}
