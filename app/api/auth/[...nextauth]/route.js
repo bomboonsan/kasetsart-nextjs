@@ -24,6 +24,7 @@ export const authOptions = {
                     id
                     username
                     email
+                    documentId
                   }
                 }
               }
@@ -54,6 +55,7 @@ export const authOptions = {
       if (user) {
         token.id = user.id;
         token.jwt = user.jwt;
+        token.documentId = user.documentId;
       }
       return token;
     },
@@ -61,6 +63,7 @@ export const authOptions = {
       if (token) {
         session.user.id = token.id;
         session.jwt = token.jwt;
+        session.user.documentId = token.documentId;
       }
       return session;
     },

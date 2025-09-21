@@ -10,72 +10,80 @@ import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 
 // GraphQL query to get user profile
-const GET_USER_PROFILE = gql`
-  query GetUserProfile($id: ID!) {
-    usersPermissionsUser(id: $id) {
-      data {
-        id
-        attributes {
-          firstName
-          lastName
-          firstNameEn
-          lastNameEn
-          phone
-          email
-          academicPosition
-          highDegree
-        }
-      }
+const GET_ME = gql`
+  query GetMe {
+    me {
+      documentId
     }
   }
 `;
 
-// GraphQL mutation to update user profile
+const GET_USER_PROFILE = gql`
+  query GetUserProfile($documentId: ID!) {
+    usersPermissionsUser(documentId: $documentId) {
+      username
+      email
+      firstNameTH
+      lastNameTH
+      firstNameEN
+      lastNameEN
+      academicPosition
+      highDegree
+      telephoneNo
+    }
+  }
+`;
+
 const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
-    updateUsersPermissionsUser(id: $id, data: $data) {
-      data {
-        id
-      }
+  mutation UpdateUserProfile($documentId: ID!, $data: UsersPermissionsUserInput!) {
+    updateUsersPermissionsUser(documentId: $documentId, data: $data) {
+      username
     }
   }
 `;
 
 export default function ProfileEditPage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        firstNameEn: '',
-        lastNameEn: '',
+        firstNameTH: '',
+        lastNameTH: '',
+        firstNameEN: '',
+        lastNameEN: '',
         highDegree: '',
         academic_type: '',
         participation_type: '',
         email: '',
-        phone: '',
+        telephoneNo: '',
         academicPosition: '',
         department: '',
         faculty: '',
         organization: '',
     });
 
-    const userId = session?.user?.id;
+    // 1. Get documentId from 'me' query
+    const { data: meData, loading: meLoading } = useQuery(GET_ME, {
+        skip: status !== 'authenticated',
+    });
+    const userDocumentId = meData?.me?.documentId;
 
-    const { loading, error, data } = useQuery(GET_USER_PROFILE, {
-        variables: { id: userId },
-        skip: !userId,
+    // 2. Get full user profile using the documentId
+    const { loading, error, data: profileData } = useQuery(GET_USER_PROFILE, {
+        variables: { documentId: userDocumentId },
+        skip: !userDocumentId, // Skip if we don't have documentId yet
     });
 
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE, {
         onCompleted: () => {
             alert('Profile updated successfully!');
         },
-        refetchQueries: [{ query: GET_USER_PROFILE, variables: { id: userId } }]
+        refetchQueries: [
+            { query: GET_USER_PROFILE, variables: { documentId: userDocumentId } }
+        ]
     });
 
     useEffect(() => {
-        if (data && data.usersPermissionsUser && data.usersPermissionsUser.data) {
-            const profile = data.usersPermissionsUser.data.attributes;
+        if (profileData && profileData.usersPermissionsUser) {
+            const profile = profileData.usersPermissionsUser;
             const initialData = Object.keys(profile).reduce((acc, key) => {
                 if (profile[key] !== null && profile[key] !== undefined) {
                     acc[key] = profile[key];
@@ -84,7 +92,7 @@ export default function ProfileEditPage() {
             }, {});
             setFormData(prev => ({ ...prev, ...initialData }));
         }
-    }, [data]);
+    }, [profileData]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -92,14 +100,14 @@ export default function ProfileEditPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!userId) return;
+        if (!userDocumentId) return;
 
         const payload = {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            firstNameEn: formData.firstNameEn,
-            lastNameEn: formData.lastNameEn,
-            phone: formData.phone,
+            firstNameTH: formData.firstNameTH,
+            lastNameTH: formData.lastNameTH,
+            firstNameEN: formData.firstNameEN,
+            lastNameEN: formData.lastNameEN,
+            telephoneNo: formData.telephoneNo,
             email: formData.email,
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
@@ -108,7 +116,7 @@ export default function ProfileEditPage() {
         try {
             await updateProfile({
                 variables: {
-                    id: userId,
+                    documentId: userDocumentId,
                     data: payload
                 }
             });
@@ -118,7 +126,7 @@ export default function ProfileEditPage() {
         }
     };
 
-    if (status === "loading" || (loading && !data)) return <p>Loading...</p>;
+    if (meLoading || (loading && !profileData)) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
 
     return (
@@ -132,12 +140,12 @@ export default function ProfileEditPage() {
                 </div>
                 <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="ชื่อ" value={formData.firstName || ''} onChange={(value) => handleInputChange('firstName', value)} placeholder="กรุณาระบุชื่อ" />
-                        <FieldInput label="นามสกุล" value={formData.lastName || ''} onChange={(value) => handleInputChange('lastName', value)} placeholder="กรุณาระบุนามสกุล" />
+                        <FieldInput label="ชื่อ" value={formData.firstNameTH || ''} onChange={(value) => handleInputChange('firstNameTH', value)} placeholder="กรุณาระบุชื่อ" />
+                        <FieldInput label="นามสกุล" value={formData.lastNameTH || ''} onChange={(value) => handleInputChange('lastNameTH', value)} placeholder="กรุณาระบุนามสกุล" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="First Name" value={formData.firstNameEn || ''} onChange={(value) => handleInputChange('firstNameEn', value)} placeholder="First name in English" />
-                        <FieldInput label="Last Name" value={formData.lastNameEn || ''} onChange={(value) => handleInputChange('lastNameEn', value)} placeholder="Last name in English" />
+                        <FieldInput label="First Name" value={formData.firstNameEN || ''} onChange={(value) => handleInputChange('firstNameEN', value)} placeholder="First name in English" />
+                        <FieldInput label="Last Name" value={formData.lastNameEN || ''} onChange={(value) => handleInputChange('lastNameEN', value)} placeholder="Last name in English" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FieldInput label="เบอร์ติดต่อ" value={formData.phone || ''} onChange={(value) => handleInputChange('phone', value)} placeholder="" />
