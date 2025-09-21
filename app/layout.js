@@ -1,6 +1,7 @@
 import { IBM_Plex_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import Provider from "@/components/SessionProvider";
+import ApolloProvider from "@/components/ApolloProvider";
 
 const ibmPlexSansThai = IBM_Plex_Sans_Thai({
   variable: "--font-ibm-plex-sans-thai",
@@ -19,7 +20,9 @@ export default function RootLayout({ children, session }) {
       <body
         className={`${ibmPlexSansThai.variable} antialiased`}
       >
-        <Provider session={session}>{children}</Provider>
+        <Provider session={session}>
+          <ApolloProvider>{children}</ApolloProvider>
+        </Provider>
       </body>
     </html>
   );
