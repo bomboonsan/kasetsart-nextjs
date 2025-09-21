@@ -13,10 +13,10 @@ export default function Sidebar() {
 	};
 
 	return (
-		<aside className="w-64 p-4 border-r">
+		<aside className="w-64 p-4 border-r min-h-screen bg-white">
 			<nav className="flex flex-col gap-2">
 				<Link href="/">Home</Link>
-				<Link href="/app/profile">Profile</Link>
+				<Link href="/profile">Profile</Link>
 				<div className="mt-4">
 					<Button variant="ghost" onClick={handleLogout}>Logout</Button>
 				</div>
