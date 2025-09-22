@@ -4,49 +4,18 @@ import FieldInput from "@/components/myui/FieldInput";
 import FieldSelect from "@/components/myui/FieldSelect";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-
+// Hooks
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 
-const GET_ME = gql`
-  query GetMe {
-    me {
-      documentId
-    }
-  }
-`;
+// Hook 
+import { useFormOptions } from '@/hooks/useFormOptions';
 
-const GET_USER_PROFILE = gql`
-  query GetUserProfile($documentId: ID!) {
-    usersPermissionsUser(documentId: $documentId) {
-      username
-      email
-      firstNameTH
-      lastNameTH
-      firstNameEN
-      lastNameEN
-      academicPosition
-      highDegree
-      telephoneNo
-      avatar {
-        url
-      }
-      academic_types {
-        documentId
-      }
-    }
-  }
-`;
-
-const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
-    updateUsersPermissionsUser(id: $id, data: $data) {
-      __typename
-    }
-  }
-`;
+// GraphQL Queries
+import { GET_ME, GET_USER_PROFILE, UPDATE_USER_PROFILE } from '@/graphql/userQueries';
+// Utils
+import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
 export default function ProfileEditPage() {
     const { data: session, status } = useSession();
@@ -65,10 +34,14 @@ export default function ProfileEditPage() {
         faculty: '',
         organization: '',
     });
+
+    const { options, loading: optionsLoading, error: optionsError } = useFormOptions(session);
+
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const fileInputRef = useRef(null);
     const [academicTypesOptions, setAcademicTypesOptions] = useState([]);
+    const isFormInitialized = useRef(false);
 
     const { data: meData, loading: meLoading } = useQuery(GET_ME, {
         skip: status !== 'authenticated',
@@ -108,48 +81,41 @@ export default function ProfileEditPage() {
 
     // Set initial form data once profile and options are loaded
     useEffect(() => {
-        if (profileData && profileData.usersPermissionsUser && academicTypesOptions.length > 0) {
-            const profile = profileData.usersPermissionsUser;
-            const initialData = {};
+        // ถ้าข้อมูลยังไม่ครบ หรือถ้าฟอร์มถูกเซ็ตค่าไปแล้ว ให้ออกจาก function ทันที
+        if (!profileData?.usersPermissionsUser || optionsLoading || isFormInitialized.current) {
+            return;
+        }
+        const profile = profileData.usersPermissionsUser;
+        let initialData = {};
 
-            for (const key in profile) {
-                if (key === '__typename' || key === 'avatar' || key === 'academic_types') continue;
-                if (profile[key] !== null && profile[key] !== undefined) {
-                    initialData[key] = profile[key];
-                }
-            }
-
-            const selectedAcademicTypes = profile.academic_types;
-            if (selectedAcademicTypes && selectedAcademicTypes.length > 0) {
-                const selectedDocId = selectedAcademicTypes[0].documentId;
-                const matchingType = academicTypesOptions.find(t => t.documentId === selectedDocId);
-                if (matchingType) {
-                    initialData.academic_types = matchingType.id;
-                }
-            }
-
-            setFormData(prev => ({ ...prev, ...initialData }));
-
-            if (profile.avatar && profile.avatar.url) {
-                const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-                setPreviewUrl(strapiUrl + profile.avatar.url);
+        for (const key in profile) {
+            if (key === '__typename' || key === 'avatar') continue;
+            if (profile[key] !== null && profile[key] !== undefined) {
+                initialData[key] = profile[key];
             }
         }
-    }, [profileData, academicTypesOptions]);
+        initialData.academic_types = profile.academic_types[0]?.documentId || '';
+
+        setFormData(prev => ({ ...prev, ...initialData }));
+
+        if (profile.avatar && profile.avatar.url) {
+            const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+            setPreviewUrl(strapiUrl + profile.avatar.url);
+        }
+
+        isFormInitialized.current = true; // Mark form as initialized
+    }, [profileData, options, optionsLoading]);
 
     const handleInputChange = (field, value) => {
+        let formattedValue = value;
         if (field === 'telephoneNo') {
-            const numericValue = value.replace(/[^0-9]/g, '');
-            setFormData(prev => ({ ...prev, [field]: numericValue.slice(0, 10) }));
+            formattedValue = formatToDigitsOnly(value).slice(0, 10);
         } else if (field === 'firstNameEN' || field === 'lastNameEN') {
-            const englishOnlyValue = value.replace(/[^a-zA-Z ]/g, '');
-            setFormData(prev => ({ ...prev, [field]: englishOnlyValue }));
+            formattedValue = formatToEnglishOnly(value);
         } else if (field === 'firstNameTH' || field === 'lastNameTH') {
-            const thaiOnlyValue = value.replace(/[^ก-๙ ]/g, '');
-            setFormData(prev => ({ ...prev, [field]: thaiOnlyValue }));
-        } else {
-            setFormData(prev => ({ ...prev, [field]: value }));
+            formattedValue = formatToThaiOnly(value);
         }
+        setFormData(prev => ({ ...prev, [field]: formattedValue }));
     };
 
     const handleFileChange = (e) => {
@@ -194,6 +160,11 @@ export default function ProfileEditPage() {
                 return;
             }
         }
+        let academic_typesId = null;
+        const matchingType = academicTypesOptions.find(t => t.documentId === formData.academic_types);
+        if (matchingType) {
+            academic_typesId = matchingType.id;
+        }
 
         const payload = {
             firstNameTH: formData.firstNameTH,
@@ -204,7 +175,7 @@ export default function ProfileEditPage() {
             email: formData.email,
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
-            academic_types: formData.academic_types,
+            academic_types: [academic_typesId] || null,
         };
 
         if (uploadedAvatarId) {
@@ -227,6 +198,10 @@ export default function ProfileEditPage() {
 
     if (meLoading || (loading && !profileData)) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
+
+    if (optionsLoading) return <p>Loading form options...</p>;
+    if (optionsError) return <p>Error: {optionsError}</p>;
+    console.log("Profile Edit Form Data:", formData);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -257,9 +232,6 @@ export default function ProfileEditPage() {
             <Block>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-lg font-semibold">Edit Profile</h2>
-                    <Button type="submit" disabled={updateLoading}>
-                        {updateLoading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
-                    </Button>
                 </div>
                 <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,7 +251,8 @@ export default function ProfileEditPage() {
                         <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.id, label: at.name }))} />
+                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.documentId, label: at.name }))} />
+
                         {/* <FieldSelect label="ประเภทการเข้าร่วม" value={formData.participation_type} onChange={(value) => handleInputChange('participation_type', value)} options={[{ value: '', label: 'เลือกประเภทการเข้าร่วม' }, ...participationTypes.map(pt => ({ value: pt.id, label: pt.name }))]} /> */}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -287,6 +260,9 @@ export default function ProfileEditPage() {
                         {/* <FieldSelect label="คณะ" value={formData.faculty} onChange={(value) => handleInputChange('faculty', value)} options={[{ value: '', label: 'เลือกคณะ' }, ...faculties.map(fac => ({ value: fac.id, label: fac.name }))]} /> */}
                         {/* <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organization} onChange={(value) => handleInputChange('organization', value)} options={[{ value: '', label: 'เลือกมหาวิทยาลัย/หน่วยงาน' }, ...organizations.map(org => ({ value: org.id, label: org.name }))]} /> */}
                     </div>
+                    <Button type="submit" disabled={updateLoading}>
+                        {updateLoading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
+                    </Button>
                 </div>
             </Block>
             {updateError && (
