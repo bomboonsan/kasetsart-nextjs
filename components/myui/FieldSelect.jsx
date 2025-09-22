@@ -10,10 +10,17 @@ import {
 import { Label } from "@/components/ui/label"
 
 export default function FieldSelect({ id, label, value, onChange, options, placeholder, ...props }) {
+    const handleValueChange = (newValue) => {
+        if (newValue === '') {
+            return;
+        }
+        onChange(newValue);
+    };
+
     return (
         <div className="space-y-1">
             <Label htmlFor={id}>{label}</Label>
-            <Select value={value} onValueChange={onChange} {...props}>
+            <Select value={value} onValueChange={handleValueChange} {...props}>
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder || "Select an option"} />
                 </SelectTrigger>

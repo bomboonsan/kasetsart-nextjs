@@ -27,35 +27,113 @@ const fetchAcademicTypes = async (token) => {
         items = [];
     }
 
-    // normalize: ให้ผลลัพธ์เป็น { value, label }
+    // normalize: ให้ผลลัพธ์เป็น { id, value, label }
     return items.map((it) => {
         const raw = it.attributes ? { ...it.attributes, id: it.id } : it;
-        const value = raw.documentId ?? raw.document_id ?? raw.id ?? null;
+        const id = it.id ?? raw.id ?? null;
+        const value = raw.documentId ?? raw.document_id ?? id;
         const label = raw.name ?? raw.title ?? '';
-        return { value, label };
+        return { id, value, label };
     });
 };
 
-// ตัวอย่าง fetch ที่ใช้ axios (คอมเมนต์ไว้เป็นตัวอย่าง)
-// const fetchDepartments = async (token) => {
-//   const res = await apiClient.get('/departments?populate=*', {
-//     headers: { Authorization: `Bearer ${token}` }
-//   });
-//   const payload = res.data;
-//   // normalize เหมือนข้างบน
-//   return (Array.isArray(payload.data) ? payload.data : payload).map(d => {
-//     const raw = d.attributes ? { ...d.attributes, id: d.id } : d;
-//     return { value: raw.documentId ?? raw.id, label: raw.name ?? raw.title };
-//   });
-// };
+const fetchDepartments = async (token) => {
+    const res = await apiClient.get('/departments?populate=*', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const payload = res.data;
+    let items = [];
 
-// ...สร้างฟังก์ชัน fetch อื่นๆ ตามต้องการ...
+    // รองรับหลายรูปแบบที่ Strapi อาจคืนค่า (ตรงๆ หรือใน .data)
+    if (Array.isArray(payload)) {
+        items = payload;
+    } else if (Array.isArray(payload.data)) {
+        // Strapi v4: { data: [ { id, attributes: { ... } } ], meta: {} }
+        items = payload.data;
+    } else if (payload.data && Array.isArray(payload.data.data)) {
+        // ถ้าถูกห่อชั้นเพิ่มเติม (defensive)
+        items = payload.data.data;
+    } else {
+        items = [];
+    }
+
+    // normalize: ให้ผลลัพธ์เป็น { id, value, label }
+    return items.map((it) => {
+        const raw = it.attributes ? { ...it.attributes, id: it.id } : it;
+        const id = it.id ?? raw.id ?? null;
+        const value = raw.documentId ?? raw.document_id ?? id;
+        const label = raw.name ?? raw.title ?? '';
+        return { id, value, label };
+    });
+};
+
+const fetchFaculties = async (token) => {
+    const res = await apiClient.get('/faculties?populate=*', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const payload = res.data;
+    let items = [];
+
+    // รองรับหลายรูปแบบที่ Strapi อาจคืนค่า (ตรงๆ หรือใน .data)
+    if (Array.isArray(payload)) {
+        items = payload;
+    } else if (Array.isArray(payload.data)) {
+        // Strapi v4: { data: [ { id, attributes: { ... } } ], meta: {} }
+        items = payload.data;
+    } else if (payload.data && Array.isArray(payload.data.data)) {
+        // ถ้าถูกห่อชั้นเพิ่มเติม (defensive)
+        items = payload.data.data;
+    } else {
+        items = [];
+    }
+
+    // normalize: ให้ผลลัพธ์เป็น { id, value, label }
+    return items.map((it) => {
+        const raw = it.attributes ? { ...it.attributes, id: it.id } : it;
+        const id = it.id ?? raw.id ?? null;
+        const value = raw.documentId ?? raw.document_id ?? id;
+        const label = raw.name ?? raw.title ?? '';
+        return { id, value, label };
+    });
+};
+
+const fetchOrganizations = async (token) => {
+    const res = await apiClient.get('/organizations?populate=*', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const payload = res.data;
+    let items = [];
+
+    // รองรับหลายรูปแบบที่ Strapi อาจคืนค่า (ตรงๆ หรือใน .data)
+    if (Array.isArray(payload)) {
+        items = payload;
+    } else if (Array.isArray(payload.data)) {
+        // Strapi v4: { data: [ { id, attributes: { ... } } ], meta: {} }
+        items = payload.data;
+    } else if (payload.data && Array.isArray(payload.data.data)) {
+        // ถ้าถูกห่อชั้นเพิ่มเติม (defensive)
+        items = payload.data.data;
+    } else {
+        items = [];
+    }
+
+    // normalize: ให้ผลลัพธ์เป็น { id, value, label }
+    return items.map((it) => {
+        const raw = it.attributes ? { ...it.attributes, id: it.id } : it;
+        const id = it.id ?? raw.id ?? null;
+        const value = raw.documentId ?? raw.document_id ?? id;
+        const label = raw.name ?? raw.title ?? '';
+        return { id, value, label };
+    });
+};
+
 
 export function useFormOptions(session) {
     const [options, setOptions] = useState({
         academicTypes: [],
         departments: [],
         faculties: [],
+        organizations: [],
         // เพิ่ม options อื่นๆ ที่นี่
     });
     const [loading, setLoading] = useState(true);
@@ -71,15 +149,24 @@ export function useFormOptions(session) {
                     setError(null);
 
                     // ยิง API พร้อมกันทั้งหมดด้วย Promise.all เพื่อความรวดเร็ว
-                    const [academicTypesData] = await Promise.all([
+                    const [academicTypesData, departmentsData, facultiesData, organizationsData] = await Promise.all([
                         fetchAcademicTypes(token),
-                        // fetchDepartments(token),
+                        fetchDepartments(token),
+                        fetchFaculties(token),
+                        fetchOrganizations(token),
                     ]);
+                    console.log("Fetched form options:", {
+                        academicTypesData,
+                        departmentsData,
+                        facultiesData,
+                        organizationsData,
+                    });
 
                     setOptions({
                         academicTypes: academicTypesData,
-                        // departments: departmentsData,
-                        // faculties: facultiesData,
+                        departments: departmentsData,
+                        faculties: facultiesData,
+                        organizations: organizationsData,
                     });
 
                 } catch (err) {

@@ -1,4 +1,5 @@
 "use client";
+// Components
 import Block from "@/components/layout/Block";
 import FieldInput from "@/components/myui/FieldInput";
 import FieldSelect from "@/components/myui/FieldSelect";
@@ -8,39 +9,38 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "@apollo/client/react";
-
-// Hook 
+// Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
-
 // GraphQL Queries
 import { GET_ME, GET_USER_PROFILE, UPDATE_USER_PROFILE } from '@/graphql/userQueries';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
+const initialFormData = {
+    firstNameTH: '',
+    lastNameTH: '',
+    firstNameEN: '',
+    lastNameEN: '',
+    highDegree: '',
+    academic_types: '',
+    email: '',
+    telephoneNo: '',
+    academicPosition: '',
+    departments: '',
+    faculties: '',
+    organizations: '',
+    participation: '',
+}
+
 export default function ProfileEditPage() {
     const { data: session, status } = useSession();
-    const [formData, setFormData] = useState({
-        firstNameTH: '',
-        lastNameTH: '',
-        firstNameEN: '',
-        lastNameEN: '',
-        highDegree: '',
-        academic_types: '',
-        participation_type: '',
-        email: '',
-        telephoneNo: '',
-        academicPosition: '',
-        department: '',
-        faculty: '',
-        organization: '',
-    });
+    const [formData, setFormData] = useState(initialFormData);
 
     const { options, loading: optionsLoading, error: optionsError } = useFormOptions(session);
 
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const fileInputRef = useRef(null);
-    const [academicTypesOptions, setAcademicTypesOptions] = useState([]);
     const isFormInitialized = useRef(false);
 
     const { data: meData, loading: meLoading } = useQuery(GET_ME, {
@@ -55,29 +55,6 @@ export default function ProfileEditPage() {
     });
 
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
-
-    // Fetch Academic Types using REST API
-    useEffect(() => {
-        if (status === 'authenticated') {
-            const fetchAcademicTypes = async () => {
-                const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-                const token = session?.jwt;
-                try {
-                    const res = await fetch(`${strapiUrl}/api/academic-types?populate=*`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                    if (!res.ok) throw new Error('Failed to fetch academic types');
-                    const json = await res.json();
-                    setAcademicTypesOptions(json.data || []);
-                } catch (e) {
-                    console.error("Could not fetch academic types:", e);
-                }
-            };
-            fetchAcademicTypes();
-        }
-    }, [status, session]);
 
     // Set initial form data once profile and options are loaded
     useEffect(() => {
@@ -98,13 +75,15 @@ export default function ProfileEditPage() {
 
         setFormData(prev => ({ ...prev, ...initialData }));
 
+        console.log("Initial form data set:", initialData);
+
         if (profile.avatar && profile.avatar.url) {
             const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
             setPreviewUrl(strapiUrl + profile.avatar.url);
         }
 
         isFormInitialized.current = true; // Mark form as initialized
-    }, [profileData, options, optionsLoading]);
+    }, [profileData, optionsLoading]);
 
     const handleInputChange = (field, value) => {
         let formattedValue = value;
@@ -161,9 +140,42 @@ export default function ProfileEditPage() {
             }
         }
         let academic_typesId = null;
-        const matchingType = academicTypesOptions.find(t => t.documentId === formData.academic_types);
+        const matchingType = options.academicTypes.find(t => t.value === formData.academic_types);
         if (matchingType) {
             academic_typesId = matchingType.id;
+        }
+
+        let departmentId = null;
+        let matchingDepartment = null;
+        if (formData.departments[0]?.documentId) {
+            matchingDepartment = options.departments.find(d => d.value === formData.departments[0].documentId);
+        } else {
+            matchingDepartment = options.departments.find(d => d.value === formData.departments);
+        }
+        if (matchingDepartment) {
+            departmentId = matchingDepartment.id;
+        }
+        let facultyId = null;
+        let matchingFaculty = null;
+        if (formData.faculties[0]?.documentId) {
+            matchingFaculty = options.faculties.find(f => f.value === formData.faculties[0].documentId);
+        } else {
+            matchingFaculty = options.faculties.find(f => f.value === formData.faculties);
+        }
+        if (matchingFaculty) {
+            facultyId = matchingFaculty.id;
+        }
+
+
+        let organizationId = null;
+        let matchingOrganization = null;
+        if (formData.organizations[0]?.documentId) {
+            matchingOrganization = options.organizations.find(o => o.value === formData.organizations[0].documentId);
+        } else {
+            matchingOrganization = options.organizations.find(o => o.value === formData.organizations);
+        }
+        if (matchingOrganization) {
+            organizationId = matchingOrganization.id;
         }
 
         const payload = {
@@ -176,7 +188,12 @@ export default function ProfileEditPage() {
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
             academic_types: [academic_typesId] || null,
+            participation: formData.participation,
+            departments: departmentId ? [departmentId] : null,
+            faculties: facultyId ? [facultyId] : null,
+            organizations: organizationId ? [organizationId] : null,
         };
+        console.log("Payload to submit:", payload);
 
         if (uploadedAvatarId) {
             payload.avatar = uploadedAvatarId;
@@ -201,8 +218,6 @@ export default function ProfileEditPage() {
 
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
-    console.log("Profile Edit Form Data:", formData);
-
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
@@ -251,14 +266,23 @@ export default function ProfileEditPage() {
                         <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={academicTypesOptions.map(at => ({ value: at.documentId, label: at.name }))} />
+                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={options.academicTypes} />
 
-                        {/* <FieldSelect label="ประเภทการเข้าร่วม" value={formData.participation_type} onChange={(value) => handleInputChange('participation_type', value)} options={[{ value: '', label: 'เลือกประเภทการเข้าร่วม' }, ...participationTypes.map(pt => ({ value: pt.id, label: pt.name }))]} /> */}
+                        <FieldSelect
+                            label="ประเภทการเข้าร่วม"
+                            value={formData.participation || ''}
+                            onChange={(value) => handleInputChange('participation', value)}
+                            placeholder="เลือกประเภทการเข้าร่วม"
+                            options={[
+                                { value: "0", label: 'participating' },
+                                { value: "1", label: 'supporting' }
+                            ]}
+                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* <FieldSelect label="ภาควิชา" value={formData.department} onChange={(value) => handleInputChange('department', value)} options={[{ value: '', label: 'เลือกภาควิชา' }, ...departments.map(dep => ({ value: dep.id, label: dep.name }))]} /> */}
-                        {/* <FieldSelect label="คณะ" value={formData.faculty} onChange={(value) => handleInputChange('faculty', value)} options={[{ value: '', label: 'เลือกคณะ' }, ...faculties.map(fac => ({ value: fac.id, label: fac.name }))]} /> */}
-                        {/* <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organization} onChange={(value) => handleInputChange('organization', value)} options={[{ value: '', label: 'เลือกมหาวิทยาลัย/หน่วยงาน' }, ...organizations.map(org => ({ value: org.id, label: org.name }))]} /> */}
+                        <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={options.departments} />
+                        <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={options.faculties} />
+                        <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={options.organizations} />
                     </div>
                     <Button type="submit" disabled={updateLoading}>
                         {updateLoading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}

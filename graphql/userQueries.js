@@ -26,6 +26,16 @@ export const GET_USER_PROFILE = gql`
       academic_types {
         documentId
       }
+        participation
+        departments {
+          documentId
+        }
+        faculties {
+          documentId
+        }
+        organizations {
+          documentId
+        }
     }
   }
 `;
