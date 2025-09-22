@@ -120,6 +120,10 @@ export default function ProfileEditPage() {
         }
     };
 
+    const handleReset = () => {
+        window.location.reload();
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userId) return;
@@ -154,44 +158,33 @@ export default function ProfileEditPage() {
                 return;
             }
         }
-        let academic_typesId = null;
-        const matchingType = options.academicTypes.find(t => t.value === formData.academic_types);
-        if (matchingType) {
-            academic_typesId = matchingType.id;
-        }
 
-        let departmentId = null;
-        let matchingDepartment = null;
-        if (formData.departments[0]?.documentId) {
-            matchingDepartment = options.departments.find(d => d.value === formData.departments[0].documentId);
-        } else {
-            matchingDepartment = options.departments.find(d => d.value === formData.departments);
-        }
-        if (matchingDepartment) {
-            departmentId = matchingDepartment.id;
-        }
-        let facultyId = null;
-        let matchingFaculty = null;
-        if (formData.faculties[0]?.documentId) {
-            matchingFaculty = options.faculties.find(f => f.value === formData.faculties[0].documentId);
-        } else {
-            matchingFaculty = options.faculties.find(f => f.value === formData.faculties);
-        }
-        if (matchingFaculty) {
-            facultyId = matchingFaculty.id;
-        }
+        const extractDocumentId = (value) => {
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                return null;
+            }
+            if (Array.isArray(value)) {
+                return extractDocumentId(value[0]);
+            }
+            if (typeof value === 'object') {
+                return value.documentId || value.value || null;
+            }
+            return value;
+        };
 
+        const resolveRelationId = (value, optionList) => {
+            const documentId = extractDocumentId(value);
+            if (!documentId || !Array.isArray(optionList)) {
+                return null;
+            }
+            const match = optionList.find((item) => item.value === documentId || item.documentId === documentId);
+            return match?.id || null;
+        };
 
-        let organizationId = null;
-        let matchingOrganization = null;
-        if (formData.organizations[0]?.documentId) {
-            matchingOrganization = options.organizations.find(o => o.value === formData.organizations[0].documentId);
-        } else {
-            matchingOrganization = options.organizations.find(o => o.value === formData.organizations);
-        }
-        if (matchingOrganization) {
-            organizationId = matchingOrganization.id;
-        }
+        const academicTypeId = resolveRelationId(formData.academic_types, options.academicTypes);
+        const departmentId = resolveRelationId(formData.departments, options.departments);
+        const facultyId = resolveRelationId(formData.faculties, options.faculties);
+        const organizationId = resolveRelationId(formData.organizations, options.organizations);
 
         const payload = {
             firstNameTH: formData.firstNameTH,
@@ -202,7 +195,7 @@ export default function ProfileEditPage() {
             email: formData.email,
             academicPosition: formData.academicPosition,
             highDegree: formData.highDegree,
-            academic_types: [academic_typesId] || null,
+            academic_types: academicTypeId ? [academicTypeId] : null,
             participation: formData.participation,
             departments: departmentId ? [departmentId] : null,
             faculties: facultyId ? [facultyId] : null,
@@ -239,14 +232,13 @@ export default function ProfileEditPage() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
-                <h2 className="text-lg font-semibold mb-4">Profile Image</h2>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 mb-6">
                     <Image
                         src={previewUrl || '/profile-placeholder.svg'}
                         alt="Profile Avatar"
                         width={96}
                         height={96}
-                        className="rounded-full object-cover bg-gray-200"
+                        className="rounded-full aspect-square object-cover bg-gray-200"
                         unoptimized
                     />
                     <input
@@ -259,12 +251,6 @@ export default function ProfileEditPage() {
                     <Button type="button" onClick={() => fileInputRef.current.click()}>
                         Change Image
                     </Button>
-                </div>
-            </Block>
-
-            <Block>
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-lg font-semibold">Edit Profile</h2>
                 </div>
                 <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -302,9 +288,14 @@ export default function ProfileEditPage() {
                         <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties.map(f => ({ value: f.documentId, label: f.title }))} />
                         <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={selectData.organizations.map(o => ({ value: o.documentId, label: o.title }))} />
                     </div>
-                    <Button type="submit" disabled={updateLoading}>
-                        {updateLoading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
-                    </Button>
+                    <div className="flex gap-4">
+                        <Button type="submit" disabled={updateLoading}>
+                            {updateLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={handleReset} disabled={updateLoading}>
+                            ยกเลิก
+                        </Button>
+                    </div>
                 </div>
             </Block>
             {updateError && (
