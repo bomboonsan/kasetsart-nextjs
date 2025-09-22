@@ -12,7 +12,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 // Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
 // GraphQL Queries
-import { GET_ME, GET_USER_PROFILE, UPDATE_USER_PROFILE } from '@/graphql/userQueries';
+import { GET_ME, GET_USER_PROFILE, UPDATE_USER_PROFILE, GET_PROFILE_OPTIONS } from '@/graphql/userQueries';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
@@ -35,6 +35,7 @@ const initialFormData = {
 export default function ProfileEditPage() {
     const { data: session, status } = useSession();
     const [formData, setFormData] = useState(initialFormData);
+    const [selectData, setSelectData] = useState({});
 
     const { options, loading: optionsLoading, error: optionsError } = useFormOptions(session);
 
@@ -54,6 +55,18 @@ export default function ProfileEditPage() {
         skip: !userDocumentId,
     });
 
+    const { loading: optionsXLoading, error: optionsXError, data: optionsData } = useQuery(GET_PROFILE_OPTIONS);
+
+    useEffect(() => {
+        if (optionsData) {
+            setSelectData({
+                departments: optionsData.departments,
+                faculties: optionsData.faculties,
+                organizations: optionsData.organizations,
+            });
+        }
+    }, [optionsData]);
+
     const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE);
 
     // Set initial form data once profile and options are loaded
@@ -63,6 +76,7 @@ export default function ProfileEditPage() {
             return;
         }
         const profile = profileData.usersPermissionsUser;
+        // console.log("profileData:", profileData);
         let initialData = {};
 
         for (const key in profile) {
@@ -76,6 +90,7 @@ export default function ProfileEditPage() {
         setFormData(prev => ({ ...prev, ...initialData }));
 
         console.log("Initial form data set:", initialData);
+
 
         if (profile.avatar && profile.avatar.url) {
             const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
@@ -218,6 +233,9 @@ export default function ProfileEditPage() {
 
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
+
+
+    console.log("Form selectData:", selectData);
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
@@ -280,9 +298,9 @@ export default function ProfileEditPage() {
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={options.departments} />
-                        <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={options.faculties} />
-                        <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={options.organizations} />
+                        <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={selectData.departments.map(d => ({ value: d.documentId, label: d.title }))} />
+                        <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties.map(f => ({ value: f.documentId, label: f.title }))} />
+                        <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={selectData.organizations.map(o => ({ value: o.documentId, label: o.title }))} />
                     </div>
                     <Button type="submit" disabled={updateLoading}>
                         {updateLoading ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}

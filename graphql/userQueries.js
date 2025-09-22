@@ -40,6 +40,27 @@ export const GET_USER_PROFILE = gql`
   }
 `;
 
+export const GET_PROFILE_OPTIONS = gql`
+  query GetProfileOptions {
+    academicTypes {
+      documentId
+      name
+    }
+    departments {
+      documentId
+      title
+    }
+    faculties {
+      documentId
+      title
+    }
+    organizations {
+      documentId
+      title
+    }
+}
+`;
+
 export const UPDATE_USER_PROFILE = gql`
   mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
     updateUsersPermissionsUser(id: $id, data: $data) {
