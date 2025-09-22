@@ -30,6 +30,7 @@ const initialFormData = {
     faculties: '',
     organizations: '',
     participation: '',
+    education: ''
 }
 
 const initialEducationItem = {
@@ -84,7 +85,7 @@ export default function ProfileEditPage() {
             return;
         }
         const profile = profileData.usersPermissionsUser;
-        // console.log("profileData:", profileData);
+        console.log("profileData:", profileData);
         let initialData = {};
 
         for (const key in profile) {
@@ -100,7 +101,18 @@ export default function ProfileEditPage() {
         // Initialize education data
         if (profile.education) {
             try {
-                const educationData = JSON.parse(profile.education);
+                let educationData;
+
+                // Check if education is already an object/array or a JSON string
+                if (typeof profile.education === 'string') {
+                    educationData = JSON.parse(profile.education);
+                } else if (Array.isArray(profile.education)) {
+                    educationData = profile.education;
+                } else if (typeof profile.education === 'object') {
+                    // If it's an object but not an array, wrap it in an array
+                    educationData = [profile.education];
+                }
+
                 if (Array.isArray(educationData) && educationData.length > 0) {
                     setEducation(educationData);
                 }
@@ -399,8 +411,6 @@ export default function ProfileEditPage() {
                         <Button type="button" variant="secondary" onClick={addEducation}>
                             เพิ่มวุฒิการศึกษา
                         </Button>
-                        <Button type="button">บันทึกวุฒิการศึกษา</Button>
-                        <Button type="button" variant="outline">ยกเลิก</Button>
                     </div>
                 </div>
             </Block>

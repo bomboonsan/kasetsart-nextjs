@@ -23,6 +23,7 @@ export const GET_USER_PROFILE = gql`
       avatar {
         url
       }
+      education
       academic_types {
         documentId
       }
