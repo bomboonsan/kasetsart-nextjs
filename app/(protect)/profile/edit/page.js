@@ -298,6 +298,52 @@ export default function ProfileEditPage() {
                     </div>
                 </div>
             </Block>
+            <Block>
+                <div className="space-y-6 p-6">
+                    <h2 className='text-lg text-gray-900'>วุฒิการศึกษา</h2>
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-12 gap-4 items-end pb-4 border-b last:border-b-0">
+                            <div className="col-span-12 md:col-span-3">
+                                <FieldSelect
+                                    label="ระดับวุฒิการศึกษา"
+                                    value={formData.participation || ''}
+                                    onChange={(value) => handleInputChange('participation', value)}
+                                    placeholder="เลือกประเภทการเข้าร่วม"
+                                    options={[
+                                        { value: "ปริญญาตรี", label: 'ปริญญาตรี' },
+                                        { value: "ปริญญาโท", label: 'ปริญญาโท' },
+                                        { value: "ปริญญาเอก", label: 'ปริญญาเอก' }
+                                    ]}
+                                />
+                            </div>
+                            <div className="col-span-12 md:col-span-4">
+                                <FieldInput label="ชื่อสถาบันการศึกษา" value="" placeholder="กรุณาระบุชื่อสถาบันการศึกษา" />
+                            </div>
+                            <div className="col-span-12 md:col-span-3">
+                                <FieldInput label="คณะ/สาขา" value="" placeholder="กรุณาระบุสาขาวิชา" />
+                            </div>
+                            <div className="col-span-9 md:col-span-1">
+                                <FieldInput label="ปีที่สำเร็จ" value="" placeholder="กรุณาระบุปีที่สำเร็จ" />
+                            </div>
+                            <div className="col-span-3 md:col-span-1 flex justify-end">
+                                <Button variant="secondary" type="button">
+                                    {/* <Trash2 className="h-4 w-4 text-gray-600" /> */}
+                                    +
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-4 pt-2">
+                        {/* <button type="button" className="inline-flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                            <span>เพิ่มวุฒิการศึกษา</span>
+                        </button> */}
+                        <Button type="button" variant="secondary">เพิ่มวุฒิการศึกษา</Button>
+                        <Button type="button">บันทึกวุฒิการศึกษา</Button>
+                        <Button type="button" variant="outline">ยกเลิก</Button>
+                    </div>
+                </div>
+            </Block>
             {updateError && (
                 <Block>
                     <p className="text-sm text-red-600">Error saving profile: {updateError.message}</p>
