@@ -31,6 +31,8 @@ export const CREATE_PROJECT = gql`
         documentId
         name
       }
+      partners
+      
     }
   }
 `;

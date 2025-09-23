@@ -18,30 +18,8 @@ export const PROJECT_FORM_INITIAL = {
     icTypes: "",
     impact: "",
     sdg: "",
-    partners: [
-        {
-            id: 1,
-            order: 1,
-            fullname: "สมชาย ใจดี",
-            orgName: "คณะเกษตรศาสตร์ มหาวิทยาลัยเกษตรศาสตร์",
-            partnerType: "หัวหน้าโครงการ",
-            partnerComment: "First Author",
-            partnerProportion_percentage_custom: "50",
-            partnerProportion: 0.5,
-            isInternal: true,
-        },
-        {
-            id: 2,
-            order: 2,
-            fullname: "สมหญิง รักงาน",
-            orgName: "คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเกษตรศาสตร์",
-            partnerType: "นักวิจัยร่วม",
-            partnerComment: "",
-            partnerProportion_percentage_custom: "30",
-            partnerProportion: 0.3,
-            isInternal: true,
-        }
-    ],
+    partners: [],
+    users: [],
     attachments: []
 }
 
