@@ -95,8 +95,8 @@ adminMenuItems = [
 		active: false,
 	},
 	{
-		id: "form/overview",
-		url: "/dashboard/admin/form/overview",
+		id: "admin/form/all",
+		url: "/admin/form/all",
 		icon: <FileUser />,
 		label: "โครงการทั้งหมด",
 		active: false,
