@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Partners({ data, onChange }) {
     const [displayRows, setDisplayRows] = useState([]);
+    const [dialogOpen, setDialogOpen] = useState(false);
     const [modalIsInternal, setModalIsInternal] = useState(true);
     const [modalUserObj, setModalUserObj] = useState(null);
     const [modalPartnerFullName, setModalPartnerFullName] = useState('');
@@ -50,6 +51,7 @@ export default function Partners({ data, onChange }) {
         setModalPartnerProportionCustom('');
         setModalPartnerCommentArr([]);
         setEditingIndex(null);
+        setDialogOpen(false);
     };
 
     const handleAddPartner = () => {
@@ -61,7 +63,7 @@ export default function Partners({ data, onChange }) {
             orgName: modalOrgName,
             partnerType: modalPartnerType,
             partnerProportion_percentage_custom: modalPartnerProportionCustom,
-            partnerProportion: parseFloat(modalPartnerProportionCustom) / 100 || 0, // Convert percentage to decimal
+            partnerProportion: "", // <<- มาจากเอาจำนวน partner ที่งหมดที่มี isInternal = true มาแบ่งกันเป็นหน่วยสัดส่วน เต็ม 1 
             partnerComment: modalPartnerCommentArr.join(', '),
             isInternal: modalIsInternal,
         };
@@ -76,8 +78,7 @@ export default function Partners({ data, onChange }) {
 
         handleDataChange(newRows);
         resetForm();
-        const dlg = document.getElementById('my_modal_2');
-        if (dlg && dlg.close) dlg.close();
+        // dialog controlled by React state; resetForm will close it
     };
 
     const handleEditPartner = (index) => {
@@ -90,7 +91,7 @@ export default function Partners({ data, onChange }) {
         setModalPartnerType(partner.partnerType || '');
         setModalPartnerProportionCustom(partner.partnerProportion_percentage_custom || '');
         setModalPartnerCommentArr(partner.partnerComment ? partner.partnerComment.split(',').map(s => s.trim()) : []);
-        document.getElementById('my_modal_2').showModal();
+        setDialogOpen(true);
     };
 
     const handleRemovePartner = (index) => {
@@ -114,9 +115,9 @@ export default function Partners({ data, onChange }) {
 
     return (
         <>
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}>
                 <DialogTrigger asChild>
-                    <Button variant="default" size="sm" className="mb-4">เพิ่มสมาชิก</Button>
+                    <Button variant="default" size="sm" className="mb-4" onClick={() => { resetForm(); setDialogOpen(true); }}>เพิ่มสมาชิก</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-5xl">
                     <DialogHeader>
@@ -210,7 +211,7 @@ export default function Partners({ data, onChange }) {
                                             label="ชื่อผู้ร่วมโครงการวิจัย"
                                             type="text"
                                             value={modalPartnerFullName}
-                                            onChange={(value) => setModalPartnerFullName(value)}
+                                            onChange={(e) => setModalPartnerFullName(e.target.value)}
                                             placeholder="กรอกชื่อ-นามสกุล"
                                         />
                                     </div>
@@ -219,7 +220,7 @@ export default function Partners({ data, onChange }) {
                                             label="ชื่อหน่วยงาน"
                                             type="text"
                                             value={modalOrgName}
-                                            onChange={(value) => setModalOrgName(value)}
+                                            onChange={(e) => setModalOrgName(e.target.value)}
                                             placeholder="กรอกชื่อหน่วยงาน"
                                         />
                                     </div>
@@ -250,13 +251,13 @@ export default function Partners({ data, onChange }) {
                                 min="0"
                                 max="100"
                                 value={modalPartnerProportionCustom || ''}
-                                onChange={(value) => {
+                                onChange={(e) => {
                                     // allow empty or valid number between 0-100
-                                    if (value === '' || value === null) {
+                                    if (e.target.value === '' || e.target.value === null) {
                                         setModalPartnerProportionCustom('')
                                         return
                                     }
-                                    const num = parseFloat(String(value))
+                                    const num = parseFloat(String(e.target.value))
                                     if (Number.isNaN(num)) return
                                     const clamped = Math.max(0, Math.min(100, num))
                                     setModalPartnerProportionCustom(String(clamped))
