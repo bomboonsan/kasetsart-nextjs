@@ -43,6 +43,9 @@ export default function ProjectForm({ props }) {
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+        if (field === 'partners') {
+            console.log('Partners updated in ProjectForm:', value);
+        }
     };
 
     const handleSubmit = async () => {
@@ -185,7 +188,7 @@ export default function ProjectForm({ props }) {
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />
                     <FormSelect id="impact" label="Impact" value={formData.impact ?? ""} placeholder="เลือก Impact" onChange={(val) => handleInputChange('impact', val)} options={impactsOptions} />
                     <FormSelect id="sdgs" label="SDG" value={formData.sdg ?? ""} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
-                    <Partners data={formData.partners} />
+                    <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
                 </div>
                 <div className='flex justify-end items-center gap-3 mt-4'>
                     <Button variant="outline">ยกเลิก</Button>
