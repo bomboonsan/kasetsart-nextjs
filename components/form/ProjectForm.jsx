@@ -69,6 +69,16 @@ export default function ProjectForm({ props }) {
         
         try {
             // Prepare data for submission based on Strapi schema
+            // derive users_permissions_users (manyToMany) from partners that are internal and linked to a user
+            const users_permissions_users = Array.isArray(formData.partners)
+                ? formData.partners
+                    .filter(p => p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
+                    .map(p => {
+                        return p.userID || p.User?.documentId || p.User?.id;
+                    })
+                    .filter(Boolean)
+                : [];
+
             const projectData = {
                 fiscalYear: parseInt(formData.fiscalYear) || null,
                 projectType: parseInt(formData.projectType) || null,
@@ -89,7 +99,9 @@ export default function ProjectForm({ props }) {
                 ic_types: formData.icTypes ? [formData.icTypes] : [],
                 impacts: formData.impact ? [formData.impact] : [],
                 sdgs: formData.sdg ? [formData.sdg] : [],
-                partners: formData.partners || []
+                partners: formData.partners || [],
+                // Strapi relation field for users-permissions user manyToMany
+                users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
                 // users and attachments can be handled similarly if needed
             };
 
