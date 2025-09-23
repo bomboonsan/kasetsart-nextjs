@@ -13,33 +13,41 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const client = getClient();
+        // Don't call `getClient()` here because it uses `getSession()` which
+        // triggers a request to `/api/auth` and causes a recursive loop when
+        // this authorize() is running. Use a direct fetch to the GraphQL
+        // endpoint for the login mutation instead.
         try {
-          const { data } = await client.mutate({
-            mutation: gql`
-              mutation ($identifier: String!, $password: String!) {
-                login(input: { identifier: $identifier, password: $password }) {
-                  jwt
-                  user {
-                    id
-                    username
-                    email
-                    documentId
-                  }
-                }
-              }
-            `,
-            variables: {
-              identifier: credentials.email,
-              password: credentials.password,
-            },
+          const graphqlUrl =
+            process.env.NEXT_PUBLIC_STRAPI_GRAPHQL_API_URL ||
+            "http://localhost:1338/graphql";
+
+          const query = `mutation ($identifier: String!, $password: String!) {\n` +
+            `  login(input: { identifier: $identifier, password: $password }) {\n` +
+            `    jwt\n` +
+            `    user { id username email documentId }\n` +
+            `  }\n` +
+            `}`;
+
+          const resp = await fetch(graphqlUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query,
+              variables: {
+                identifier: credentials.email,
+                password: credentials.password,
+              },
+            }),
           });
+
+          const json = await resp.json();
+          const data = json?.data;
 
           if (data && data.login) {
             return { ...data.login.user, jwt: data.login.jwt };
-          } else {
-            return null;
           }
+          return null;
         } catch (error) {
           console.error("Login error:", error);
           return null;
