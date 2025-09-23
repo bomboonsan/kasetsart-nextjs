@@ -85,7 +85,9 @@ export default function ProjectForm({ props }) {
                 // Handle relations - need to pass documentIds as arrays
                 ic_types: formData.icTypes ? [formData.icTypes] : [],
                 impacts: formData.impact ? [formData.impact] : [],
-                sdgs: formData.sdg ? [formData.sdg] : []
+                sdgs: formData.sdg ? [formData.sdg] : [],
+                partners: formData.partners || []
+                // users and attachments can be handled similarly if needed
             };
 
             // Remove null values to avoid issues
