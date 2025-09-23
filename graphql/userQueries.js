@@ -65,6 +65,61 @@ export const GET_PROFILE_OPTIONS = gql`
 }
 `;
 
+export const GET_ALL_USERS = gql`
+  query GetAllUsers($pagination: PaginationArg, $filters: UsersPermissionsUserFiltersInput) {
+    usersPermissionsUsers(pagination: $pagination, filters: $filters) {
+      data {
+        id
+        documentId
+        attributes {
+          username
+          email
+          firstNameTH
+          lastNameTH
+          firstNameEN
+          lastNameEN
+          academicPosition
+          departments {
+            data {
+              id
+              documentId
+              attributes {
+                title
+              }
+            }
+          }
+          faculties {
+            data {
+              id
+              documentId
+              attributes {
+                title
+              }
+            }
+          }
+          organizations {
+            data {
+              id
+              documentId
+              attributes {
+                title
+              }
+            }
+          }
+        }
+      }
+      meta {
+        pagination {
+          total
+          page
+          pageSize
+          pageCount
+        }
+      }
+    }
+  }
+`;
+
 export const UPDATE_USER_PROFILE = gql`
   mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
     updateUsersPermissionsUser(id: $id, data: $data) {

@@ -3,7 +3,7 @@ import Block from '../layout/Block';
 import FormInput from '../myui/FormInput';
 import FormSelect from '../myui/FormSelect';
 import FormCheckbox from '../myui/FormCheckbox';
-// import UserPicker from './UserPicker';
+import UserPicker from './UserPicker';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -166,7 +166,7 @@ export default function Partners({ data, onChange }) {
                             modalIsInternal === true ? (
                                 <>
                                     <div>
-                                        {/* <UserPicker
+                                        <UserPicker
                                             label="ผู้ร่วมโครงการวิจัย"
                                             selectedUser={modalUserObj}
                                             onSelect={(u) => {
@@ -177,7 +177,7 @@ export default function Partners({ data, onChange }) {
                                                 setModalPartnerFullName(display)
                                                 setModalOrgName(org)
                                             }}
-                                        /> */}
+                                        />
                                     </div>
                                     <div>
                                         <FormInput
