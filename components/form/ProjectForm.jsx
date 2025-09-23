@@ -20,9 +20,92 @@ export default function ProjectForm({ props }) {
     const [icTypesOptions, setIcTypesOptions] = useState([]);
     const [impactsOptions, setImpactsOptions] = useState([]);
     const [sdgsOptions, setSdgsOptions] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [createProject] = useMutation(CREATE_PROJECT, {
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
+        },
+        onCompleted: (data) => {
+            console.log('Project created successfully:', data);
+            alert('บันทึกโครงการสำเร็จแล้ว!');
+            // Reset form or redirect as needed
+            setFormData(PROJECT_FORM_INITIAL);
+        },
+        onError: (error) => {
+            console.error('Error creating project:', error);
+            alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+        }
+    });
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = async () => {
+        if (!session?.jwt) {
+            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+            return;
+        }
+
+        // Basic validation
+        if (!formData.nameTH.trim()) {
+            alert('กรุณากรอกชื่อโครงการภาษาไทย');
+            return;
+        }
+
+        if (!formData.fiscalYear) {
+            alert('กรุณากรอกปีงบประมาณ');
+            return;
+        }
+
+        setIsSubmitting(true);
+        
+        try {
+            // Prepare data for submission based on Strapi schema
+            const projectData = {
+                fiscalYear: parseInt(formData.fiscalYear) || null,
+                projectType: parseInt(formData.projectType) || null,
+                projectMode: parseInt(formData.projectMode) || null,
+                subProjectCount: parseInt(formData.subProjectCount) || null,
+                nameTH: formData.nameTH.trim() || null,
+                nameEN: formData.nameEN.trim() || null,
+                isEnvironmentallySustainable: parseInt(formData.isEnvironmentallySustainable) || null,
+                durationStart: formData.durationStart || null,
+                durationEnd: formData.durationEnd || null,
+                researchKind: formData.researchKind || null,
+                fundType: formData.fundType || null,
+                fundSubType: formData.fundSubType || null,
+                fundName: formData.fundName || null,
+                budget: parseInt(formData.budget) || null,
+                keywords: formData.keywords || null,
+                // Handle relations - need to pass documentIds as arrays
+                ic_types: formData.icTypes ? [formData.icTypes] : [],
+                impacts: formData.impact ? [formData.impact] : [],
+                sdgs: formData.sdg ? [formData.sdg] : []
+            };
+
+            // Remove null values to avoid issues
+            Object.keys(projectData).forEach(key => {
+                if (projectData[key] === null || projectData[key] === "") {
+                    delete projectData[key];
+                }
+            });
+
+            console.log('Submitting project data:', projectData);
+
+            await createProject({
+                variables: {
+                    data: projectData
+                }
+            });
+        } catch (error) {
+            console.error('Submission error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     useEffect(() => {
@@ -71,7 +154,7 @@ export default function ProjectForm({ props }) {
                         { value: '0', label: 'โครงการวิจัย' },
                         { value: '1', label: 'โครงการพัฒนาวิชาการประเภทงานวิจัย' },
                     ]} />
-                    <FormRadio id="researchType" label="ลักษณะโครงการวิจัย" value={formData.researchType} onChange={(e) => handleInputChange('researchType', e.target.value)} options={[
+                    <FormRadio id="projectMode" label="ลักษณะโครงการวิจัย" value={formData.projectMode} onChange={(e) => handleInputChange('projectMode', e.target.value)} options={[
                         { value: '0', label: 'โครงการวิจัยเดี่ยว' },
                         { value: '1', label: 'แผนงานวิจัย หรือชุดโครงการวิจัย' },
                     ]} />
@@ -88,7 +171,7 @@ export default function ProjectForm({ props }) {
                         <span className="text-blue-700">(ปี พ.ศ. 4 หลัก)</span>
                         <span className="text-red-500 ml-1">*</span>
                     </FormDateSelect>
-                    <FormTextarea id="xxx" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" defaultValue="" placeholder="" rows={5} />
+                    <FormTextarea id="responsibleOrganization" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.responsibleOrganization} onChange={(e) => handleInputChange('responsibleOrganization', e.target.value)} placeholder="" rows={5} />
                     <FormSelect id="researchKind" label="ประเภทงานวิจัย" value={formData.researchKind ?? ""} placeholder="เลือกประเภทงานวิจัย" onChange={(val) => handleInputChange('researchKind', val)} options={researchKindOptions} />
                     <FormSelect id="fundType" label="ประเภทแหล่งทุน" value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
                     <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
@@ -102,7 +185,13 @@ export default function ProjectForm({ props }) {
                 </div>
                 <div className='flex justify-end items-center gap-3 mt-4'>
                     <Button variant="outline">ยกเลิก</Button>
-                    <Button variant="default">บันทึก</Button>
+                    <Button 
+                        variant="default" 
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
+                    </Button>
                 </div>
             </Block>
         </>
