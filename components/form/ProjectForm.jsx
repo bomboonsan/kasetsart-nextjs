@@ -81,8 +81,8 @@ export default function ProjectForm({ props }) {
 
             const projectData = {
                 fiscalYear: parseInt(formData.fiscalYear) || null,
-                projectType: parseInt(formData.projectType) || null,
-                projectMode: parseInt(formData.projectMode) || null,
+                projectType: formData.projectType || null,
+                projectMode: formData.projectMode || null,
                 subProjectCount: parseInt(formData.subProjectCount) || null,
                 nameTH: formData.nameTH.trim() || null,
                 nameEN: formData.nameEN.trim() || null,
