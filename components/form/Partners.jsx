@@ -1,66 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import Block from '../layout/Block';
+import FormInput from '../myui/FormInput';
+import FormSelect from '../myui/FormSelect';
+import FormCheckbox from '../myui/FormCheckbox';
+// import UserPicker from './UserPicker';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
-export default function Partners(data) {
-    const data = [{
-        order: 1,
-        name: "lorem ipsum",
-        organization: "test org",
-        type: "หัวหน้าโครงการ",
-        note: "first author",
-        proportionCustom: "0.5",
-        proportion: "0.5",
-    }, {
-        order: 2,
-        name: "ipsum test",
-        organization: "test2 org",
-        type: "นักวิจัยร่วม",
-        note: "",
-        proportionCustom: "0.2",
-        proportion: "0.5",
-    }]
+export default function Partners({ data, onChange }) {
+    const [displayRows, setDisplayRows] = useState([]);
+    const [modalIsInternal, setModalIsInternal] = useState(true);
+    const [modalUserObj, setModalUserObj] = useState(null);
+    const [modalPartnerFullName, setModalPartnerFullName] = useState('');
+    const [modalOrgName, setModalOrgName] = useState('');
+    const [modalPartnerType, setModalPartnerType] = useState('');
+    const [modalPartnerProportionCustom, setModalPartnerProportionCustom] = useState('');
+    const [modalPartnerCommentArr, setModalPartnerCommentArr] = useState([]);
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [hasFirstAuthor, setHasFirstAuthor] = useState(false);
+    const [hasCorresponding, setHasCorresponding] = useState(false);
+
+    useEffect(() => {
+        setHasFirstAuthor(displayRows.some(p => p.partnerComment?.includes('First Author')));
+        setHasCorresponding(displayRows.some(p => p.partnerComment?.includes('Corresponding Author')));
+    }, [displayRows]);
+
+    useEffect(() => {
+        // Initialize with sorted data from props
+        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.order - b.order) : [];
+        setDisplayRows(sortedData);
+    }, [data]);
+
+    const handleDataChange = (newRows) => {
+        const sortedRows = newRows.map((row, index) => ({ ...row, order: index + 1 }));
+        setDisplayRows(sortedRows);
+        if (onChange) {
+            onChange(sortedRows);
+        }
+    };
+
+    const resetForm = () => {
+        setModalIsInternal(true);
+        setModalUserObj(null);
+        setModalPartnerFullName('');
+        setModalOrgName('');
+        setModalPartnerType('');
+        setModalPartnerProportionCustom('');
+        setModalPartnerCommentArr([]);
+        setEditingIndex(null);
+    };
+
+    const handleAddPartner = () => {
+        const newPartner = {
+            id: editingIndex !== null ? displayRows[editingIndex].id : Date.now(), // Generate ID if creating new
+            userID: modalUserObj ? modalUserObj.id : undefined,
+            User: modalUserObj,
+            fullname: modalPartnerFullName,
+            orgName: modalOrgName,
+            partnerType: modalPartnerType,
+            partnerProportion_percentage_custom: modalPartnerProportionCustom,
+            partnerProportion: parseFloat(modalPartnerProportionCustom) / 100 || 0, // Convert percentage to decimal
+            partnerComment: modalPartnerCommentArr.join(', '),
+            isInternal: modalIsInternal,
+        };
+
+        let newRows;
+        if (editingIndex !== null) {
+            newRows = [...displayRows];
+            newRows[editingIndex] = newPartner;
+        } else {
+            newRows = [...displayRows, newPartner];
+        }
+
+        handleDataChange(newRows);
+        resetForm();
+        const dlg = document.getElementById('my_modal_2');
+        if (dlg && dlg.close) dlg.close();
+    };
+
+    const handleEditPartner = (index) => {
+        const partner = displayRows[index];
+        setEditingIndex(index);
+        setModalIsInternal(partner.isInternal);
+        setModalUserObj(partner.User || null);
+        setModalPartnerFullName(partner.fullname || '');
+        setModalOrgName(partner.orgName || '');
+        setModalPartnerType(partner.partnerType || '');
+        setModalPartnerProportionCustom(partner.partnerProportion_percentage_custom || '');
+        setModalPartnerCommentArr(partner.partnerComment ? partner.partnerComment.split(',').map(s => s.trim()) : []);
+        document.getElementById('my_modal_2').showModal();
+    };
+
+    const handleRemovePartner = (index) => {
+        const newRows = displayRows.filter((_, i) => i !== index);
+        handleDataChange(newRows);
+    };
+
+    const moveUp = (index) => {
+        if (index === 0) return;
+        const newRows = [...displayRows];
+        [newRows[index - 1], newRows[index]] = [newRows[index], newRows[index - 1]];
+        handleDataChange(newRows);
+    };
+
+    const moveDown = (index) => {
+        if (index === displayRows.length - 1) return;
+        const newRows = [...displayRows];
+        [newRows[index], newRows[index + 1]] = [newRows[index + 1], newRows[index]];
+        handleDataChange(newRows);
+    };
+
     return (
         <>
             <dialog id="my_modal_2" className="modal">
                 <div className="modal-box w-11/12 max-w-5xl text-gray-700">
-                    <FormFieldBlock>
-                        <div className="flex items-center gap-10">
-                            <label className="flex items-center gap-3 text-zinc-700">
-                                <input
-                                    type="radio"
-                                    value="true"
-                                    checked={modalIsInternal === true}
-                                    onChange={() => setModalIsInternal(true)}
-                                    className={`
-                                text-zinc-700
-                                px-3 py-2 border border-gray-300 rounded-md
-                                placeholder-gray-400 focus:outline-none focus:ring-2
-                                focus:ring-blue-500 focus:border-blue-500
-                                transition-colors duration-200
-                            `}
-                                />
-                                ภายใน มก.
-                            </label>
-                            <label className="flex items-center gap-3 text-zinc-700">
-                                <input
-                                    type="radio"
-                                    value="false"
-                                    checked={modalIsInternal === false}
-                                    onChange={() => setModalIsInternal(false)}
-                                    className={`
-                                text-zinc-700
-                                px-3 py-2 border border-gray-300 rounded-md
-                                placeholder-gray-400 focus:outline-none focus:ring-2
-                                focus:ring-blue-500 focus:border-blue-500
-                                transition-colors duration-200
-                            `}
-                                />
-                                ภายนอก มก. (หัวหน้าโครงการวิจัยภายนอก มก. นิสิต และลูกจ้าง)
-                            </label>
-                        </div>
+                    <Block>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-10">
+                                <label className="flex items-center gap-3 text-zinc-700">
+                                    <input
+                                        type="radio"
+                                        value="true"
+                                        checked={modalIsInternal === true}
+                                        onChange={() => setModalIsInternal(true)}
+                                        className="form-radio text-blue-600"
+                                    />
+                                    ภายใน มก.
+                                </label>
+                                <label className="flex items-center gap-3 text-zinc-700">
+                                    <input
+                                        type="radio"
+                                        value="false"
+                                        checked={modalIsInternal === false}
+                                        onChange={() => setModalIsInternal(false)}
+                                        className="form-radio text-blue-600"
+                                    />
+                                    ภายนอก มก. (หัวหน้าโครงการวิจัยภายนอก มก. นิสิต และลูกจ้าง)
+                                </label>
+                            </div>
                         {
                             modalIsInternal === true ? (
                                 <>
                                     <div>
-                                        <UserPicker
+                                        {/* <UserPicker
                                             label="ผู้ร่วมโครงการวิจัย"
                                             selectedUser={modalUserObj}
                                             onSelect={(u) => {
@@ -71,11 +152,10 @@ export default function Partners(data) {
                                                 setModalPartnerFullName(display)
                                                 setModalOrgName(org)
                                             }}
-                                        />
+                                        /> */}
                                     </div>
                                     <div>
                                         <FormInput
-                                            mini={false}
                                             label="ชื่อผู้ร่วมโครงการวิจัย"
                                             type="text"
                                             value={(() => {
@@ -94,7 +174,6 @@ export default function Partners(data) {
                                     </div>
                                     <div>
                                         <FormInput
-                                            mini={false}
                                             label="ชื่อหน่วยงาน"
                                             type="text"
                                             value={(() => {
@@ -118,7 +197,6 @@ export default function Partners(data) {
                                 <>
                                     <div>
                                         <FormInput
-                                            mini={false}
                                             label="ชื่อผู้ร่วมโครงการวิจัย"
                                             type="text"
                                             value={modalPartnerFullName}
@@ -128,7 +206,6 @@ export default function Partners(data) {
                                     </div>
                                     <div>
                                         <FormInput
-                                            mini={false}
                                             label="ชื่อหน่วยงาน"
                                             type="text"
                                             value={modalOrgName}
@@ -145,8 +222,8 @@ export default function Partners(data) {
                                 value={modalPartnerType}
                                 onChange={(value) => setModalPartnerType(value)}
                                 className="max-w-lg"
+                                placeholder="เลือกประเภท"
                                 options={[
-                                    { value: '', label: 'เลือกประเภท' },
                                     { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
                                     { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
                                     { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
@@ -156,9 +233,7 @@ export default function Partners(data) {
                             />
                         </div>
                         <div>
-
                             <FormInput
-                                mini={false}
                                 label="สัดส่วนการมีส่วนร่วม (%)"
                                 type="number"
                                 step="0.001"
@@ -184,7 +259,7 @@ export default function Partners(data) {
                                 label="หมายเหตุ"
                                 inline={true}
                                 value={Array.isArray(modalPartnerCommentArr) ? modalPartnerCommentArr : (modalPartnerCommentArr ? String(modalPartnerCommentArr).split(',').map(s => s.trim()).filter(Boolean) : [])}
-                                onChange={(arr) => setModalPartnerCommentArr(arr)}
+                                onChange={(e) => setModalPartnerCommentArr(e.target.value)}
                                 className="max-w-lg"
                                 options={[
                                     ...(!hasFirstAuthor || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('First Author')) ? [{ value: 'First Author', label: 'First Author' }] : []),
@@ -192,7 +267,8 @@ export default function Partners(data) {
                                 ]}
                             />
                         </div>
-                    </FormFieldBlock>
+                        </div>
+                    </Block>
                     <div className="modal-action">
                         <button onClick={handleAddPartner} type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                             {editingIndex !== null ? 'บันทึก' : 'เพิ่ม'}
@@ -328,7 +404,7 @@ export default function Partners(data) {
                                         )}
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {(displayRows.length >= 2) && (
+                                        {(displayRows.length >= 1) && (
                                             <div className="flex items-center gap-3 justify-end">
                                                 <button type="button" onClick={() => handleEditPartner(i)} className="text-blue-600 hover:text-blue-900">
                                                     แก้ไข
