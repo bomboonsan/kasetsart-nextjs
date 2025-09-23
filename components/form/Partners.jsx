@@ -27,6 +27,7 @@ export default function Partners({ data, onChange }) {
     useEffect(() => {
         // Initialize with sorted data from props
         const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.order - b.order) : [];
+        console.log('Initializing Partners with data:', sortedData);
         setDisplayRows(sortedData);
     }, [data]);
 
@@ -111,9 +112,9 @@ export default function Partners({ data, onChange }) {
 
     return (
         <>
-            <dialog id="my_modal_2" className="modal">
-                <div className="modal-box w-11/12 max-w-5xl text-gray-700">
-                    <Block>
+            <dialog id="my_modal_2" className="modal left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="modal-box max-w-5xl text-gray-700">
+                    <div className="p-4 rounded-xl shadow-2xl">
                         <div className="space-y-4">
                             <div className="flex items-center gap-10">
                                 <label className="flex items-center gap-3 text-zinc-700">
@@ -268,8 +269,8 @@ export default function Partners({ data, onChange }) {
                             />
                         </div>
                         </div>
-                    </Block>
-                    <div className="modal-action">
+                    </div>
+                    <div className="flex gap-3 justify-end mt-4">
                         <button onClick={handleAddPartner} type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                             {editingIndex !== null ? 'บันทึก' : 'เพิ่ม'}
                         </button>
@@ -361,21 +362,9 @@ export default function Partners({ data, onChange }) {
                                     <td className="px-4 py-4 whitespace-nowrap">
                                         <div>
                                             <div className="text-sm font-medium text-gray-900">
-                                                {/* แสดงชื่อเต็มจาก profile (ไทย) เป็นหลัก */}
-                                                {(() => {
-                                                    if (p.fullname) return p.fullname
-                                                    const prof = p.User?.profile
-                                                    if (prof && (prof.firstNameTH || prof.lastNameTH)) {
-                                                        return `${prof.firstNameTH || ''} ${prof.lastNameTH || ''}`.trim()
-                                                    }
-                                                    return p.User?.email || '-'
-                                                })()}
+                                                {p.fullname ? p.fullname : "ไม่ระบุ"}
                                             </div>
-                                            {p.User?.email && (
-                                                <div className="text-sm text-gray-500">
-                                                    {p.User.email}
-                                                </div>
-                                            )}
+                                            <span className='text-xs text-gray-700'>{p.isInternal ? "บุคคลภายใน" : "บุคคลภายนอก"}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap">
