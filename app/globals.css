@@ -136,3 +136,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-ibm-plex-sans-thai), 'IBM Plex Sans Thai', sans-serif;
 }
+
+.inputGroup {
+  @apply space-y-4;
+}
+.inputGroup .forminput {
+  @apply border-b border-b-gray-100 pb-4;
+}
