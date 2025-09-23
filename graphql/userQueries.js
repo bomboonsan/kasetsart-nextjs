@@ -68,53 +68,25 @@ export const GET_PROFILE_OPTIONS = gql`
 export const GET_ALL_USERS = gql`
   query GetAllUsers($pagination: PaginationArg, $filters: UsersPermissionsUserFiltersInput) {
     usersPermissionsUsers(pagination: $pagination, filters: $filters) {
-      data {
-        id
+      documentId
+      username
+      email
+      firstNameTH
+      lastNameTH
+      firstNameEN
+      lastNameEN
+      academicPosition
+      departments {
         documentId
-        attributes {
-          username
-          email
-          firstNameTH
-          lastNameTH
-          firstNameEN
-          lastNameEN
-          academicPosition
-          departments {
-            data {
-              id
-              documentId
-              attributes {
-                title
-              }
-            }
-          }
-          faculties {
-            data {
-              id
-              documentId
-              attributes {
-                title
-              }
-            }
-          }
-          organizations {
-            data {
-              id
-              documentId
-              attributes {
-                title
-              }
-            }
-          }
-        }
+        title
       }
-      meta {
-        pagination {
-          total
-          page
-          pageSize
-          pageCount
-        }
+      faculties {
+        documentId
+        title
+      }
+      organizations {
+        documentId
+        title
       }
     }
   }

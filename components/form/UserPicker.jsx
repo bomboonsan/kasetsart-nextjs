@@ -26,35 +26,31 @@ export default function UserPicker({ label, selectedUser, onSelect }) {
                 ]
             } : {}
         },
-        skip: !searchOpen
+        skip: !searchOpen,
+        ssr: false // prevent server-side fetch to avoid build/chunking issues
     });
 
     useEffect(() => {
-        if (usersData?.usersPermissionsUsers?.data) {
-            const users = usersData.usersPermissionsUsers.data.map(user => ({
-                id: user.documentId,
-                documentId: user.documentId,
-                username: user.attributes.username,
-                email: user.attributes.email,
-                firstNameTH: user.attributes.firstNameTH,
-                lastNameTH: user.attributes.lastNameTH,
-                firstNameEN: user.attributes.firstNameEN,
-                lastNameEN: user.attributes.lastNameEN,
-                academicPosition: user.attributes.academicPosition,
-                departments: user.attributes.departments?.data?.map(dept => ({
-                    id: dept.documentId,
-                    name: dept.attributes.title
-                })) || [],
-                faculties: user.attributes.faculties?.data?.map(fac => ({
-                    id: fac.documentId,
-                    name: fac.attributes.title
-                })) || [],
-                organizations: user.attributes.organizations?.data?.map(org => ({
-                    id: org.documentId,
-                    name: org.attributes.title
-                })) || []
+        // New query returns an array of users directly (no .data/.attributes wrapper)
+        const returned = usersData?.usersPermissionsUsers;
+        if (Array.isArray(returned)) {
+            const users = returned.map(user => ({
+                id: user.documentId || user.id,
+                documentId: user.documentId || user.id,
+                username: user.username,
+                email: user.email,
+                firstNameTH: user.firstNameTH,
+                lastNameTH: user.lastNameTH,
+                firstNameEN: user.firstNameEN,
+                lastNameEN: user.lastNameEN,
+                academicPosition: user.academicPosition,
+                departments: Array.isArray(user.departments) ? user.departments.map(d => ({ id: d.documentId, name: d.title })) : [],
+                faculties: Array.isArray(user.faculties) ? user.faculties.map(f => ({ id: f.documentId, name: f.title })) : [],
+                organizations: Array.isArray(user.organizations) ? user.organizations.map(o => ({ id: o.documentId, name: o.title })) : []
             }));
             setFilteredUsers(users);
+        } else {
+            setFilteredUsers([]);
         }
     }, [usersData]);
 

@@ -127,6 +127,8 @@ export default function Partners({ data, onChange }) {
         handleDataChange(newRows);
     };
 
+    console.log('modalUserObj:', modalUserObj);
+
     return (
         <>
             <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}>
@@ -185,8 +187,7 @@ export default function Partners({ data, onChange }) {
                                             type="text"
                                             value={(() => {
                                                 if (modalUserObj) {
-                                                    const prof = Array.isArray(modalUserObj.profile) ? modalUserObj.profile[0] : modalUserObj.profile
-                                                    return prof ? `${prof.firstNameTH || ''} ${prof.lastNameTH || ''}`.trim() : modalUserObj.email
+                                                    return modalUserObj.firstNameTH ? `${modalUserObj.firstNameTH || ''} ${modalUserObj.lastNameTH || ''}`.trim() : modalUserObj.email
                                                 }
                                                 return modalPartnerFullName || ''
                                             })()}
@@ -204,9 +205,9 @@ export default function Partners({ data, onChange }) {
                                             value={(() => {
                                                 if (modalUserObj) {
                                                     return [
-                                                        modalUserObj.department?.name,
-                                                        modalUserObj.faculty?.name,
-                                                        modalUserObj.organization?.name
+                                                        modalUserObj.departments[0]?.name,
+                                                        modalUserObj.faculties[0]?.name,
+                                                        modalUserObj.organizations[0]?.name
                                                     ].filter(Boolean).join(' ')
                                                 }
                                                 return modalOrgName || ''
