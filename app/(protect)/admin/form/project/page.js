@@ -69,13 +69,12 @@ export default function ProjectTable() {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>ชื่อโครงการ</TableHead>
-                            <TableHead>ปีงบประมาณ</TableHead>
-                            <TableHead>งบประมาณ</TableHead>
-                            <TableHead>สถานะ</TableHead>
-                            <TableHead>วันที่เผยแพร่</TableHead>
-                            <TableHead>วันที่แก้ไข</TableHead>
-                            <TableHead className="text-right">จัดการ</TableHead>
+                            <TableHead className={'px-5'}>ชื่อโครงการ</TableHead>
+                            <TableHead className={'px-5'}>ปีงบประมาณ</TableHead>
+                            <TableHead className={'px-5'}>งบประมาณ</TableHead>
+                            <TableHead className={'px-5'}>วันที่เผยแพร่</TableHead>
+                            <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
+                            <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -88,18 +87,17 @@ export default function ProjectTable() {
 
                         {projects.map((p) => (
                             <TableRow key={p.documentId}>
-                                <TableCell>
+                                <TableCell className={'px-5'}>
                                     <div className="font-semibold">{p.nameTH || p.nameEN || '—'}</div>
-                                    <div className="text-xs text-gray-500">{p.documentId}</div>
+                                    <div className="text-xs text-gray-500">{p.nameEN}</div>
                                 </TableCell>
-                                <TableCell>{p.fiscalYear || '-'}</TableCell>
-                                <TableCell>{p.budget ? `${p.budget} บาท` : '-'}</TableCell>
-                                <TableCell><span className="inline-block bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">{p.status || 'เผยแพร่'}</span></TableCell>
-                                <TableCell>{p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
-                                <TableCell>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
-                                <TableCell className="text-right">
-                                    <a className="text-blue-600 mr-3">ดู</a>
-                                    <a className="text-green-600">แก้ไข</a>
+                                <TableCell className={'px-5'}>{p.fiscalYear || '-'}</TableCell>
+                                <TableCell className={'px-5'}>{p.budget ? `${p.budget} บาท` : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className="text-right px-5">
+                                    <a className="text-blue-600 mr-3" href={`/admin/form/project/view/${p.documentId}`}>ดู</a>
+                                    <a className="text-green-600" href={`/admin/form/project/edit/${p.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}

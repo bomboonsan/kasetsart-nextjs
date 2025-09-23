@@ -32,7 +32,15 @@ export const CREATE_PROJECT = gql`
         name
       }
       partners
-      
+
+    }
+  }
+`;
+
+export const UPDATE_PROJECT = gql`
+  mutation UpdateProject($documentId: ID!, $data: ProjectInput!) {
+    updateProject(documentId: $documentId, data: $data) {
+      documentId
     }
   }
 `;

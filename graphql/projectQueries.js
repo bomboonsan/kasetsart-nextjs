@@ -14,3 +14,30 @@ export const GET_PROJECTS = gql`
     }
   }
 `;
+
+export const GET_PROJECT = gql`
+  query GetProject($documentId: ID!) {
+    project(documentId: $documentId) {
+      documentId
+      fiscalYear
+      projectType
+      projectMode
+      subProjectCount
+      nameTH
+      nameEN
+      isEnvironmentallySustainable
+      durationStart
+      durationEnd
+      researchKind
+      fundType
+      fundSubType
+      fundName
+      budget
+      keywords
+      ic_types { documentId name }
+      impacts { documentId name }
+      sdgs { documentId name }
+      partners
+    }
+  }
+`;

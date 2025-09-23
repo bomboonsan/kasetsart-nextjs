@@ -14,7 +14,7 @@ import { PROJECT_FORM_INITIAL, researchKindOptions, fundTypeOptions, subFundType
 import { GET_PROJECT_OPTIONS } from '@/graphql/optionForm';
 import { CREATE_PROJECT } from '@/graphql/formQueries';
 import { useQuery, useMutation } from "@apollo/client/react";
-export default function ProjectForm({ props }) {
+export default function ProjectForm({ initialData, onSubmit }) {
     const { data: session, status } = useSession();
     const [formData, setFormData] = useState(PROJECT_FORM_INITIAL);
     const [fundSubTypeOptions, setFundSubTypeOptions] = useState([]);
@@ -114,11 +114,15 @@ export default function ProjectForm({ props }) {
 
             console.log('Submitting project data:', projectData);
 
-            await createProject({
-                variables: {
-                    data: projectData
-                }
-            });
+            if (onSubmit) {
+                await onSubmit(projectData);
+            } else {
+                await createProject({
+                    variables: {
+                        data: projectData
+                    }
+                });
+            }
         } catch (error) {
             console.error('Submission error:', error);
         } finally {
@@ -129,6 +133,21 @@ export default function ProjectForm({ props }) {
     useEffect(() => {
         console.log(formData);
     }, [formData]);
+
+    // hydrate when editing
+    useEffect(() => {
+        if (initialData) {
+            const hydrated = {
+                ...PROJECT_FORM_INITIAL,
+                ...initialData,
+                // map relations to expected single select values
+                icTypes: initialData.ic_types?.[0]?.documentId ?? initialData.icTypes ?? "",
+                impact: initialData.impacts?.[0]?.documentId ?? initialData.impact ?? "",
+                sdg: initialData.sdgs?.[0]?.documentId ?? initialData.sdg ?? "",
+            };
+            setFormData(hydrated);
+        }
+    }, [initialData]);
 
     useEffect(() => {
         console.log('fundType changed:', formData.fundType);
@@ -178,8 +197,8 @@ export default function ProjectForm({ props }) {
                     ]} />
                     <FormInput id="subProjectCount" type='number' label="จำนวนโครงการย่อย" value={formData.subProjectCount} placeholder="กรอกจำนวนโครงการย่อย" onChange={(e) => handleInputChange('subProjectCount', e.target.value)} />
                     {/* <FormInput id="project-name" label="ชื่อโครงการ" value="" placeholder="กรอกชื่อโครงการ" /> */}
-                    <FormTextarea id="nameTH" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" onChange={(e) => handleInputChange('nameTH', e.target.value)} placeholder="" rows={5} />
-                    <FormTextarea id="nameEN" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" onChange={(e) => handleInputChange('nameEN', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="nameTH" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" value={formData.nameTH} onChange={(e) => handleInputChange('nameTH', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="nameEN" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" value={formData.nameEN} onChange={(e) => handleInputChange('nameEN', e.target.value)} placeholder="" rows={5} />
                     <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
                         { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                         { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
@@ -196,7 +215,7 @@ export default function ProjectForm({ props }) {
                     <FormSelect id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
                     <FormTextarea label=" " value={formData.fundName} readOnly disabled />
                     <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="0" onChange={(e) => handleInputChange('budget', e.target.value)} />
-                    <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />
                     <FormSelect id="impact" label="Impact" value={formData.impact ?? ""} placeholder="เลือก Impact" onChange={(val) => handleInputChange('impact', val)} options={impactsOptions} />
                     <FormSelect id="sdgs" label="SDG" value={formData.sdg ?? ""} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
