@@ -66,6 +66,22 @@ export default function ProjectEdit() {
                         </div>
                     </Block>
                     <Block>
+                        <h2 className="text-lg font-medium mb-3">ไฟล์แนบ</h2>
+                        <div className="space-y-2">
+                            {project.attachments && project.attachments.length > 0 ? (
+                                project.attachments.map((file) => (
+                                    <div key={file.documentId}>
+                                        <a href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                            {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                                        </a>
+                                    </div>
+                                ))
+                            ) : (
+                                <div>ไม่มีไฟล์แนบ</div>
+                            )}
+                        </div>  
+                    </Block>
+                    <Block>
                         <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
                         <PartnersView data={project.partners} />
                     </Block>
