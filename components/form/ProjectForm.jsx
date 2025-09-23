@@ -8,6 +8,7 @@ import FormRadio from '@/components/myui/FormRadio';
 import FormTextarea from '@/components/myui/FormTextarea';
 import FormDateSelect from '../myui/FormDateSelect';
 import FormSelect from '../myui/FormSelect';
+import Partners from "../form/Partners"
 import { Button } from '../ui/button';
 import { PROJECT_FORM_INITIAL, researchKindOptions, fundTypeOptions, subFundType1, subFundType2, subFundType3, subFundType4, fundNameOptions } from '@/data/project';
 import { GET_PROJECT_OPTIONS } from '@/graphql/optionForm';
@@ -182,6 +183,7 @@ export default function ProjectForm({ props }) {
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />
                     <FormSelect id="impact" label="Impact" value={formData.impact ?? ""} placeholder="เลือก Impact" onChange={(val) => handleInputChange('impact', val)} options={impactsOptions} />
                     <FormSelect id="sdgs" label="SDG" value={formData.sdg ?? ""} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
+                    <Partners data={formData.partners} />
                 </div>
                 <div className='flex justify-end items-center gap-3 mt-4'>
                     <Button variant="outline">ยกเลิก</Button>

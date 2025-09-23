@@ -18,6 +18,23 @@ export const PROJECT_FORM_INITIAL = {
     icTypes: "",
     impact: "",
     sdg: "",
+    partners: [{
+        order: 1,
+        name: "lorem ipsum",
+        organization: "test org",
+        type: "หัวหน้าโครงการ",
+        note: "first author",
+        proportionCustom: "0.5",
+        proportion: "0.5",
+    }, {
+            order: 2,
+            name: "ipsum test",
+            organization: "test2 org",
+            type: "นักวิจัยร่วม",
+            note: "",
+            proportionCustom: "0.2",
+            proportion: "0.5",
+    }],
     attachments: []
 }
 
