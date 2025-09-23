@@ -30,12 +30,15 @@ export const GET_USER_PROFILE = gql`
         participation
         departments {
           documentId
+          title
         }
         faculties {
           documentId
+          title
         }
         organizations {
           documentId
+          title
         }
     }
   }
