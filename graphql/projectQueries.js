@@ -37,6 +37,13 @@ export const GET_PROJECT = gql`
       ic_types { documentId name }
       impacts { documentId name }
       sdgs { documentId name }
+      attachments { 
+        documentId
+        name
+        url
+        size
+        mime
+      }
       partners
     }
   }

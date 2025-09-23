@@ -28,11 +28,46 @@ export default function FileUploadField({
             const incoming = JSON.stringify(value || [])
             if (incoming !== lastAppliedRef.current) {
                 lastAppliedRef.current = incoming
-                setAttachments(value || [])
+                // ปรับให้รองรับทั้งข้อมูลจาก upload ใหม่และข้อมูลจาก GraphQL
+                const normalizedAttachments = (value || []).map(file => {
+                    // หากเป็นไฟล์จาก GraphQL (มี documentId) ให้ normalize URL
+                    if (file.documentId || (file.url && !file.url.startsWith('http'))) {
+                        const url = file.url?.startsWith('http') 
+                            ? file.url 
+                            : `${API_BASE}${file.url || ''}`
+                        return {
+                            id: file.id,
+                            documentId: file.documentId,
+                            name: file.name,
+                            url,
+                            size: file.size,
+                            mime: file.mime
+                        }
+                    }
+                    // หากเป็นไฟล์จาก upload ใหม่ ให้คืนค่าตามเดิม
+                    return file
+                })
+                setAttachments(normalizedAttachments)
             }
         } catch (e) {
             // หาก stringify ล้มเหลว ให้ fallback เป็นการเซ็ตปกติ
-            setAttachments(value || [])
+            const normalizedAttachments = (value || []).map(file => {
+                if (file.documentId || (file.url && !file.url.startsWith('http'))) {
+                    const url = file.url?.startsWith('http') 
+                        ? file.url 
+                        : `${API_BASE}${file.url || ''}`
+                    return {
+                        id: file.id,
+                        documentId: file.documentId,
+                        name: file.name,
+                        url,
+                        size: file.size,
+                        mime: file.mime
+                    }
+                }
+                return file
+            })
+            setAttachments(normalizedAttachments)
         }
         // หมายเหตุ: ใช้เฉพาะ `value` เป็น dependency เพื่อลด risk ของ loop
     }, [value])
@@ -185,32 +220,45 @@ export default function FileUploadField({
                 <div className="space-y-2">
                     <p className="text-sm font-medium text-gray-700">ไฟล์ที่อัปโหลดแล้ว:</p>
                     <ul className="space-y-1">
-                        {attachments.map((file, index) => (
-                            <li key={file.id || index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
-                                <div className="flex-1 truncate">
-                                    {(() => { const href = file?.url?.startsWith('http') ? file.url : `${API_BASE}${file?.url || ''}`; return (
-                                    <a
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:underline"
+                        {attachments.map((file, index) => {
+                            // สร้าง href ที่ปลอดภัยสำหรับทั้งไฟล์จาก upload ใหม่และจาก GraphQL
+                            const href = (() => {
+                                if (!file?.url) return '#'
+                                return file.url.startsWith('http') ? file.url : `${API_BASE}${file.url}`
+                            })()
+                            
+                            return (
+                                <li key={file.id || file.documentId || index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
+                                    <div className="flex-1 truncate">
+                                        <a
+                                            href={href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline"
+                                        >
+                                            {file.name || 'ไฟล์ไม่มีชื่อ'}
+                                        </a>
+                                        {typeof file.size === 'number' && !Number.isNaN(file.size) && (
+                                            <span className="text-xs text-gray-400 ml-2">
+                                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                                            </span>
+                                        )}
+                                        {file.mime && (
+                                            <span className="text-xs text-gray-400 ml-2">
+                                                ({file.mime})
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeAttachment(index)}
+                                        className="text-red-600 text-xs hover:underline"
                                     >
-                                        {file.name}
-                                    </a>
-                                    )})()}
-                                    {typeof file.size === 'number' && !Number.isNaN(file.size) && (
-                                        <span className="text-xs text-gray-400 ml-2">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                                    )}
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => removeAttachment(index)}
-                                    className="text-red-600 text-xs hover:underline"
-                                >
-                                    ลบ
-                                </button>
-                            </li>
-                        ))}
+                                        ลบ
+                                    </button>
+                                </li>
+                            )
+                        })}
                     </ul>
                     {error && <div className="text-sm text-red-600">{error}</div>}
                 </div>
