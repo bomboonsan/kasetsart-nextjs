@@ -139,7 +139,7 @@ export default function Sidebar() {
 	};
 
 	return (
-		<aside className="w-64 p-4 border-r min-h-screen bg-white sticky top-0 flex flex-col justify-between">
+		<aside className="w-64 p-4 border-r md:h-screen bg-white sticky top-0 flex flex-col justify-between">
 			<section className="space-y-6">
 				<div className="py-4 border-b border-gray-200">
 					<div className="flex items-center space-x-2">

@@ -5,6 +5,8 @@ import FormSelect from '../myui/FormSelect';
 import FormCheckbox from '../myui/FormCheckbox';
 // import UserPicker from './UserPicker';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 export default function Partners({ data, onChange }) {
     const [displayRows, setDisplayRows] = useState([]);
@@ -112,9 +114,16 @@ export default function Partners({ data, onChange }) {
 
     return (
         <>
-            <dialog id="my_modal_2" className="modal left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="modal-box max-w-5xl text-gray-700">
-                    <div className="p-4 rounded-xl shadow-2xl">
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="default" size="sm" className="mb-4">เพิ่มสมาชิก</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl">
+                    <DialogHeader>
+                        <DialogTitle>เพิ่ม / แก้ไข ผู้ร่วมโครงการวิจัย</DialogTitle>
+                        <DialogDescription>กรอกข้อมูลผู้ร่วมโครงการวิจัยที่เกี่ยวข้องกับโครงการ</DialogDescription>
+                    </DialogHeader>
+                    <div className="p-4 rounded-xl">
                         <div className="space-y-4">
                             <div className="flex items-center gap-10">
                                 <label className="flex items-center gap-3 text-zinc-700">
@@ -270,30 +279,18 @@ export default function Partners({ data, onChange }) {
                         </div>
                         </div>
                     </div>
-                    <div className="flex gap-3 justify-end mt-4">
-                        <button onClick={handleAddPartner} type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline" size="sm" onClick={() => { resetForm(); }}>
+                                ยกเลิก
+                            </Button>
+                        </DialogClose>
+                        <Button variant="default" size="sm" onClick={() => { handleAddPartner(); }}>
                             {editingIndex !== null ? 'บันทึก' : 'เพิ่ม'}
-                        </button>
-                        <button
-                            type="button"
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                            onClick={() => { resetForm(); const dlg = document.getElementById('my_modal_2'); if (dlg && dlg.close) dlg.close(); }}
-                        >
-                            ยกเลิก
-                        </button>
-                    </div>
-                </div>
-                <div
-                    className="modal-backdrop backdrop-blur-sm"
-                    onClick={() => { resetForm(); const dlg = document.getElementById('my_modal_2'); if (dlg && dlg.close) dlg.close(); }}
-                />
-            </dialog>
-            <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" onClick={() => {
-                resetForm();
-                document.getElementById('my_modal_2').showModal();
-            }}>
-                เพิ่มสมาชิก
-            </button>
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <div className="bg-white border border-gray-200 rounded-b-md overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -339,22 +336,12 @@ export default function Partners({ data, onChange }) {
                                             </div>
                                             {(displayRows.length >= 2) && (
                                                 <div className='text-gray-700 flex items-center gap-2 ml-3'>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => moveUp(i)}
-                                                        disabled={i === 0}
-                                                        className={`px-2 py-1 rounded bg-gray-100 text-xs ${i === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
-                                                    >
+                                                    <Button size="sm" variant="ghost" onClick={() => moveUp(i)} disabled={i === 0}>
                                                         <ChevronUp />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => moveDown(i)}
-                                                        disabled={i === displayRows.length - 1}
-                                                        className={`px-2 py-1 rounded bg-gray-100 text-xs ${i === displayRows.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'}`}
-                                                    >
+                                                    </Button>
+                                                    <Button size="sm" variant="ghost" onClick={() => moveDown(i)} disabled={i === displayRows.length - 1}>
                                                         <ChevronDown />
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             )}
                                         </div>
@@ -395,12 +382,12 @@ export default function Partners({ data, onChange }) {
                                     <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         {(displayRows.length >= 1) && (
                                             <div className="flex items-center gap-3 justify-end">
-                                                <button type="button" onClick={() => handleEditPartner(i)} className="text-blue-600 hover:text-blue-900">
+                                                <Button size="sm" variant="ghost" onClick={() => handleEditPartner(i)}>
                                                     แก้ไข
-                                                </button>
-                                                <button type="button" onClick={() => handleRemovePartner(i)} className="text-red-600 hover:text-red-900">
+                                                </Button>
+                                                <Button size="sm" variant="ghost" onClick={() => handleRemovePartner(i)}>
                                                     ลบ
-                                                </button>
+                                                </Button>
                                             </div>
                                         )}
                                     </td>
