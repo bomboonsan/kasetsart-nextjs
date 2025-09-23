@@ -35,7 +35,21 @@ export default function Partners({ data, onChange }) {
     }, [data]);
 
     const handleDataChange = (newRows) => {
-        const sortedRows = newRows.map((row, index) => ({ ...row, order: index + 1 }));
+        // assign order
+        let sortedRows = newRows.map((row, index) => ({ ...row, order: index + 1 }));
+
+        // Calculate partnerProportion: equal split among internal partners (sum to 1)
+        const internalCount = sortedRows.filter(r => r.isInternal).length;
+        if (internalCount > 0) {
+            const share = 1 / internalCount;
+            sortedRows = sortedRows.map(r => ({
+                ...r,
+                partnerProportion: r.isInternal ? Number(share) : 0
+            }));
+        } else {
+            sortedRows = sortedRows.map(r => ({ ...r, partnerProportion: 0 }));
+        }
+
         setDisplayRows(sortedRows);
         if (onChange) {
             onChange(sortedRows);
