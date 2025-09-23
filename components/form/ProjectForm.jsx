@@ -79,7 +79,7 @@ export default function ProjectForm({ props }) {
                     {/* <FormInput id="project-name" label="ชื่อโครงการ" value="" placeholder="กรอกชื่อโครงการ" /> */}
                     <FormTextarea id="nameTH" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" onChange={(e) => handleInputChange('nameTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="nameEN" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" onChange={(e) => handleInputChange('nameEN', e.target.value)} placeholder="" rows={5} />
-                    <FormRadio id="isEnvironmentallySustainable" label="" value="0" onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
+                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
                         { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                         { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                     ]} />
@@ -94,7 +94,7 @@ export default function ProjectForm({ props }) {
                     <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
                     <FormSelect id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
                     <FormTextarea label=" " value={formData.fundName} readOnly disabled />
-                    <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="กรอกงบวิจัย" onChange={(e) => handleInputChange('budget', e.target.value)} />
+                    <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="0" onChange={(e) => handleInputChange('budget', e.target.value)} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />
                     <FormSelect id="impact" label="Impact" value={formData.impact ?? ""} placeholder="เลือก Impact" onChange={(val) => handleInputChange('impact', val)} options={impactsOptions} />
