@@ -10,9 +10,9 @@ export const PROJECT_FORM_INITIAL = {
     durationStart: "2025-08-01", // ระยะเวลาการทำวิจัย (Date)
     durationEnd: "2027-12-31", // ระยะเวลาการทำวิจัย (Date)
 
-    researchKind: "", // ประเภทงานวิจัย (Int) Value จาก select
-    fundType: "", // ประเภทแหล่งทุน (Int) Value จาก select
-    fundSubType: "", // ประเภทแหล่งทุน (Int) Value จาก select
+    researchKind: "", // ประเภทงานวิจัย (String) Value จาก select
+    fundType: "", // ประเภทแหล่งทุน (String) Value จาก select
+    fundSubType: "", // ประเภทแหล่งทุน (String) Value จาก select
     fundName: "", // ชื่อแหล่งทุน (String)
     budget: "", // งบวิจัย (Int)
     keywords: "", // คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร) (String)
