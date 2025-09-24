@@ -93,3 +93,28 @@ export const MY_FUNDS = gql`
         }
     }
 `;
+
+export const MY_BOOKS = gql`
+  query GetBooks($pagination: PaginationArg, $sort: [String], $userId: ID!) {
+    books(
+      pagination: $pagination
+      sort: $sort
+      filters: { funds: { users_permissions_users: { documentId: { eq: $userId } } } }
+    ) {
+      documentId
+      bookType
+      titleTH
+      titleEN
+      publicationDate
+      updatedAt
+      writers
+      attachments {
+        documentId
+        name
+        url
+        size
+        mime
+      }
+    }
+  }
+`;
