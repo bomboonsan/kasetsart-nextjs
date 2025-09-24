@@ -7,12 +7,15 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 // Hooks
 import { useState, useEffect, useRef } from "react";
+import { useParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "@apollo/client/react";
 // Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
 // GraphQL Queries
 import { GET_USER_PROFILE, GET_PROFILE_OPTIONS, UPDATE_USER_PROFILE } from '@/graphql/userQueries';
+// Utils
+import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
 const initialFormData = {
     firstNameTH: '',
@@ -40,7 +43,9 @@ const initialEducationItem = {
 
 export default function AdminUserEditPage({ params }) {
     const { data: session, status } = useSession();
-    const documentId = params?.id;
+    // Next.js params may be a promise; use useParams to safely access route params in client components
+    const routeParams = useParams?.();
+    const documentId = routeParams?.id || params?.id;
     const [formData, setFormData] = useState(initialFormData);
     const [selectData, setSelectData] = useState({});
     const [education, setEducation] = useState([{ ...initialEducationItem }]);
@@ -78,12 +83,13 @@ export default function AdminUserEditPage({ params }) {
         }
     });
 
-    // Initialize form with fetched profile
+        // Initialize form with fetched profile
     useEffect(() => {
         if (!profileData?.usersPermissionsUser || optionsLoading || isFormInitialized.current) {
             return;
         }
         const profile = profileData.usersPermissionsUser;
+        console.log("Admin Edit - profileData:", profileData);
         let initialData = {};
 
         for (const key in profile) {
@@ -105,6 +111,7 @@ export default function AdminUserEditPage({ params }) {
                 } else if (Array.isArray(profile.education)) {
                     educationData = profile.education;
                 } else if (typeof profile.education === 'object') {
+                    // If it's an object but not an array, wrap it in an array
                     educationData = [profile.education];
                 }
 
@@ -116,6 +123,8 @@ export default function AdminUserEditPage({ params }) {
             }
         }
 
+        console.log("Admin Edit - Initial form data set:", initialData);
+
         if (profile.avatar && profile.avatar.url) {
             const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
             setPreviewUrl(strapiUrl + profile.avatar.url);
@@ -125,7 +134,15 @@ export default function AdminUserEditPage({ params }) {
     }, [profileData, optionsLoading]);
 
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        let formattedValue = value;
+        if (field === 'telephoneNo') {
+            formattedValue = formatToDigitsOnly(value).slice(0, 10);
+        } else if (field === 'firstNameEN' || field === 'lastNameEN') {
+            formattedValue = formatToEnglishOnly(value);
+        } else if (field === 'firstNameTH' || field === 'lastNameTH') {
+            formattedValue = formatToThaiOnly(value);
+        }
+        setFormData(prev => ({ ...prev, [field]: formattedValue }));
     };
 
     const addEducation = () => setEducation(prev => [...prev, { ...initialEducationItem }]);
@@ -153,7 +170,8 @@ export default function AdminUserEditPage({ params }) {
         const documentId = extractDocumentId(value);
         if (!documentId || !Array.isArray(optionList)) return null;
         const match = optionList.find((item) => item.value === documentId || item.documentId === documentId);
-        return match?.documentId || null;
+        // Return numeric id (Strapi REST expects numeric IDs for relations)
+        return match?.id || null;
     };
 
     const handleSubmit = async (e) => {
@@ -212,15 +230,48 @@ export default function AdminUserEditPage({ params }) {
             organizations: organizationId ? [organizationId] : null,
             education: JSON.stringify(education.filter(edu => edu.level || edu.institution || edu.field || edu.year))
         };
+        console.log("Admin Edit - Payload to submit:", payload);
 
         if (uploadedAvatarId) payload.avatar = uploadedAvatarId;
         if (password && password.length > 0) payload.password = password;
 
         try {
-            await updateProfile({ variables: { id: documentId, data: payload } });
-            alert('Profile updated successfully!');
-            refetch();
+            // First try GraphQL mutation (some setups may support it)
+            try {
+                await updateProfile({ variables: { id: documentId, data: payload } });
+                alert('Profile updated successfully!');
+                refetch();
+                return;
+            } catch (gqlErr) {
+                // If GraphQL update fails with "User not found" or similar, fall back to REST API below
+                console.warn('GraphQL update failed, falling back to REST update:', gqlErr.message || gqlErr);
+            }
+
+            // REST fallback: use internal admin API route which uses STRAPI_ADMIN_TOKEN on the server
+            const adminApiRes = await fetch('/api/admin/users/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ documentId, payload })
+            });
+
+            const adminText = await adminApiRes.text();
+            let adminJson = null;
+            try { adminJson = JSON.parse(adminText); } catch (e) {}
+
+            if (!adminApiRes.ok) {
+                throw new Error(`Admin API update failed: ${adminApiRes.status} ${adminText}`);
+            }
+
+            if (adminJson?.success) {
+                alert('User profile updated successfully!');
+                refetch();
+                return;
+            }
+
+            throw new Error(`Admin API update did not succeed: ${adminText}`);
+
         } catch (err) {
+            console.error(err);
             alert(`Failed to update profile: ${err.message}`);
         }
     };
@@ -231,6 +282,7 @@ export default function AdminUserEditPage({ params }) {
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
 
+    console.log("Admin Edit - Form selectData:", selectData);
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
