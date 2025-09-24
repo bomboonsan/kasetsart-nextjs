@@ -23,9 +23,17 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const originalAttachmentIdsRef = useRef([]);
 
-    const extractAttachmentIds = (arr) => Array.isArray(arr)
-        ? arr.filter(a => a && (a.id || a.documentId)).map(a => String(a.documentId || a.id))
-        : [];
+    const extractAttachmentIds = (arr) => {
+        if (!Array.isArray(arr)) return [];
+        return arr
+            .filter(a => a && (a.id || a.documentId))
+            .map(a => {
+                const raw = a.documentId ?? a.id;
+                const n = Number(raw);
+                return Number.isNaN(n) ? null : n;
+            })
+            .filter(Boolean);
+    };
 
     useEffect(() => {
         if (initialData) {
@@ -195,6 +203,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
         }, [formData.__projectObj]);
 
+    if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
     console.log('Render PublicationForm', { formData });
 
     return (
@@ -216,7 +225,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
                     <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
                     {/* Standards Section */}
-                    {/* <div className="space-y-1 flex flex-wrap items-center forminput">
+                    <div className="space-y-1 flex flex-wrap items-center forminput">
                         <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
                         <div className="grid grid-cols-2 gap-3 text-sm w-2/3">
                             <label className="flex flex-wrap items-center gap-2">
@@ -276,7 +285,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                             </label>
                         </div>
                         
-                    </div> */}
+                    </div>
                     
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={e => handleInputChange('keywords', e.target.value)} rows={3} />
