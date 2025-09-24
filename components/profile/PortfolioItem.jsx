@@ -1,6 +1,15 @@
-import { Button }  from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function PublicationItem({ title, description }) {
+export default function PublicationItem({ title, description, editLink, attachments }) {
     return (
         <div className="border-b border-b-gray-200 py-3 last:border-b-0">
             <div className="flex justify-between items-start gap-4">
@@ -13,9 +22,11 @@ export default function PublicationItem({ title, description }) {
                     </p>
                 </div>
                 <div className="flex-shrink-0 flex gap-2">
-                    <Button variant="outline" className="text-sm px-3 py-1.5">
-                        แก้ไขผลงาน
-                    </Button>
+                    {editLink && <Link href={editLink} passHref>
+                        <Button variant="outline" className="text-sm px-3 py-1.5">
+                            แก้ไขผลงาน
+                        </Button>
+                    </Link>}
                     <Button variant="default" className="text-sm px-3 py-1.5">
                         ดูเอกสาร
                     </Button>

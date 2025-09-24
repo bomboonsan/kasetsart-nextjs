@@ -79,6 +79,7 @@ export default function ProfilePortfolio({ data }) {
                                         key={p.documentId || p.id}
                                         title={p.nameTH}
                                         description={p.nameEN}
+                                        editLink={`/form/project/edit/${p.documentId || p.id}`}
                                     />
                                 ))
                             );
@@ -91,6 +92,7 @@ export default function ProfilePortfolio({ data }) {
                                         key={c.documentId || c.id}
                                         title={c.titleTH}
                                         description={c.titleEN}
+                                        editLink={`/form/conference/edit/${c.documentId || c.id}`}
                                     />
                                 ))
                             );
@@ -103,6 +105,7 @@ export default function ProfilePortfolio({ data }) {
                                         key={pu.documentId || pu.id}
                                         title={pu.titleTH}
                                         description={pu.titleEN}
+                                        editLink={`/form/publication/edit/${pu.documentId || pu.id}`}
                                     />
                                 ))
                             );
@@ -114,6 +117,7 @@ export default function ProfilePortfolio({ data }) {
                                     <PublicationItem
                                         key={f.documentId || f.id}
                                         title={f.contentDesc}
+                                        editLink={`/form/fund/edit/${f.documentId || f.id}`}
                                     />
                                 ))
                             );
@@ -126,6 +130,7 @@ export default function ProfilePortfolio({ data }) {
                                         key={b.documentId || b.id}
                                         title={b.titleTH}
                                         description={b.titleEN}
+                                        editLink={`/form/book/edit/${b.documentId || b.id}`}
                                     />
                                 ))
                             );
