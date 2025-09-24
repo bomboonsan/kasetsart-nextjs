@@ -56,6 +56,7 @@ function buildResearchStats(projects = [], icTypesMaster = [], impactsMaster = [
 
 export default function DashboardPage() {
   const { data, loading, error } = useQuery(GET_DASHBOARD, { fetchPolicy: 'cache-and-network' });
+  const [selectedDeptPersonnel, setSelectedDeptPersonnel] = useState('all');
   const [selectedDept, setSelectedDept] = useState('all');
   // Checkbox toggles for each stats category (simulate old behaviour if needed)
   const [useProjects, setUseProjects] = useState(true);
@@ -88,16 +89,12 @@ export default function DashboardPage() {
 
   // Academic personnel distribution (from usersPermissionsUsers.academic_types)
   // Optionally filter users by selected department (if selectedDept !== 'all')
+  // Always show faculty personnel across all departments (ignore selectedDept)
   const facultyPersonnelData = useMemo(() => {
-    const filteredUsers = selectedDept === 'all' ? users : users.filter(u => {
-      const depts = u?.departments || [];
-      return depts.some(d => d?.documentId === selectedDept);
-    });
-
-    const counts = aggregateAcademicTypes(filteredUsers);
+    const counts = aggregateAcademicTypes(users);
     const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
     return Object.entries(counts).map(([label, raw]) => ({ label, value: ((raw / total) * 100).toFixed(1), raw }));
-  }, [users, selectedDept]);
+  }, [users]);
 
   const departmentPersonnelData = facultyPersonnelData.map(d => ({ category: d.label, personnel: d.raw, percentage: d.value }));
 
@@ -150,9 +147,9 @@ export default function DashboardPage() {
             colors={['#6366f1', '#22c55e', '#06b6d4', '#f59e0b', '#ef4444']}
             height={80}
             departments={departments}
-            selectedDeptId={selectedDept}
-            onDeptChange={(id) => setSelectedDept(id)}
-            selectedDeptLabel={selectedDept === 'all' ? 'ทั้งหมด' : (departments.find(d => d.documentId === selectedDept)?.title || '')}
+            selectedDeptId={selectedDeptPersonnel}
+            onDeptChange={(id) => setSelectedDeptPersonnel(id)}
+            selectedDeptLabel={selectedDeptPersonnel === 'all' ? 'ทั้งหมด' : (departments.find(d => d.documentId === selectedDeptPersonnel)?.title || '')}
           />
         </div>
 
