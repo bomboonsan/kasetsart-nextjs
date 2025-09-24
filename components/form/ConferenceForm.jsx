@@ -1,0 +1,74 @@
+'use client';
+
+import React from 'react';
+import { useEffect, useMemo, useState } from 'react'
+import { useSession } from "next-auth/react";
+import Block from '../layout/Block';
+import FormInput from '@/components/myui/FormInput';
+import FormInputSelect from '@/components/myui/FormInputSelect';
+import FormRadio from '@/components/myui/FormRadio';
+import FormTextarea from '@/components/myui/FormTextarea';
+import FormDateSelect from '../myui/FormDateSelect';
+import FormSelect from '../myui/FormSelect';
+import Partners from "../form/Partners"
+import FileUploadField from './FileUploadField';
+import { Button } from '../ui/button';
+import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
+
+export default function ConferenceForm({ }) {
+    const { data: session } = useSession();
+    const [formData, setFormData] = useState(CONFERENCE_FORM_INITIAL);
+    const handleInputChange = (field, value) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+        if (field === 'partners') {
+            console.log('Partners updated in ProjectForm:', value);
+        }
+    };
+    console.log('formData', formData);
+    return (
+        <>
+            <Block> 
+                <div className="inputGroup">
+                    <FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH} onChange={(e) => handleInputChange('titleTH', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN} onChange={(e) => handleInputChange('titleEN', e.target.value)} placeholder="" rows={5} />
+                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
+                        { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
+                        { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
+                    ]} />
+                    <FormTextarea id="journalName" label="ชื่อการประชุมทางวิชาการ (ใช้ชื่อไทยถ้าไม่มีชื่อไทยให้ใช้ภาษาอื่น)" value={formData.journalName} onChange={(e) => handleInputChange('journalName', e.target.value)} placeholder="" rows={5} />
+                    <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI" value={formData.doi} placeholder="กรอก DOI" onChange={(e) => handleInputChange('doi', e.target.value)} />
+                    <FormInput id="isbn" label="ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)" value={formData.isbn} placeholder="กรอก ISBN" onChange={(e) => handleInputChange('isbn', e.target.value)} />
+                    <FormDateSelect durationStart={formData.durationStart} durationEnd={formData.durationEnd} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
+                        วัน/เดือน/ปี ที่นำเสนอ
+                        <span className="text-red-500 ml-1">*</span>
+                    </FormDateSelect>
+                    <FormInputSelect id="cost" label="ค่าใช้จ่าย (Int)" value={formData.costType} valueInput={formData.cost} onInputChange={(value) => handleInputChange('cost', value)} onChange={(value) => handleInputChange('costType', value)} placeholder="กรุณาเลือก" options={COST_TYPE_OPTIONS} after="จาก" />
+                    <FormRadio id="presentationWork" label="การนำเสนอผลงาน" value={formData.presentationWork} onChange={(e) => handleInputChange('presentationWork', e.target.value)} options={[
+                        { value: '0', label: 'ได้รับเชิญ (Invited Paper.)' },
+                        { value: '1', label: 'เสนอเอง' },
+                    ]} />
+                    <FormRadio id="presentType" label="ประเภทการนำเสนอ" value={formData.presentType} onChange={(e) => handleInputChange('presentType', e.target.value)} options={[
+                        { value: '0', label: 'ภาคบรรยาย (Oral)' },
+                        { value: '1', label: 'ภาคโปสเตอร์ (Poster)' },
+                        { value: '2', label: 'เข้าร่วมประชุมวิชาการ' },
+                    ]} />
+                    <FormRadio id="articleType" label="ลักษณะของบทความ" value={formData.articleType} onChange={(e) => handleInputChange('articleType', e.target.value)} options={[
+                        { value: '0', label: 'Abstract อย่างเดียว' },
+                        { value: '1', label: 'เรื่องเต็ม' },
+                    ]} />
+                    <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={(e) => handleInputChange('abstractTH', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="abstractEN" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractEN} onChange={(e) => handleInputChange('abstractEN', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="summary" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
+                    <FormRadio id="level" label="ระดับการนำเสนอ" value={formData.level} onChange={(e) => handleInputChange('level', e.target.value)} options={[
+                        { value: '0', label: 'ระดับชาติ' },
+                        { value: '1', label: 'ระดับนานาชาติ' },
+                    ]} />
+                    <Partners />
+                </div>
+            </Block>
+            <div className='p-6'>
+                <Button type="submit">บันทึก</Button>
+            </div>
+        </>
+    );
+}
