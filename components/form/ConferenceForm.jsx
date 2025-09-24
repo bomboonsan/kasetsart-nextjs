@@ -18,12 +18,31 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
-// import { parse } from 'next/dist/build/swc/generated-native';
 
-export default function ConferenceForm({ }) {
+export default function ConferenceForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
     const [formData, setFormData] = useState(CONFERENCE_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingObj, setLoadingObj] = useState({});
+
+    // Hydrate form data when editing
+    useEffect(() => {
+        if (initialData) {
+            // Map the conference data to form structure
+            const hydrated = {
+                ...CONFERENCE_FORM_INITIAL,
+                ...initialData,
+                // Map project relation if exists
+                __projectObj: initialData.projects?.[0] ? {
+                    ...initialData.projects[0],
+                    partners: initialData.projects[0].partners || []
+                } : null,
+                // Ensure partners come from the linked project if available
+                partners: initialData.projects?.[0]?.partners || [],
+            };
+            setFormData(hydrated);
+        }
+    }, [initialData]);
 
     const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
         context: {
@@ -86,13 +105,13 @@ export default function ConferenceForm({ }) {
             const conferenceData = {
                 titleTH: formData.titleTH.trim() || null,
                 titleEN: formData.titleEN.trim() || null,
-                isEnvironmentallySustainable: parseInt(formData.isEnvironmentallySustainable) || null,
+                isEnvironmentallySustainable: formData.isEnvironmentallySustainable || null,
                 journalName: formData.journalName || null,
                 doi: formData.doi || null,
                 isbn: formData.isbn || null,
                 durationStart: formData.durationStart || null,
                 durationEnd: formData.durationEnd || null,
-                cost: parseInt(formData.cost) || null,
+                cost: formData.cost || null,
                 costType: formData.costType || null,
                 presentationWork: formData.presentationWork || null,
                 presentType: formData.presentType || null,
@@ -100,7 +119,7 @@ export default function ConferenceForm({ }) {
                 abstractTH: formData.abstractTH || null,
                 abstractEN: formData.abstractEN || null,
                 summary: formData.summary || null,
-                level: parseInt(formData.level) || null,
+                level: formData.level || null,
                 country: formData.country || null,
                 state: formData.state || null,
                 city: formData.city || null,
@@ -119,16 +138,23 @@ export default function ConferenceForm({ }) {
                 }
             });
 
-            console.log('Creating conference with data:', conferenceData);
+            console.log('Conference data:', conferenceData);
 
-            // สร้าง conference
-            const conferenceResult = await createConference({
-                variables: {
-                    data: conferenceData
-                }
-            });
-
-            console.log('Conference created:', conferenceResult);
+            // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
+            if (isEdit && onSubmit) {
+                await onSubmit(conferenceData);
+            } else {
+                // สร้าง conference ใหม่
+                const conferenceResult = await createConference({
+                    variables: {
+                        data: conferenceData
+                    }
+                });
+                console.log('Conference created:', conferenceResult);
+                alert('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
+                // Reset form only for create
+                setFormData(CONFERENCE_FORM_INITIAL);
+            }
 
             // อัปเดต partners ใน project ถ้ามีและถ้า partners มีการเปลี่ยนแปลง
             if (formData.__projectObj?.documentId && formData.partners && Array.isArray(formData.partners)) {
@@ -142,10 +168,6 @@ export default function ConferenceForm({ }) {
                 });
                 console.log('Project partners updated successfully');
             }
-
-            alert('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
-            // Reset form
-            setFormData(CONFERENCE_FORM_INITIAL);
             
         } catch (error) {
             console.error('Submission error:', error);
@@ -194,9 +216,9 @@ export default function ConferenceForm({ }) {
 
     useEffect(() => {
         if (!formData.__projectObj) return;
-        setFormData((prev) => ({ ...prev, fundName: formData.__projectObj.fundName || "" }));
-        setFormData((prev) => ({ ...prev, keywords: formData.__projectObj.keywords || "" }));
-        setFormData((prev) => ({ ...prev, isEnvironmentallySustainable: formData.__projectObj.isEnvironmentallySustainable || "" }));
+        // setFormData((prev) => ({ ...prev, fundName: formData.__projectObj.fundName || "" }));
+        // setFormData((prev) => ({ ...prev, keywords: formData.__projectObj.keywords || "" }));
+        // setFormData((prev) => ({ ...prev, isEnvironmentallySustainable: formData.__projectObj.isEnvironmentallySustainable || "" }));
         setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
     }, [formData.__projectObj]);
     console.log('formData', formData);
@@ -204,21 +226,21 @@ export default function ConferenceForm({ }) {
         <>
             <Block> 
                 <div className="inputGroup">
-                    <FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH} onChange={(e) => handleInputChange('titleTH', e.target.value)} placeholder="" rows={5} />
-                    <FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN} onChange={(e) => handleInputChange('titleEN', e.target.value)} placeholder="" rows={5} />
-                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
+                    <FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH ?? ""} onChange={(e) => handleInputChange('titleTH', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN ?? ""} onChange={(e) => handleInputChange('titleEN', e.target.value)} placeholder="" rows={5} />
+                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable ?? ""} onChange={(e) => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[
                         { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                         { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                     ]} />
-                    <FormTextarea id="journalName" label="ชื่อการประชุมทางวิชาการ (ใช้ชื่อไทยถ้าไม่มีชื่อไทยให้ใช้ภาษาอื่น)" value={formData.journalName} onChange={(e) => handleInputChange('journalName', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="journalName" label="ชื่อการประชุมทางวิชาการ (ใช้ชื่อไทยถ้าไม่มีชื่อไทยให้ใช้ภาษาอื่น)" value={formData.journalName ?? ""} onChange={(e) => handleInputChange('journalName', e.target.value)} placeholder="" rows={5} />
                     <ProjectPicker label="โครงการวิจัยที่เกี่ยวข้อง" required={false} selectedProject={formData.__projectObj} onSelect={(project) => handleInputChange('__projectObj', project)} />
-                    <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI" value={formData.doi} placeholder="กรอก DOI" onChange={(e) => handleInputChange('doi', e.target.value)} />
-                    <FormInput id="isbn" label="ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)" value={formData.isbn} placeholder="กรอก ISBN" onChange={(e) => handleInputChange('isbn', e.target.value)} />
-                    <FormDateSelect durationStart={formData.durationStart} durationEnd={formData.durationEnd} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
+                    <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI" value={formData.doi ?? ""} placeholder="กรอก DOI" onChange={(e) => handleInputChange('doi', e.target.value)} />
+                    <FormInput id="isbn" label="ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)" value={formData.isbn ?? ""} placeholder="กรอก ISBN" onChange={(e) => handleInputChange('isbn', e.target.value)} />
+                    {/* <FormDateSelect durationStart={formData.durationStart ?? ""} durationEnd={formData.durationEnd ?? ""} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
                         วัน/เดือน/ปี ที่นำเสนอ
                         <span className="text-red-500 ml-1">*</span>
-                    </FormDateSelect>
-                    <FormInputSelect id="cost" label="ค่าใช้จ่าย (Int)" value={formData.costType} valueInput={formData.cost} onInputChange={(value) => handleInputChange('cost', value)} onChange={(value) => handleInputChange('costType', value)} placeholder="กรุณาเลือก" options={COST_TYPE_OPTIONS} after="จาก" />
+                    </FormDateSelect> */}
+                    <FormInputSelect id="cost" label="ค่าใช้จ่าย (Int)" value={formData.costType ?? ""} valueInput={formData.cost ?? ""} onInputChange={(value) => handleInputChange('cost', value)} onChange={(value) => handleInputChange('costType', value)} placeholder="กรุณาเลือก" options={COST_TYPE_OPTIONS} after="จาก" />
                     <FormRadio id="presentationWork" label="การนำเสนอผลงาน" value={formData.presentationWork} onChange={(e) => handleInputChange('presentationWork', e.target.value)} options={[
                         { value: '0', label: 'ได้รับเชิญ (Invited Paper.)' },
                         { value: '1', label: 'เสนอเอง' },
@@ -237,7 +259,7 @@ export default function ConferenceForm({ }) {
                     <FormTextarea id="summary" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
                     <FileUploadField
                         label="เอกสารแนบ"
-                        value={formData.attachments}
+                        value={formData.attachments ?? ""}
                         onFilesChange={(files) => handleInputChange('attachments', files)}
                     />
                     <FormRadio id="level" label="ระดับการนำเสนอ" value={formData.level} onChange={(e) => handleInputChange('level', e.target.value)} options={[

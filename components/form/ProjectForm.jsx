@@ -86,15 +86,16 @@ export default function ProjectForm({ initialData, onSubmit }) {
                     .filter(attachment => attachment.id)
                     .map(attachment => attachment.id)
                 : [];
+        
 
             const projectData = {
                 fiscalYear: parseInt(formData.fiscalYear) || null,
                 projectType: formData.projectType || null,
                 projectMode: formData.projectMode || null,
-                subProjectCount: parseInt(formData.subProjectCount) || null,
+                subProjectCount: formData.subProjectCount || null,
                 nameTH: formData.nameTH.trim() || null,
                 nameEN: formData.nameEN.trim() || null,
-                isEnvironmentallySustainable: parseInt(formData.isEnvironmentallySustainable) || null,
+                isEnvironmentallySustainable: formData.isEnvironmentallySustainable || null,
                 durationStart: formData.durationStart || null,
                 durationEnd: formData.durationEnd || null,
                 researchKind: formData.researchKind || null,
@@ -110,7 +111,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 sdgs: formData.sdg ? [formData.sdg] : [],
                 partners: formData.partners || [],
                 // Add attachments relation - pass file IDs from uploaded files
-                attachments: attachmentIds.length ? attachmentIds : formData.attachments,
+                attachments: attachmentIds.length ? attachmentIds : [],
                 // Strapi relation field for users-permissions user manyToMany
                 users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
             };

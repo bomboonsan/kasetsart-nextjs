@@ -1,5 +1,29 @@
 import { gql } from "@apollo/client";
 
+export const GET_CONFERENCES = gql`
+  query GetConferences($pagination: PaginationArg, $sort: [String], $filters: ConferenceFiltersInput) {
+    conferences(pagination: $pagination, sort: $sort, filters: $filters) {
+      documentId
+      titleTH
+      titleEN
+      journalName
+      durationStart
+      durationEnd
+      level
+      country
+      state
+      city
+      publishedAt
+      updatedAt
+      projects {
+        documentId
+        nameTH
+        nameEN
+      }
+    }
+  }
+`;
+
 export const CREATE_PROJECT = gql`
   mutation CreateProject($data: ProjectInput!) {
     createProject(data: $data) {
@@ -36,7 +60,6 @@ export const CREATE_PROJECT = gql`
         name
       }
       attachments {
-        id
         documentId
         name
         url
@@ -62,6 +85,92 @@ export const UPDATE_PROJECT_PARTNERS = gql`
     updateProject(documentId: $documentId, data: $data) {
       documentId
       partners
+    }
+  }
+`;
+
+export const GET_CONFERENCE = gql`
+  query GetConference($documentId: ID!) {
+    conference(documentId: $documentId) {
+      documentId
+      titleTH
+      titleEN
+      isEnvironmentallySustainable
+      journalName
+      doi
+      isbn
+      durationStart
+      durationEnd
+      cost
+      costType
+      presentationWork
+      presentType
+      articleType
+      abstractTH
+      abstractEN
+      summary
+      level
+      country
+      state
+      city
+      fundName
+      keywords
+      attachments {
+        documentId
+        name
+        url
+        size
+        mime
+      }
+      projects {
+        documentId
+        nameTH
+        nameEN
+        partners
+      }
+    }
+  }
+`;
+
+export const UPDATE_CONFERENCE = gql`
+  mutation UpdateConference($documentId: ID!, $data: ConferenceInput!) {
+    updateConference(documentId: $documentId, data: $data) {
+      documentId
+      titleTH
+      titleEN
+      isEnvironmentallySustainable
+      journalName
+      doi
+      isbn
+      durationStart
+      durationEnd
+      cost
+      costType
+      presentationWork
+      presentType
+      articleType
+      abstractTH
+      abstractEN
+      summary
+      level
+      country
+      state
+      city
+      fundName
+      keywords
+      attachments {
+        documentId
+        name
+        url
+        size
+        mime
+      }
+      projects {
+        documentId
+        nameTH
+        nameEN
+        partners
+      }
     }
   }
 `;

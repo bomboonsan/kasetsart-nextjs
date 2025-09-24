@@ -36,7 +36,7 @@ export default function FileUploadField({
                             ? file.url 
                             : `${API_BASE}${file.url || ''}`
                         return {
-                            id: file.id,
+                            // id: file.id,
                             documentId: file.documentId,
                             name: file.name,
                             url,
@@ -57,7 +57,7 @@ export default function FileUploadField({
                         ? file.url 
                         : `${API_BASE}${file.url || ''}`
                     return {
-                        id: file.id,
+                        // id: file.id,
                         documentId: file.documentId,
                         name: file.name,
                         url,
@@ -106,7 +106,7 @@ export default function FileUploadField({
                     ? (file.url.startsWith('http') ? file.url : `${API_BASE}${file.url}`)
                     : ''
                 return {
-                    id: file.id,
+                    // id: file.id,
                     name: file.name,
                     url,
                     size: file.size,
