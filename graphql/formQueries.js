@@ -93,14 +93,13 @@ export const CREATE_CONFERENCE = gql`
       fundName
       keywords
       attachments {
-        id
         documentId
         name
         url
         size
         mime
       }
-      project_research {
+      projects {
         documentId
         nameTH
         nameEN

@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
+// import { parse } from 'next/dist/build/swc/generated-native';
 
 export default function ConferenceForm({ }) {
     const { data: session } = useSession();
@@ -99,7 +100,7 @@ export default function ConferenceForm({ }) {
                 abstractTH: formData.abstractTH || null,
                 abstractEN: formData.abstractEN || null,
                 summary: formData.summary || null,
-                level: formData.level || null,
+                level: parseInt(formData.level) || null,
                 country: formData.country || null,
                 state: formData.state || null,
                 city: formData.city || null,
