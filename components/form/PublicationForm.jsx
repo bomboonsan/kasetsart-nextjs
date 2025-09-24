@@ -216,7 +216,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
                     <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
                     {/* Standards Section */}
-                    <div className="space-y-1 flex flex-wrap items-center forminput">
+                    {/* <div className="space-y-1 flex flex-wrap items-center forminput">
                         <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
                         <div className="grid grid-cols-2 gap-3 text-sm w-2/3">
                             <label className="flex flex-wrap items-center gap-2">
@@ -276,7 +276,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                             </label>
                         </div>
                         
-                    </div>
+                    </div> */}
                     
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={e => handleInputChange('keywords', e.target.value)} rows={3} />
