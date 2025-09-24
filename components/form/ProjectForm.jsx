@@ -251,7 +251,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                         { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                         { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                     ]} />
-                    <FormDateSelect durationStart={formData.durationStart} durationEnd={formData.durationEnd} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
+                    <FormDateSelect durationStart={formData.durationStart} durationEnd={formData.durationEnd} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay={false}>
                         ระยะเวลาการทำวิจัย{" "}
                         <span className="text-blue-700">(ปี พ.ศ. 4 หลัก)</span>
                         <span className="text-red-500 ml-1">*</span>

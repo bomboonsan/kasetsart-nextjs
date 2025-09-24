@@ -10,6 +10,7 @@ export default function FormDateSelect({ id = Math.floor(Math.random() * 10000),
             </div>
             <div>
                 <DateSelect
+                    noDay={noDay}
                     title="เริ่มต้น"
                     value={durationStart}
                     onChange={(value) =>
@@ -19,6 +20,7 @@ export default function FormDateSelect({ id = Math.floor(Math.random() * 10000),
             </div>
             <div>
                 <DateSelect
+                    noDay={noDay}
                     title="สิ้นสุด"
                     value={durationEnd}
                     onChange={(value) => durationEndChange("durationEnd", value)}

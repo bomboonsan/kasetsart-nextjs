@@ -216,3 +216,77 @@ export const CREATE_CONFERENCE = gql`
     }
   }
 `;
+
+// Publication operations
+export const GET_PUBLICATION = gql`
+  query GetPublication($documentId: ID!) {
+    publication(documentId: $documentId) {
+      documentId
+      titleTH
+      titleEN
+      isEnvironmentallySustainable
+      journalName
+      doi
+      isbn
+      volume
+      issue
+      durationStart
+      durationEnd
+      pageStart
+      pageEnd
+      level
+      isJournalDatabase
+      isScopus
+      scopusType
+      scopusValue
+      isACI
+      isABDC
+      abdcType
+      isTCI1
+      isTCI2
+      isAJG
+      ajgType
+      isSSRN
+      isWOS
+      wosType
+      fundName
+      keywords
+      abstractTH
+      abstractEN
+      attachments { documentId name url size mime }
+      projects { documentId nameTH nameEN partners }
+    }
+  }
+`;
+
+export const CREATE_PUBLICATION = gql`
+  mutation CreatePublication($data: PublicationInput!) {
+    createPublication(data: $data) {
+      documentId
+      titleTH
+      titleEN
+      journalName
+      doi
+      isbn
+      volume
+      issue
+      durationStart
+      durationEnd
+      pageStart
+      pageEnd
+      level
+      fundName
+      keywords
+      attachments { documentId name url size mime }
+      projects { documentId nameTH nameEN }
+    }
+  }
+`;
+
+export const UPDATE_PUBLICATION = gql`
+  mutation UpdatePublication($documentId: ID!, $data: PublicationInput!) {
+    updatePublication(documentId: $documentId, data: $data) {
+      documentId
+    }
+  }
+`;
