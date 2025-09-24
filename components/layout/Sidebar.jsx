@@ -109,8 +109,8 @@ adminMenuItems = [
 		active: false,
 		children: [
 			{
-				id: "dashboard/admin/manage-users",
-				url: "/dashboard/admin/manage-users",
+				id: "admin/user",
+				url: "/admin/user",
 				icon: <UsersRound />,
 				label: "รายชื่อผู้ใช้",
 				active: false,
