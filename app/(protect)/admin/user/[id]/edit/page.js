@@ -9,11 +9,11 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react"; // Only for fetching profile data; updates done via REST now
 // Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
 // GraphQL Queries
-import { GET_USER_PROFILE, GET_PROFILE_OPTIONS, UPDATE_USER_PROFILE } from '@/graphql/userQueries';
+import { GET_USER_PROFILE, GET_PROFILE_OPTIONS } from '@/graphql/userQueries';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
@@ -75,15 +75,11 @@ export default function AdminUserEditPage({ params }) {
         }
     }, [optionsData]);
 
-    const [updateProfile, { loading: updateLoading, error: updateError }] = useMutation(UPDATE_USER_PROFILE, {
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        }
-    });
+    // GraphQL mutation removed; we'll use REST API with admin token via internal routes
+    const updateLoading = false;
+    const updateError = null;
 
-        // Initialize form with fetched profile
+    // Initialize form with fetched profile
     useEffect(() => {
         if (!profileData?.usersPermissionsUser || optionsLoading || isFormInitialized.current) {
             return;
@@ -236,42 +232,33 @@ export default function AdminUserEditPage({ params }) {
         if (password && password.length > 0) payload.password = password;
 
         try {
-            // First try GraphQL mutation (some setups may support it)
-            try {
-                await updateProfile({ variables: { id: documentId, data: payload } });
-                alert('Profile updated successfully!');
-                refetch();
-                return;
-            } catch (gqlErr) {
-                // If GraphQL update fails with "User not found" or similar, fall back to REST API below
-                console.warn('GraphQL update failed, falling back to REST update:', gqlErr.message || gqlErr);
+            // Resolve numeric id first (faster subsequent updates could cache, but simple for now)
+            const resolveRes = await fetch(`/api/admin/users/resolve-id?documentId=${encodeURIComponent(documentId)}`);
+            if (!resolveRes.ok) {
+                const t = await resolveRes.text();
+                throw new Error(`Resolve id failed: ${resolveRes.status} ${t}`);
             }
+            const resolveJson = await resolveRes.json();
+            const numericId = resolveJson?.id;
+            if (!numericId) throw new Error('Could not resolve numeric user id');
 
-            // REST fallback: use internal admin API route which uses STRAPI_ADMIN_TOKEN on the server
             const adminApiRes = await fetch('/api/admin/users/update', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ documentId, payload })
+                body: JSON.stringify({ id: numericId, payload })
             });
-
             const adminText = await adminApiRes.text();
-            let adminJson = null;
-            try { adminJson = JSON.parse(adminText); } catch (e) {}
-
+            let adminJson = null; try { adminJson = JSON.parse(adminText); } catch (e) {}
             if (!adminApiRes.ok) {
-                throw new Error(`Admin API update failed: ${adminApiRes.status} ${adminText}`);
+                throw new Error(`Update failed: ${adminApiRes.status} ${adminText}`);
             }
-
-            if (adminJson?.success) {
-                alert('User profile updated successfully!');
-                refetch();
-                return;
+            if (!adminJson?.success) {
+                throw new Error(`Update did not succeed: ${adminText}`);
             }
-
-            throw new Error(`Admin API update did not succeed: ${adminText}`);
-
+            alert('User profile updated successfully!');
+            refetch();
         } catch (err) {
-            console.error(err);
+            console.error('Admin user update error:', err);
             alert(`Failed to update profile: ${err.message}`);
         }
     };
@@ -425,11 +412,7 @@ export default function AdminUserEditPage({ params }) {
                     </div>
                 </div>
             </Block>
-            {updateError && (
-                <Block>
-                    <p className="text-sm text-red-600">Error saving profile: {updateError.message}</p>
-                </Block>
-            )}
+            {/* updateError removed: using REST alerts inline */}
         </form>
     );
 }
