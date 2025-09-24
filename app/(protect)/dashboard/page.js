@@ -138,11 +138,28 @@ export default function DashboardPage() {
         </div>
 
         <div className='col-span-6 md:col-span-4 h-full'>
-          <PersonnelChart title="ภาพรวมประเภทบุคคลากรของภาควิชา" subtitle="จำนวนบุคลากรแบ่งตามประเภท" data={departmentPersonnelData} colors={['#6366f1', '#22c55e', '#06b6d4', '#f59e0b', '#ef4444']} height={80} selectedDeptLabel={selectedDept === 'all' ? 'ทั้งหมด' : (departments.find(d => d.documentId === selectedDept)?.title || '')} />
+          <PersonnelChart
+            title="ภาพรวมประเภทบุคคลากรของภาควิชา"
+            subtitle="จำนวนบุคลากรแบ่งตามประเภท"
+            data={departmentPersonnelData}
+            colors={['#6366f1', '#22c55e', '#06b6d4', '#f59e0b', '#ef4444']}
+            height={80}
+            departments={departments}
+            selectedDeptId={selectedDept}
+            onDeptChange={(id) => setSelectedDept(id)}
+            selectedDeptLabel={selectedDept === 'all' ? 'ทั้งหมด' : (departments.find(d => d.documentId === selectedDept)?.title || '')}
+          />
         </div>
 
         <div className='col-span-6 md:col-span-6'>
-          <ScholarshipTable title="สถิติงานวิจัยตาม IC Types, Impact และ SDG" subtitle="จำนวนโครงการวิจัยแยกตามหมวดหมู่" researchStats={researchStats} />
+          <ScholarshipTable
+            title="สถิติงานวิจัยตาม IC Types, Impact และ SDG"
+            subtitle="จำนวนโครงการวิจัยแยกตามหมวดหมู่"
+            researchStats={researchStats}
+            departments={departments}
+            selectedDeptId={selectedDept}
+            onDeptChange={(id) => setSelectedDept(id)}
+          />
         </div>
       </div>
     </div>

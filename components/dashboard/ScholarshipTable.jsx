@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 
 const TYPE_TABS = [
   { key: "icTypes", label: "IC Type" },
@@ -8,10 +8,26 @@ const TYPE_TABS = [
   { key: "sdgs", label: "SDG" },
 ];
 
-export default function ScholarshipTable({ title, subtitle, researchStats = {} }) {
+export default function ScholarshipTable({
+  title,
+  subtitle,
+  researchStats = {},
+  // presentational department props
+  departments = [],
+  selectedDeptId = 'all',
+  onDeptChange = null,
+}) {
   const [activeType, setActiveType] = useState("icTypes");
   const [selectedItems, setSelectedItems] = useState([]);
   const activeData = researchStats?.[activeType] || [];
+  const debounceRef = useRef(null)
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
 
   // Default: mark all items checked whenever activeData changes
   useEffect(() => {
@@ -44,6 +60,8 @@ export default function ScholarshipTable({ title, subtitle, researchStats = {} }
       setSelectedItems((prev) => prev.filter((i) => i !== value));
     }
   };
+
+  console.log('departments render', departments);
 
   return (
     <div className="p-6 border border-gray-50 rounded-lg shadow-sm bg-white">
@@ -107,6 +125,38 @@ export default function ScholarshipTable({ title, subtitle, researchStats = {} }
             >
               เลือกทั้งหมด
             </label>
+          </div>
+          <div className="ml-6 flex items-center gap-2">
+            <label className="text-xs text-gray-500">เลือกภาควิชา</label>
+            <select
+              value={selectedDeptId}
+              onChange={(e) => {
+                const v = e.target.value === '' ? 'all' : e.target.value
+                startTransition(() => {
+                  if (debounceRef.current) clearTimeout(debounceRef.current)
+                  debounceRef.current = setTimeout(() => {
+                    if (typeof onDeptChange === 'function') onDeptChange(v)
+                  }, 250)
+                })
+              }}
+              className="px-3 py-1 bg-white border border-gray-200 text-sm rounded-md text-gray-900"
+              disabled={!Array.isArray(departments) || departments.length === 0}
+            >
+              <option value="all">ทั้งหมด</option>
+              {Array.isArray(departments) && departments.map((dept) => {
+                const id = dept?.id ?? dept?.documentId ?? (dept?.attributes && (dept.attributes.id ?? dept.attributes.documentId)) ?? null
+                const title = dept?.title ?? (dept?.attributes && dept.attributes.title) ?? String(dept)
+                const value = id != null ? String(id) : (dept?.documentId ? String(dept.documentId) : null)
+                if (!value) return null
+                return <option key={value} value={value}>{title}</option>
+              })}
+            </select>
+            {isPending && (
+              <div className="ml-2 flex items-center text-xs text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2" />
+                <span>กำลังอัปเดต...</span>
+              </div>
+            )}
           </div>
         </div>
 

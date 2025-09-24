@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import { useRef, useTransition, useEffect } from 'react';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -11,9 +12,21 @@ export default function PersonnelChart({
   data = [],
   colors = ['#6366f1', '#22c55e', '#06b6d4', '#f59e0b', '#ef4444'],
   height = 200,
-  // optional props if parent already filters by department
+  // presentational department props
+  departments = [],
+  selectedDeptId = 'all',
+  onDeptChange = null,
+  // optional prop if parent already provides a friendly label
   selectedDeptLabel,
 }) {
+  const debounceRef = useRef(null)
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
   const displayData = Array.isArray(data) ? data : [];
 
   // Create series data for stacked bar
@@ -104,6 +117,40 @@ export default function PersonnelChart({
         <div>
           <h2 className='text-lg text-gray-900 font-medium'>{title}</h2>
           {subtitle && <p className="text-sm text-gray-500">{subtitle}{selectedDeptLabel ? ` (${selectedDeptLabel})` : ''}</p>}
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500">เลือกภาควิชา</label>
+          <select
+            value={selectedDeptId}
+            onChange={(e) => {
+              const v = e.target.value
+              startTransition(() => {
+                if (debounceRef.current) clearTimeout(debounceRef.current)
+                debounceRef.current = setTimeout(() => {
+                  if (typeof onDeptChange === 'function') onDeptChange(v)
+                }, 250)
+              })
+            }}
+            className="px-3 py-1 bg-white border border-gray-200 text-sm rounded-md text-gray-900"
+            disabled={!Array.isArray(departments) || departments.length === 0}
+          >
+            <option value="all">ทั้งหมด</option>
+            {Array.isArray(departments) && departments.map((dept) => {
+              const id = dept?.id ?? dept?.documentId ?? (dept?.attributes && (dept.attributes.id ?? dept.attributes.documentId)) ?? null
+              const title = dept?.title ?? (dept?.attributes && dept.attributes.title) ?? String(dept)
+              const value = id != null ? String(id) : (dept?.documentId ? String(dept.documentId) : null)
+              if (!value) return null
+              return (
+                <option key={value} value={value}>{title}</option>
+              )
+            })}
+          </select>
+          {isPending && (
+            <div className="ml-2 flex items-center text-xs text-gray-500">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2" />
+              <span>กำลังอัปเดต...</span>
+            </div>
+          )}
         </div>
       </div>
       {displayData.length === 0 ? (
