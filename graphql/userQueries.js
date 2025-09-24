@@ -8,6 +8,17 @@ export const GET_ME = gql`
   }
 `;
 
+// อัปเดตโปรไฟล์ผู้ใช้ (รวมถึงฟิลด์ทั่วไปและ avatar)
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
+    updateUsersPermissionsUser(id: $id, data: $data) {
+      data {
+        documentId
+      }
+    }
+  }
+`;
+
 export const GET_USER_PROFILE = gql`
   query GetUserProfile($documentId: ID!) {
     usersPermissionsUser(documentId: $documentId) {
