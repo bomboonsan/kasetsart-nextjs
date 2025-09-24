@@ -68,14 +68,14 @@ export default function AdminUsersPage() {
     const setLoadingFor = (key, val) => setRowLoading(prev => ({ ...prev, [key]: val }));
 
     // เปลี่ยนบทบาท ผ่าน REST internal API
-    const handleRoleChange = async (userDocId, roleDocId) => {
+    const handleRoleChange = async (userDocId, numericRoleId) => {
         const key = `role-${userDocId}`;
         try {
             setLoadingFor(key, true);
             const res = await fetch('/api/admin/users/update-role', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: { documentId: userDocId }, role: { documentId: roleDocId } })
+                body: JSON.stringify({ user: { documentId: userDocId }, role: { id: Number(numericRoleId) } })
             });
             if (!res.ok) {
                 const t = await res.text();
@@ -110,6 +110,17 @@ export default function AdminUsersPage() {
             setLoadingFor(key, false);
         }
     };
+
+    const roleDocumentToId = (doc) =>  {
+        // 1: "nf9v7nyjebiy06f5kjpshual", // User
+        // 3: "nv62t3lijrmcf91kf97zc18j", // Admin
+        // 4: "paz95zzzpd60h4c9toxlbqkl", // Super admin
+        return {
+            "nf9v7nyjebiy06f5kjpshual": 1,
+            "nv62t3lijrmcf91kf97zc18j": 3,
+            "paz95zzzpd60h4c9toxlbqkl": 4
+        }[doc] || 1;
+    }
 
 
     return (
@@ -204,14 +215,14 @@ export default function AdminUsersPage() {
                                     <TableCell className="text-right text-sm">
                                         <div className="flex items-center justify-end gap-2">
                                             <select
-                                                value={u.role?.id ?? "nf9v7nyjebiy06f5kjpshual"}
+                                                value={roleDocumentToId(u.role?.documentId) ?? 1}
                                                 onChange={(e) => handleRoleChange(u.documentId ?? u.id, e.target.value)}
                                                 className="px-2 py-1 border rounded text-sm disabled:opacity-50"
                                                 disabled={rowLoading[`role-${u.documentId ?? u.id}`]}
                                             >
-                                                <option value="1">User</option>
-                                                <option value="3">Admin</option>
-                                                <option value="4">Super admin</option>
+                                                <option value={1}>User</option>
+                                                <option value={3}>Admin</option>
+                                                <option value={4}>Super admin</option>
                                             </select>
 
                                             <Button
