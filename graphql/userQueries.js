@@ -27,19 +27,78 @@ export const GET_USER_PROFILE = gql`
       academic_types {
         documentId
       }
-        participation
-        departments {
+      participation
+      departments {
+        documentId
+        title
+      }
+      faculties {
+        documentId
+        title
+      }
+      organizations {
+        documentId
+        title
+      }
+      projects {        
+        documentId
+        nameEN
+        nameTH
+        attachments {
           documentId
-          title
+          name
+          url
+          size
+          mime
         }
-        faculties {
+        conferences {
           documentId
-          title
+          titleEN
+          titleTH
+          attachments {
+            documentId
+            name
+            url
+            size
+            mime
+          }
         }
-        organizations {
+        publications {
           documentId
-          title
+          titleEN
+          titleTH
+          attachments {
+            documentId
+            name
+            url
+            size
+            mime
+          }
         }
+      }
+      funds {
+        documentId
+        contentDesc
+        attachments {
+          documentId
+          name
+          url
+          size
+          mime
+        }
+        books {
+          documentId
+          titleTH
+          titleEN
+          attachments {
+            documentId
+            name
+            url
+            size
+            mime
+          }
+        }
+      }
     }
   }
 `;
