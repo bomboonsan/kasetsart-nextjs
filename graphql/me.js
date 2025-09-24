@@ -19,7 +19,65 @@ export const MY_PROJECTS = gql`
         }
     }
 `;
+export const MY_CONFERENCES = gql`
+  query GetConferences($pagination: PaginationArg, $sort: [String], $userId: ID!) {
+    conferences(
+      pagination: $pagination
+      sort: $sort
+      filters: {
+        projects: {
+          users_permissions_users: { documentId: { eq: $userId } }
+        }
+      }
+    ) {
+      documentId
+      titleTH
+      titleEN
+      journalName
+      durationStart
+      durationEnd
+      level
+      country
+      state
+      city
+      publishedAt
+      updatedAt
+      projects {
+        documentId
+        nameTH
+        nameEN
+      }
+    }
+  }
+`;
 
+export const MY_PUBLICATIONS = gql`
+  query GetPublications($pagination: PaginationArg, $sort: [String], $userId: ID!) {
+    publications(
+      pagination: $pagination
+      sort: $sort
+      filters: {
+        projects: { users_permissions_users: { documentId: { eq: $userId } } }
+      }
+    ) {
+      documentId
+      titleTH
+      titleEN
+      journalName
+      volume
+      issue
+      pageStart
+      pageEnd
+      level
+      updatedAt
+      projects {
+        documentId
+        nameTH
+        nameEN
+      }
+    }
+  }
+`;
 
 export const MY_FUNDS = gql`
     query GetFunds($pagination: PaginationArg, $sort: [String], $userId: ID!) {
