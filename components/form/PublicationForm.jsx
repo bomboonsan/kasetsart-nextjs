@@ -17,12 +17,6 @@ import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION } from '@/graphql/formQueries';
 
-/*
-  NOTE: Pattern follows ConferenceForm / ProjectForm
-  - Hydrate initial data
-  - Track original attachments to avoid sending unchanged array on update
-*/
-
 export default function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
     const [formData, setFormData] = useState(PUBLICATION_FORM_INITIAL);
@@ -78,6 +72,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             const data = {
+                
                 titleTH: formData.titleTH?.trim() || null,
                 titleEN: formData.titleEN?.trim() || null,
                 isEnvironmentallySustainable: formData.isEnvironmentallySustainable ?? null,
@@ -156,6 +151,12 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             if (field === 'isWOS') handleInputChange('wosType', '');
         }
     };
+    useEffect(() => {
+            if (!formData.__projectObj) return;
+            setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
+        }, [formData.__projectObj]);
+
+    console.log('Render PublicationForm', { formData });
 
     return (
         <>
