@@ -402,7 +402,7 @@ export const UPDATE_FUND_PARTNERS = gql`
 // Book (Work Book) operations
 export const GET_BOOK = gql`
   query GetBook($documentId: ID!) {
-    workBook(documentId: $documentId) {
+    book(documentId: $documentId) {
       documentId
       bookType
       titleTH
@@ -412,7 +412,6 @@ export const GET_BOOK = gql`
       publicationDate
       attachments { documentId name url size mime }
       writers
-      partners
       funds { documentId fundType fundTypeText }
     }
   }
