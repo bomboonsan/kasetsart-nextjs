@@ -375,3 +375,40 @@ export const UPDATE_FUND_PARTNERS = gql`
     }
   }
 `;
+
+// Book (Work Book) operations
+export const GET_BOOK = gql`
+  query GetBook($documentId: ID!) {
+    workBook(documentId: $documentId) {
+      documentId
+      bookType
+      titleTH
+      titleEN
+      detail
+      level
+      publicationDate
+      attachments { documentId name url size mime }
+      writers
+      partners
+      funds { documentId fundType fundTypeText }
+    }
+  }
+`;
+
+export const CREATE_BOOK = gql`
+  mutation CreateBook($data: WorkBookInput!) {
+    createWorkBook(data: $data) {
+      documentId
+      titleTH
+      titleEN
+    }
+  }
+`;
+
+export const UPDATE_BOOK = gql`
+  mutation UpdateBook($documentId: ID!, $data: WorkBookInput!) {
+    updateWorkBook(documentId: $documentId, data: $data) {
+      documentId
+    }
+  }
+`;

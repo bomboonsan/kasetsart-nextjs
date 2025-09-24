@@ -8,5 +8,6 @@ export const BOOK_FORM_INITIAL = {
     publicationDate: "", // วันที่เกิดผลงาน (Date)
     attachments: [],
     writers: [], // Writers array for dynamic management
+    partners: [], // ผู้ร่วมงาน/ผู้ร่วมจัดทำ (Array similar to conference partners structure)
     __fundingObj: undefined, // สำหรับเก็บ object โครงการขอทุนที่เลือก
 }
