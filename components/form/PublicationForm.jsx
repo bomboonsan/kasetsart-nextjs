@@ -15,7 +15,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
-import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION } from '@/graphql/formQueries';
+import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
 
 export default function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
@@ -49,6 +49,16 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
 
     const [updatePublication] = useMutation(UPDATE_PUBLICATION, {
         context: { headers: { Authorization: session?.jwt ? `Bearer ${session?.jwt}` : '' } },
+    });
+
+    const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
+        context: { headers: { Authorization: session?.jwt ? `Bearer ${session?.jwt}` : '' } },
+        onCompleted: (data) => {
+            console.log('Project partners updated successfully:', data);
+        },
+        onError: (error) => {
+            console.error('Error updating project partners:', error);
+        }
     });
 
     const handleInputChange = (field, value) => {
@@ -120,6 +130,21 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                 await createPublication({ variables: { data } });
                 alert('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
                 setFormData(PUBLICATION_FORM_INITIAL);
+            }
+
+            // Update project partners if project is selected and partners provided
+            try {
+                if (formData.__projectObj?.documentId && formData.partners && Array.isArray(formData.partners)) {
+                    await updateProjectPartners({
+                        variables: {
+                            documentId: formData.__projectObj.documentId,
+                            data: { partners: formData.partners }
+                        }
+                    });
+                }
+            } catch (err) {
+                // Log but don't block main flow
+                console.error('Failed to update project partners from PublicationForm:', err);
             }
         } catch (e) {
             console.error('Publication submit error:', e);

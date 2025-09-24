@@ -24,6 +24,28 @@ export const GET_CONFERENCES = gql`
   }
 `;
 
+export const GET_PUBLICATIONS = gql`
+  query GetPublications($pagination: PaginationArg, $sort: [String], $filters: PublicationFiltersInput) {
+    publications(pagination: $pagination, sort: $sort, filters: $filters) {
+      documentId
+      titleTH
+      titleEN
+      journalName
+      volume
+      issue
+      pageStart
+      pageEnd
+      level
+      updatedAt
+      projects {
+        documentId
+        nameTH
+        nameEN
+      }
+    }
+  }
+`;
+
 export const CREATE_PROJECT = gql`
   mutation CreateProject($data: ProjectInput!) {
     createProject(data: $data) {
