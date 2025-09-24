@@ -86,14 +86,19 @@ export default function DashboardPage() {
     return items;
   }, [useProjects, useFunds, usePublications, useConferences, useBooks, projects.length, funds.length, publications.length, conferences.length, books.length]);
 
-  // Academic personnel distribution (from usersPermissionsUsers.academic_types) – treat each academic type entry as one person in that category
+  // Academic personnel distribution (from usersPermissionsUsers.academic_types)
+  // Optionally filter users by selected department (if selectedDept !== 'all')
   const facultyPersonnelData = useMemo(() => {
-    const counts = aggregateAcademicTypes(users);
+    const filteredUsers = selectedDept === 'all' ? users : users.filter(u => {
+      const depts = u?.departments || [];
+      return depts.some(d => d?.documentId === selectedDept);
+    });
+
+    const counts = aggregateAcademicTypes(filteredUsers);
     const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
     return Object.entries(counts).map(([label, raw]) => ({ label, value: ((raw / total) * 100).toFixed(1), raw }));
-  }, [users]);
+  }, [users, selectedDept]);
 
-  // Department specific personnel chart could be derived if each user stored department relationship; not in query now, so we reuse faculty data
   const departmentPersonnelData = facultyPersonnelData.map(d => ({ category: d.label, personnel: d.raw, percentage: d.value }));
 
   // Research stats built from project relations

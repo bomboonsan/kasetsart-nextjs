@@ -30,12 +30,17 @@ query Dashboard {
     books {
         documentId
     }
-    usersPermissionsUsers {
-        academic_types {
-        name
-        documentId
+        usersPermissionsUsers {
+                documentId
+                academic_types {
+                    name
+                    documentId
+                }
+                departments {
+                    documentId
+                    title
+                }
         }
-    }
     icTypes {
         documentId
         name
