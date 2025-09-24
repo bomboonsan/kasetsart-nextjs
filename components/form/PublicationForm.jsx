@@ -176,59 +176,66 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
                     <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
                     {/* Standards Section */}
-                    <div className="space-y-3">
-                        <div className="text-sm font-medium text-gray-700">ดัชนี / มาตรฐานวารสาร</div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                            <label className="flex items-center gap-2">
+                    <div className="space-y-1 flex flex-wrap items-center forminput">
+                        <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
+                        <div className="grid grid-cols-2 gap-3 text-sm w-2/3">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isScopus} onChange={e => handleStandardToggle('isScopus', e.target.checked)} />
                                 <span>Scopus</span>
+                                <div className='w-full'>
+                                    {formData.isScopus ? (
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <FormSelect id="scopusValue" label="" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={val => handleInputChange('scopusValue', val)} options={scopusQuartileOptions} />
+                                            <FormSelect id="scopusType" label="" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={val => handleInputChange('scopusType', val)} options={scopusSubjectOptions} />
+                                        </div>
+                                    ) : null}
+                                </div>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isACI} onChange={e => handleStandardToggle('isACI', e.target.checked)} />
                                 <span>ACI</span>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isTCI1} onChange={e => handleStandardToggle('isTCI1', e.target.checked)} />
                                 <span>TCI1</span>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isABDC} onChange={e => handleStandardToggle('isABDC', e.target.checked)} />
                                 <span>ABDC</span>
+                                <div className='w-full'>
+                                    {formData.isABDC ? (
+                                        <FormSelect id="abdcType" label="" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('abdcType', val)} options={abdcOptions} />
+                                    ) : null}
+                                </div>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isTCI2} onChange={e => handleStandardToggle('isTCI2', e.target.checked)} />
                                 <span>TCI2</span>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isAJG} onChange={e => handleStandardToggle('isAJG', e.target.checked)} />
                                 <span>AJG</span>
+                                <div className='w-full'>
+                                    {formData.isAJG ? (
+                                        <FormSelect id="ajgType" label="" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('ajgType', val)} options={ajgOptions} />
+                                    ) : null}
+                                </div>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isSSRN} onChange={e => handleStandardToggle('isSSRN', e.target.checked)} />
                                 <span>SSRN</span>
                             </label>
-                            <label className="flex items-center gap-2">
+                            <label className="flex flex-wrap items-center gap-2">
                                 <input type="checkbox" checked={!!formData.isWOS} onChange={e => handleStandardToggle('isWOS', e.target.checked)} />
                                 <span>Web of Science</span>
+                                <div className='w-full'>
+                                {formData.isWOS ? (
+                                    <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={val => handleInputChange('wosType', val)} options={wosOptions} />
+                                ) : null}
+                                </div>
                             </label>
                         </div>
-
-                        {/* Conditional selects */}
-                        {formData.isScopus ? (
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <FormSelect id="scopusValue" label="Scopus Quartile" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={val => handleInputChange('scopusValue', val)} options={scopusQuartileOptions} />
-                                <FormSelect id="scopusType" label="สาขา (Scopus Subject)" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={val => handleInputChange('scopusType', val)} options={scopusSubjectOptions} />
-                            </div>
-                        ) : null}
-                        {formData.isABDC ? (
-                            <FormSelect id="abdcType" label="ABDC Ranking" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('abdcType', val)} options={abdcOptions} />
-                        ) : null}
-                        {formData.isAJG ? (
-                            <FormSelect id="ajgType" label="AJG Ranking" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('ajgType', val)} options={ajgOptions} />
-                        ) : null}
-                        {formData.isWOS ? (
-                            <FormSelect id="wosType" label="Web of Science Type" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={val => handleInputChange('wosType', val)} options={wosOptions} />
-                        ) : null}
+                        
                     </div>
                     
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
