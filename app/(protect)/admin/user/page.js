@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation } from '@apollo/client/react'
+import { useSession } from "next-auth/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,14 +17,31 @@ import {
 } from '@/components/ui/table'
 
 export default function AdminUsersPage() {
+    const { data: session, status } = useSession();
     const [search, setSearch] = useState('')
     const [roleFilter, setRoleFilter] = useState('all')
 
     // Fetch users (we'll filter client-side for simplicity)
-    const { data, loading, error, refetch } = useQuery(GET_ALL_USERS, { variables: { pagination: { limit: 500 } } })
-    const [updateUser] = useMutation(UPDATE_USER_PROFILE)
+    const { data, loading, error, refetch } = useQuery(GET_ALL_USERS,
+        { variables: { pagination: { limit: 500 } } },
+        {
+            context: {
+                headers: {
+                    Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+                }
+            }
+        }
+    )
+    const [updateUser] = useMutation(UPDATE_USER_PROFILE, {
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
+        }
+    })
 
     const users = data?.usersPermissionsUsers || []
+    console.log("users", users);
 
     const filtered = useMemo(() => {
         return users.filter(u => {
@@ -76,7 +94,7 @@ export default function AdminUsersPage() {
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow>
+                            <TableRow className={'bg-gray-50 font-bikd'}>
                                 <TableHead className="px-5">ชื่อ-นามสกุล</TableHead>
                                 <TableHead className="px-5">ภาควิชา</TableHead>
                                 <TableHead className="px-5">คณะ</TableHead>
@@ -90,13 +108,13 @@ export default function AdminUsersPage() {
                             {error && <TableRow><TableCell colSpan={6} className="p-6 text-center text-red-600">Error: {error.message}</TableCell></TableRow>}
                             {!loading && filtered.length === 0 && <TableRow><TableCell colSpan={6} className="p-6 text-center text-gray-500">ไม่พบข้อมูลผู้ใช้</TableCell></TableRow>}
                             {filtered.map(u => (
-                                <TableRow key={u.documentId || u.id}>
-                                    <TableCell className="px-5">{(u.firstNameTH || '') + ' ' + (u.lastNameTH || '')}</TableCell>
-                                    <TableCell className="px-5">{u.departments?.[0]?.title || '-'}</TableCell>
-                                    <TableCell className="px-5">{u.faculties?.[0]?.title || '-'}</TableCell>
-                                    <TableCell className="px-5">{u.email || '-'}</TableCell>
-                                    <TableCell className="px-5">{u.role || '-'}</TableCell>
-                                    <TableCell className="text-right">
+                                <TableRow key={u.documentId || u.id} className={'text-gray-600'}>
+                                    <TableCell className="px-5 text-sm">{(u.firstNameTH || '') + ' ' + (u.lastNameTH || '')}</TableCell>
+                                    <TableCell className="px-5 text-sm">{u.departments?.[0]?.title || '-'}</TableCell>
+                                    <TableCell className="px-5 text-sm">{u.faculties?.[0]?.title || '-'}</TableCell>
+                                    <TableCell className="px-5 text-sm">{u.email || '-'}</TableCell>
+                                    <TableCell className="px-5 text-sm">{u.role.name || '-'}</TableCell>
+                                    <TableCell className="text-right  text-sm">
                                         <div className="flex items-center justify-end gap-2">
                                             <select defaultValue={u.role || 'User'} onChange={(e) => handleRoleChange(u.documentId || u.id, e.target.value)} className="px-2 py-1 border rounded text-sm">
                                                 <option value="User">User</option>

@@ -135,6 +135,7 @@ export const GET_ALL_USERS = gql`
       firstNameEN
       lastNameEN
       academicPosition
+      
       departments {
         documentId
         title
@@ -146,6 +147,10 @@ export const GET_ALL_USERS = gql`
       organizations {
         documentId
         title
+      }
+      role {
+        name
+        documentId
       }
     }
   }
