@@ -81,11 +81,23 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             const currentIdsSorted = [...attachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
+            const booleanToString = (v) => {
+                if (v === true || v === 'true' || v === 1 || v === '1') return "1";
+                if (v === false || v === 'false' || v === 0 || v === '0') return "0";
+                return null;
+            }
+
+            // normalize boolean-like fields (accepts 0/1/'0'/'1'/true/false)
+            const coerceBoolean = (v) => {
+                if (v === true || v === 'true' || v === 1 || v === '1') return true;
+                if (v === false || v === 'false' || v === 0 || v === '0') return false;
+                return null;
+            };
+
             const data = {
-                
                 titleTH: formData.titleTH?.trim() || null,
                 titleEN: formData.titleEN?.trim() || null,
-                isEnvironmentallySustainable: formData.isEnvironmentallySustainable ?? null,
+                isEnvironmentallySustainable: booleanToString(formData.isEnvironmentallySustainable),
                 journalName: formData.journalName || null,
                 doi: formData.doi || null,
                 isbn: formData.isbn || null,
@@ -96,19 +108,19 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                 pageStart: formData.pageStart || null,
                 pageEnd: formData.pageEnd || null,
                 level: formData.level || null,
-                isJournalDatabase: formData.isJournalDatabase || null,
-                isScopus: formData.isScopus || null,
+                isJournalDatabase: booleanToString(formData.isJournalDatabase),
+                isScopus: coerceBoolean(formData.isScopus),
                 scopusType: formData.scopusType || null,
                 scopusValue: formData.scopusValue || null,
-                isACI: formData.isACI || null,
-                isABDC: formData.isABDC || null,
+                isACI: coerceBoolean(formData.isACI),
+                isABDC: coerceBoolean(formData.isABDC),
                 abdcType: formData.abdcType || null,
-                isTCI1: formData.isTCI1 || null,
-                isTCI2: formData.isTCI2 || null,
-                isAJG: formData.isAJG || null,
+                isTCI1: coerceBoolean(formData.isTCI1),
+                isTCI2: coerceBoolean(formData.isTCI2),
+                isAJG: coerceBoolean(formData.isAJG),
                 ajgType: formData.ajgType || null,
-                isSSRN: formData.isSSRN || null,
-                isWOS: formData.isWOS || null,
+                isSSRN: coerceBoolean(formData.isSSRN),
+                isWOS: coerceBoolean(formData.isWOS),
                 wosType: formData.wosType || null,
                 fundName: formData.fundName || null,
                 keywords: formData.keywords || null,
@@ -119,6 +131,8 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             };
             Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
             if (isEdit && !attachmentsChanged) delete data.attachments;
+
+            console.log('Submitting publication data:', data);
 
             if (isEdit && onSubmit) {
                 await onSubmit(data);
