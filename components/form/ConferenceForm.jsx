@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Country, State, City } from 'country-state-city';
 import { useEffect, useMemo, useState } from 'react'
 import { useSession } from "next-auth/react";
 import Block from '../layout/Block';
@@ -24,6 +25,43 @@ export default function ConferenceForm({ }) {
             console.log('Partners updated in ProjectForm:', value);
         }
     };
+    const countryOptions = useMemo(() => {
+        try {
+            const all = Country.getAllCountries() || [];
+            return [
+                ...all.map((c) => ({ value: c.isoCode, label: c.name })),
+            ];
+        } catch (e) {
+            return [];
+        }
+    }, []);
+
+    const stateOptions = useMemo(() => {
+        if (!formData.country) return [];
+        try {
+            const states = State.getStatesOfCountry(String(formData.country)) || [];
+            return [
+                ...states.map((s) => ({ value: s.isoCode, label: s.name })),
+            ];
+        } catch (e) {
+            return [];
+        }
+    }, [formData.country]);
+
+    const cityOptions = useMemo(() => {
+        if (!formData.country || !formData.state) return [];
+        try {
+            const cities = City.getCitiesOfState(
+                String(formData.country),
+                String(formData.state),
+            ) || [];
+            return [
+                ...cities.map((c) => ({ value: c.name, label: c.name })),
+            ];
+        } catch (e) {
+            return [];
+        }
+    }, [formData.country, formData.state]);
     console.log('formData', formData);
     return (
         <>
@@ -59,10 +97,20 @@ export default function ConferenceForm({ }) {
                     <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={(e) => handleInputChange('abstractTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="abstractEN" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractEN} onChange={(e) => handleInputChange('abstractEN', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="summary" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
+                    <FileUploadField
+                        label="เอกสารแนบ"
+                        value={formData.attachments}
+                        onFilesChange={(files) => handleInputChange('attachments', files)}
+                    />
                     <FormRadio id="level" label="ระดับการนำเสนอ" value={formData.level} onChange={(e) => handleInputChange('level', e.target.value)} options={[
                         { value: '0', label: 'ระดับชาติ' },
                         { value: '1', label: 'ระดับนานาชาติ' },
                     ]} />
+                    <FormSelect id="country" label="ประเทศ" value={formData.country ?? ""} placeholder="เลือกประเทศ" onChange={(val) => handleInputChange('country', val)} options={countryOptions} />
+                    <FormSelect id="state" label="มลรัฐ/จังหวัด" value={formData.state ?? ""} placeholder="เลือกมลรัฐ/จังหวัด" onChange={(val) => handleInputChange('state', val)} options={stateOptions} />
+                    <FormSelect id="city" label="เมือง" value={formData.city ?? ""} placeholder="เลือกเมือง" onChange={(val) => handleInputChange('city', val)} options={cityOptions} />
+                    <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={(e) => handleInputChange('fundName', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
                     <Partners />
                 </div>
             </Block>

@@ -163,7 +163,7 @@ export default function FileUploadField({
     }
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 pb-4">
             <label className="block text-sm font-medium text-gray-700">
                 {label}
             </label>
