@@ -345,7 +345,6 @@ export const GET_FUND = gql`
       partners
       attachments { documentId name url size mime }
       users_permissions_users { documentId username email }
-      books { documentId title }
     }
   }
 `;
