@@ -69,6 +69,7 @@ export default function ConferenceForm({ }) {
         setFormData((prev) => ({ ...prev, fundName: formData.__projectObj.fundName || "" }));
         setFormData((prev) => ({ ...prev, keywords: formData.__projectObj.keywords || "" }));
         setFormData((prev) => ({ ...prev, isEnvironmentallySustainable: formData.__projectObj.isEnvironmentallySustainable || "" }));
+        setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
     }, [formData.__projectObj]);
     console.log('formData', formData);
     return (
@@ -120,7 +121,7 @@ export default function ConferenceForm({ }) {
                     <FormSelect id="city" label="เมือง" value={formData.city ?? ""} placeholder="เลือกเมือง" onChange={(val) => handleInputChange('city', val)} options={cityOptions} />
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={(e) => handleInputChange('fundName', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
-                    <Partners />
+                    <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
                 </div>
             </Block>
             <div className='p-6'>

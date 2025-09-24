@@ -23,6 +23,7 @@ export const CONFERENCE_FORM_INITIAL = {
     state: "", // รัฐ/จังหวัด   (str) Value จาก select
     city: "", // เมือง   (str) Value จาก select
     fundName: "", // ชื่อแหล่งทุน (String)
+    partners: [], // ผู้ร่วมวิจัย/ผู้ร่วมจัดทำผลงาน (Array of String)
     attachments: [],
 }
 
