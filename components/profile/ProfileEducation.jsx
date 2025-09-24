@@ -7,6 +7,7 @@ export default function ProfileEducation({ data }) {
     console.log("ProfileEducation data:", data);
     return (
         <Block className="mt-6">
+            <h2 className="text-2xl font-semibold mb-4">ประวัติการศึกษา</h2>
             <div className="space-y-6">
                 {data.length === 0 ? (
                     <div className="text-sm text-gray-500">ยังไม่มีข้อมูลการศึกษา</div>
