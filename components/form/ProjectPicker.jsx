@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Search, FileText, X } from 'lucide-react';
+import Partners from './Partners';
 
 export default function ProjectPicker({ label = 'โครงการวิจัย', onSelect, selectedProject, required = false }) {
     const { data: session } = useSession();
@@ -21,6 +22,8 @@ export default function ProjectPicker({ label = 'โครงการวิจ�
             pagination: { pageSize: 100 },
             filters: searchTerm ? {
                 or: [
+                    { fundName: { containsi: searchTerm } },
+                    { isEnvironmentallySustainable: { containsi: isEnvironmentallySustainable } },
                     { nameTH: { containsi: searchTerm } },
                     { nameEN: { containsi: searchTerm } },
                     { keywords: { containsi: searchTerm } },
@@ -49,7 +52,12 @@ export default function ProjectPicker({ label = 'โครงการวิจ�
                 budget: project.budget,
                 keywords: project.keywords,
                 projectType: project.projectType,
-                researchKind: project.researchKind
+                isEnvironmentallySustainable: project.isEnvironmentallySustainable,
+                fundName: project.fundName,
+                researchKind: project.researchKind,
+                departments: project.departments || [],
+                users: project.users || [],
+                partners: project.partners || [],
             }));
             setFilteredProjects(projects);
         } else {

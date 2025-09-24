@@ -63,6 +63,13 @@ export default function ConferenceForm({ }) {
             return [];
         }
     }, [formData.country, formData.state]);
+
+    useEffect(() => {
+        if (!formData.__projectObj) return;
+        setFormData((prev) => ({ ...prev, fundName: formData.__projectObj.fundName || "" }));
+        setFormData((prev) => ({ ...prev, keywords: formData.__projectObj.keywords || "" }));
+        setFormData((prev) => ({ ...prev, isEnvironmentallySustainable: formData.__projectObj.isEnvironmentallySustainable || "" }));
+    }, [formData.__projectObj]);
     console.log('formData', formData);
     return (
         <>

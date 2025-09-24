@@ -7,9 +7,14 @@ export const GET_PROJECTS = gql`
       nameTH
       nameEN
       fiscalYear
+      isEnvironmentallySustainable
+      keywords
+      fundName
       budget
       publishedAt
       updatedAt
+      departments { documentId title }
+      projectType
       partners
     }
   }
@@ -37,6 +42,8 @@ export const GET_PROJECT = gql`
       ic_types { documentId name }
       impacts { documentId name }
       sdgs { documentId name }
+      departments { documentId title }
+      users { documentId username email }
       attachments { 
         documentId
         name
