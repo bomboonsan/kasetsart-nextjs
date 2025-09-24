@@ -80,6 +80,7 @@ export default function ProfilePortfolio({ data }) {
                                         title={p.nameTH}
                                         description={p.nameEN}
                                         editLink={`/form/project/edit/${p.documentId || p.id}`}
+                                        attachments={p.attachments || []}
                                     />
                                 ))
                             );
@@ -93,6 +94,7 @@ export default function ProfilePortfolio({ data }) {
                                         title={c.titleTH}
                                         description={c.titleEN}
                                         editLink={`/form/conference/edit/${c.documentId || c.id}`}
+                                        attachments={c.attachments || []}
                                     />
                                 ))
                             );
@@ -106,6 +108,7 @@ export default function ProfilePortfolio({ data }) {
                                         title={pu.titleTH}
                                         description={pu.titleEN}
                                         editLink={`/form/publication/edit/${pu.documentId || pu.id}`}
+                                        attachments={pu.attachments || []}
                                     />
                                 ))
                             );
@@ -118,6 +121,7 @@ export default function ProfilePortfolio({ data }) {
                                         key={f.documentId || f.id}
                                         title={f.contentDesc}
                                         editLink={`/form/fund/edit/${f.documentId || f.id}`}
+                                        attachments={f.attachments || []}
                                     />
                                 ))
                             );
@@ -131,6 +135,7 @@ export default function ProfilePortfolio({ data }) {
                                         title={b.titleTH}
                                         description={b.titleEN}
                                         editLink={`/form/book/edit/${b.documentId || b.id}`}
+                                        attachments={b.attachments || []}
                                     />
                                 ))
                             );

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function PublicationItem({ title, description, editLink, attachments }) {
+    console.log("PublicationItem attachments:", attachments);
     return (
         <div className="border-b border-b-gray-200 py-3 last:border-b-0">
             <div className="flex justify-between items-start gap-4">
@@ -27,9 +28,31 @@ export default function PublicationItem({ title, description, editLink, attachme
                             แก้ไขผลงาน
                         </Button>
                     </Link>}
-                    <Button variant="default" className="text-sm px-3 py-1.5">
-                        ดูเอกสาร
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="default" className="text-sm px-3 py-1.5">ดูเอกสาร</Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-xl">
+                            <DialogHeader>
+                                <DialogTitle>ไฟล์แนบ</DialogTitle>
+                                <DialogDescription>รายการไฟล์ที่แนบมากับผลงานนี้</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-2 mt-4">
+                                {attachments && attachments.length > 0 ? (
+                                    attachments.map((file) => (
+                                        <div key={file.documentId || file.id} className="flex items-center justify-between">
+                                            <a className="text-blue-600 hover:underline" href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${file.url}`} target="_blank" rel="noreferrer">
+                                                {file.name}
+                                            </a>
+                                            <div className="text-xs text-gray-500">{file.size ? `${(file.size / 1024).toFixed(2)} KB` : ''}</div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-sm text-gray-600">ไม่มีไฟล์แนบ</div>
+                                )}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </div>
