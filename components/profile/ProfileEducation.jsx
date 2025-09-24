@@ -8,7 +8,7 @@ export default function ProfileEducation({ data }) {
         <Block className="mt-6">
             <h2 className="text-2xl font-semibold mb-4">ประวัติการศึกษา</h2>
             <div className="space-y-6">
-                {data.length === 0 ? (
+                {data == null || data.length === 0 ? (
                     <div className="text-sm text-gray-500">ยังไม่มีข้อมูลการศึกษา</div>
                 ) : (data.map((item, index) => (
                     <EducationItem

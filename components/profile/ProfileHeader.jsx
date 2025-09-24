@@ -2,12 +2,18 @@ import Block from "@/components/layout/Block";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-export default function ProfileHeader({ data }) {
+export default function ProfileHeader({ data , other = false }) {
+    function initials(name, fallback) {
+        const s = (name || '').trim()
+        if (!s) return (fallback || 'U').slice(0, 2).toUpperCase()
+        const parts = s.split(/[\n+\s]+/)
+        return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '') || s[0]).toUpperCase()
+    }
     return (
         <Block>
             <div className="flex flex-col lg:flex-row items-start space-y-4 lg:space-y-0 lg:space-x-6">
                 <div className="flex-shrink-0">
-                    {data.avatar.url ? (
+                    {data.avatar ? (
                         <div className="w-32 h-32 rounded-full overflow-hidden">
                             <Image src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${data.avatar.url}`} alt={data.firstNameTH || 'avatar'} width={96} height={96} className="object-cover w-32 h-32 rounded-full" />
                         </div>
@@ -35,7 +41,7 @@ export default function ProfileHeader({ data }) {
 
                 {/* Action Button */}
                 <div className="flex-shrink-0">
-                    <Link href="/profile/edit">
+                    <Link href={other ? `/admin/user/${data.documentId || data.id}/edit` : '/profile/edit'}>
                         <Button variant="outline">Edit profile</Button>
                     </Link>
                 </div>

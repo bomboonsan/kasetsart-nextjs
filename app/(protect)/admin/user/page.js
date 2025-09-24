@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Pageheader from "@/components/layout/Pageheader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
     Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
@@ -155,7 +156,9 @@ export default function AdminUsersPage() {
                             {filtered.map((u) => (
                                 <TableRow key={u.documentId || u.id} className="text-gray-600">
                                     <TableCell className="px-5 text-sm">
-                                        {(u.firstNameTH || "") + " " + (u.lastNameTH || "")}
+                                        <Link href={`/admin/user/${u.documentId || u.id}`} className="text-primary font-medium hover:underline">
+                                            {(u.firstNameTH || "") + " " + (u.lastNameTH || "")}
+                                        </Link>
                                     </TableCell>
                                     <TableCell className="px-5 text-sm">
                                         {u.departments?.[0]?.title || "-"}

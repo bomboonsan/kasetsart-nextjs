@@ -11,6 +11,7 @@ export const GET_ME = gql`
 export const GET_USER_PROFILE = gql`
   query GetUserProfile($documentId: ID!) {
     usersPermissionsUser(documentId: $documentId) {
+      documentId
       username
       email
       firstNameTH
