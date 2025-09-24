@@ -14,6 +14,7 @@ import FormSelect from '../myui/FormSelect';
 import Partners from "../form/Partners"
 import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
+import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 
 export default function ConferenceForm({ }) {
@@ -74,6 +75,7 @@ export default function ConferenceForm({ }) {
                         { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
                     ]} />
                     <FormTextarea id="journalName" label="ชื่อการประชุมทางวิชาการ (ใช้ชื่อไทยถ้าไม่มีชื่อไทยให้ใช้ภาษาอื่น)" value={formData.journalName} onChange={(e) => handleInputChange('journalName', e.target.value)} placeholder="" rows={5} />
+                    <ProjectPicker label="โครงการวิจัยที่เกี่ยวข้อง" required={false} selectedProject={formData.__projectObj} onSelect={(project) => handleInputChange('__projectObj', project)} />
                     <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI" value={formData.doi} placeholder="กรอก DOI" onChange={(e) => handleInputChange('doi', e.target.value)} />
                     <FormInput id="isbn" label="ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)" value={formData.isbn} placeholder="กรอก ISBN" onChange={(e) => handleInputChange('isbn', e.target.value)} />
                     <FormDateSelect durationStart={formData.durationStart} durationEnd={formData.durationEnd} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
