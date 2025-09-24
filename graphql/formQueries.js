@@ -46,6 +46,27 @@ export const GET_PUBLICATIONS = gql`
   }
 `;
 
+export const GET_BOOKS = gql`
+  query GetBooks($pagination: PaginationArg, $sort: [String], $filters: BookFiltersInput) {
+    books(pagination: $pagination, sort: $sort, filters: $filters) {
+      documentId
+      bookType
+      titleTH
+      titleEN
+      publicationDate
+      updatedAt
+      writers
+      attachments {
+        documentId
+        name
+        url
+        size
+        mime
+      }
+    }
+  }
+`;
+
 export const CREATE_PROJECT = gql`
   mutation CreateProject($data: ProjectInput!) {
     createProject(data: $data) {
@@ -318,11 +339,13 @@ export const GET_FUNDS = gql`
   query GetFunds($pagination: PaginationArg, $sort: [String], $filters: FundFiltersInput) {
     funds(pagination: $pagination, sort: $sort, filters: $filters) {
       documentId
+      contentDesc
       fundType
       fundTypeText
       duration
       pages
       updatedAt
+      partners
     }
   }
 `;
@@ -396,18 +419,25 @@ export const GET_BOOK = gql`
 `;
 
 export const CREATE_BOOK = gql`
-  mutation CreateBook($data: WorkBookInput!) {
-    createWorkBook(data: $data) {
+  mutation CreateBook($data: BookInput!) {
+    createBook(data: $data) {
       documentId
+      bookType
       titleTH
       titleEN
+      detail
+      level
+      publicationDate
+      attachments { documentId name url size mime }
+      writers
+      funds { documentId fundType fundTypeText }
     }
   }
 `;
 
 export const UPDATE_BOOK = gql`
-  mutation UpdateBook($documentId: ID!, $data: WorkBookInput!) {
-    updateWorkBook(documentId: $documentId, data: $data) {
+  mutation UpdateBook($documentId: ID!, $data: BookInput!) {
+    updateBook(documentId: $documentId, data: $data) {
       documentId
     }
   }

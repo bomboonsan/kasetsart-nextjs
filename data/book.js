@@ -1,6 +1,6 @@
 export const BOOK_FORM_INITIAL = {
     funds: [], // relation to funding (documentId)
-    bookType: 0, // ประเภทผลงาน (0=หนังสือ,1=ตำรา)
+    bookType: "", // ประเภทผลงาน (0=หนังสือ,1=ตำรา)
     titleTH: "", // ชื่อผลงาน (ไทย)
     titleEN: "", // ชื่อผลงาน (อังกฤษ)
     detail: "", // รายละเอียดเบื้องต้นของหนังสือ หรือ ตำรา

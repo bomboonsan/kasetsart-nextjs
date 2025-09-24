@@ -116,7 +116,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit }) {
 			const attachmentsChanged = JSON.stringify(currentIdsSorted) !== JSON.stringify(originalIdsSorted);
 
 			const bookData = {
-				bookType: formData.bookType ?? 0,
+				bookType: formData.bookType ?? "0",
 				titleTH: formData.titleTH?.trim() || null,
 				titleEN: formData.titleEN?.trim() || null,
 				detail: formData.detail?.trim() || null,
@@ -124,7 +124,6 @@ export default function BookForm({ documentId, isEdit = false, onSubmit }) {
 				publicationDate: formData.publicationDate || null,
 				attachments: attachmentIds,
 				writers: formData.writers || [],
-				partners: formData.partners || [],
 				funds: formData.__fundingObj?.documentId ? [formData.__fundingObj.documentId] : [],
 			};
 			Object.keys(bookData).forEach(k => {
@@ -154,11 +153,18 @@ export default function BookForm({ documentId, isEdit = false, onSubmit }) {
 		}
 	};
 
+	useEffect(() => {
+		if (!formData.__fundingObj) return;
+		setFormData((prev) => ({ ...prev, partners: formData.__fundingObj.partners || [] }));
+	}, [formData.__fundingObj]);
+
+	console.log('BookForm render', { formData });
+
 	return (
 		<>
 			<Block>
 				<div className="inputGroup">
-					<FormRadio id="bookType" label="ประเภทผลงาน" value={String(formData.bookType)} onChange={(e) => handleInputChange('bookType', parseInt(e.target.value))} options={[
+					<FormRadio id="bookType" label="ประเภทผลงาน" value={String(formData.bookType)} onChange={(e) => handleInputChange('bookType', e.target.value)} options={[
 						{ value: '0', label: 'หนังสือ' },
 						{ value: '1', label: 'ตำรา' },
 					]} />

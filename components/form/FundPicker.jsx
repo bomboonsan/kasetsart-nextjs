@@ -24,6 +24,9 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 					{ fundTypeText: { containsi: searchTerm } },
 					{ fundType: { containsi: searchTerm } },
 					{ duration: { containsi: searchTerm } },
+					{ pages: { containsi: searchTerm } },
+					{ partners: { containsi: searchTerm } },
+					{ contentDesc: { containsi: searchTerm } },
 				]
 			} : {}
 		},
@@ -42,10 +45,12 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 			const mapped = returned.map(f => ({
 				id: f.documentId || f.id,
 				documentId: f.documentId || f.id,
+				contentDesc: f.contentDesc,
 				fundType: f.fundType,
 				fundTypeText: f.fundTypeText,
 				duration: f.duration,
 				pages: f.pages,
+				partners: f.partners,
 				updatedAt: f.updatedAt,
 			}));
 			setFunds(mapped);
@@ -65,7 +70,7 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 	};
 
 	const formatFundDisplay = (fund) => {
-		return fund.fundTypeText || `Fund #${fund.id}`;
+		return fund.contentDesc || `Fund #${fund.id}`;
 	};
 
 	const formatFundDetails = (fund) => {
