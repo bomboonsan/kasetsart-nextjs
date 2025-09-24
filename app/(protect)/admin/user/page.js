@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import { useSession } from "next-auth/react";
 import Pageheader from "@/components/layout/Pageheader";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,7 @@ import {
     Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
 
-import {
-    GET_ALL_USERS,
-    UPDATE_USER_ROLE,
-    UPDATE_USER_BLOCKED,
-} from "@/graphql/userQueries";
+import { GET_ALL_USERS } from "@/graphql/userQueries";
 
 // อธิบายฟังก์ชัน: สร้าง context ให้ Apollo ใส่ Authorization header ทุกคำขอ
 const useAuthContext = (jwt) => ({
@@ -66,20 +62,53 @@ export default function AdminUsersPage() {
         });
     }, [users, search, roleFilter]);
 
-    // เปลี่ยนบทบาท
-    const [updateUserRole] = useMutation(UPDATE_USER_ROLE, { context: authContext });
+    // Cache for resolving rapid updates (documentId -> in-progress flag)
+    const [rowLoading, setRowLoading] = useState({});
+
+    const setLoadingFor = (key, val) => setRowLoading(prev => ({ ...prev, [key]: val }));
+
+    // เปลี่ยนบทบาท ผ่าน REST internal API
     const handleRoleChange = async (userDocId, roleDocId) => {
-        // หมายเหตุ: roleDocId = documentId ของ role
-        console.log("update target userId=", userDocId);
-        await updateUserRole({ variables: { id: userDocId, roleId: roleDocId }, context: authContext });
-        await refetch();
+        const key = `role-${userDocId}`;
+        try {
+            setLoadingFor(key, true);
+            const res = await fetch('/api/admin/users/update-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: { documentId: userDocId }, role: { documentId: roleDocId } })
+            });
+            if (!res.ok) {
+                const t = await res.text();
+                throw new Error(`Role update failed: ${res.status} ${t}`);
+            }
+            await refetch();
+        } catch (e) {
+            alert(e.message);
+        } finally {
+            setLoadingFor(key, false);
+        }
     };
 
-    // บล็อก/ปลดบล็อก
-    const [updateUserBlocked] = useMutation(UPDATE_USER_BLOCKED, { context: authContext });
+    // บล็อก/ปลดบล็อก ผ่าน REST internal API
     const handleToggleBlocked = async (userDocId, nextBlocked) => {
-        await updateUserBlocked({ variables: { id: userDocId, blocked: nextBlocked }, context: authContext });
-        await refetch();
+        const key = `block-${userDocId}`;
+        try {
+            setLoadingFor(key, true);
+            const res = await fetch('/api/admin/users/toggle-block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: { documentId: userDocId }, blocked: nextBlocked })
+            });
+            if (!res.ok) {
+                const t = await res.text();
+                throw new Error(`Block toggle failed: ${res.status} ${t}`);
+            }
+            await refetch();
+        } catch (e) {
+            alert(e.message);
+        } finally {
+            setLoadingFor(key, false);
+        }
     };
 
 
@@ -175,27 +204,24 @@ export default function AdminUsersPage() {
                                     <TableCell className="text-right text-sm">
                                         <div className="flex items-center justify-end gap-2">
                                             <select
-                                                value={u.role?.documentId ?? "nf9v7nyjebiy06f5kjpshual"}
-                                                onChange={(e) =>
-                                                    handleRoleChange(u.documentId ?? u.id, e.target.value)
-                                                }
-                                                className="px-2 py-1 border rounded text-sm"
-                                                // disabled={changingRole}
+                                                value={u.role?.id ?? "nf9v7nyjebiy06f5kjpshual"}
+                                                onChange={(e) => handleRoleChange(u.documentId ?? u.id, e.target.value)}
+                                                className="px-2 py-1 border rounded text-sm disabled:opacity-50"
+                                                disabled={rowLoading[`role-${u.documentId ?? u.id}`]}
                                             >
-                                                <option value="nf9v7nyjebiy06f5kjpshual">User</option>
-                                                <option value="nv62t3lijrmcf91kf97zc18j">Admin</option>
-                                                <option value="paz95zzzpd60h4c9toxlbqkl">Super admin</option>
+                                                <option value="1">User</option>
+                                                <option value="3">Admin</option>
+                                                <option value="4">Super admin</option>
                                             </select>
 
                                             <Button
                                                 size="sm"
                                                 variant={u.blocked ? "destructive" : "outline"}
-                                                onClick={() =>
-                                                    handleToggleBlocked(u.documentId ?? u.id, !u.blocked)
-                                                }
-                                                // disabled={togglingBlocked}
+                                                onClick={() => handleToggleBlocked(u.documentId ?? u.id, !u.blocked)}
+                                                disabled={rowLoading[`block-${u.documentId ?? u.id}`]}
                                             >
-                                                {u.blocked ? "ยกเลิกบล็อก" : "บล็อก"}
+                                                {rowLoading[`block-${u.documentId ?? u.id}`]
+                                                    ? '...' : (u.blocked ? "ยกเลิกบล็อก" : "บล็อก")}
                                             </Button>
                                         </div>
                                     </TableCell>
