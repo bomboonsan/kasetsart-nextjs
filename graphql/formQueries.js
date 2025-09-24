@@ -412,7 +412,7 @@ export const GET_BOOK = gql`
       publicationDate
       attachments { documentId name url size mime }
       writers
-      funds { documentId fundType fundTypeText }
+      funds { documentId contentDesc fundType fundTypeText partners }
     }
   }
 `;

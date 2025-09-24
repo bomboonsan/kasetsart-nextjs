@@ -87,8 +87,7 @@ export default function FundTable() {
                         {funds.map((f) => (
                             <TableRow key={f.documentId}>
                                 <TableCell className={'px-5'}>
-                                    <div className="font-semibold">{(f.fundTypeText || f.fundType) ?? '—'}</div>
-                                    <div className="text-xs text-gray-500">{f.fundType}</div>
+                                    <div className="font-semibold">{f.fundType == "0" ? "ตำรา" : "หนังสือ"}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>{f.contentDesc ? (f.contentDesc.length > 120 ? f.contentDesc.slice(0, 120) + '...' : f.contentDesc) : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{f.writers ? f.writers.length : '-'}</TableCell>

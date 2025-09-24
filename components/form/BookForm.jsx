@@ -55,32 +55,44 @@ function WritersEditor({ writers, onChange }) {
 	);
 }
 
-export default function BookForm({ documentId, isEdit = false, onSubmit }) {
+export default function BookForm({ documentId, isEdit = false, onSubmit, initialData = null }) {
 	const { data: session } = useSession();
 	const [formData, setFormData] = useState(BOOK_FORM_INITIAL);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const originalAttachmentIdsRef = useRef([]);
 
-	// If editing, fetch existing book
+	// If editing and initialData not provided, fetch existing book
+	const shouldFetch = isEdit && !initialData && documentId;
 	const { data: existingBookData } = useQuery(GET_BOOK, {
 		variables: { documentId },
-		skip: !isEdit || !documentId,
+		skip: !shouldFetch,
 		context: { headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' } },
 		onCompleted: (data) => {
-			const b = data?.workBook;
+			const b = data?.book;
 			if (!b) return;
-			const hydrated = {
-				...BOOK_FORM_INITIAL,
-				...b,
-				publicationDate: b.publicationDate ? String(b.publicationDate).slice(0, 10) : '',
-				__fundingObj: b.funds?.[0] ? b.funds[0] : null,
-				attachments: b.attachments || [],
-				partners: b.partners || [],
-				writers: Array.isArray(b.writers) ? b.writers : [],
-			};
+			const hydrated = hydrateBook(b);
 			setFormData(hydrated);
 			originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
 		}
+	});
+
+	// If initialData provided, use it to hydrate form once
+	useEffect(() => {
+		if (!initialData) return;
+		const hydrated = hydrateBook(initialData);
+		setFormData(hydrated);
+		originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
+	}, [initialData]);
+
+	// helper to hydrate a book object into form data shape
+	const hydrateBook = (b) => ({
+		...BOOK_FORM_INITIAL,
+		...b,
+		publicationDate: b.publicationDate ? String(b.publicationDate).slice(0, 10) : '',
+		__fundingObj: b.funds?.[0] ? b.funds[0] : null,
+		attachments: b.attachments || [],
+		partners: b.partners || [],
+		writers: Array.isArray(b.writers) ? b.writers : [],
 	});
 
 	const [createBook] = useMutation(CREATE_BOOK, {
