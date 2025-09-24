@@ -8,12 +8,13 @@ import FormTextarea from '@/components/myui/FormTextarea';
 import FormInput from '@/components/myui/FormInput';
 import FormDoubleInput from '@/components/myui/FormDoubleInput';
 import FormRadio from '@/components/myui/FormRadio';
+import FormSelect from '@/components/myui/FormSelect';
 import FormDateSelect from '../myui/FormDateSelect';
 import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
-import { PUBLICATION_FORM_INITIAL } from '@/data/publication';
+import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION } from '@/graphql/formQueries';
 
 /*
@@ -133,6 +134,29 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
         }
     };
 
+    // Helpers
+    const toSelectOptions = (arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label }));
+
+    const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), []);
+    const scopusSubjectOptions = useMemo(() => toSelectOptions(listsStandardScopusSubset), []);
+    const abdcOptions = useMemo(() => toSelectOptions(listsStandardABDC), []);
+    const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), []);
+    const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), []);
+
+    const handleStandardToggle = (field, checked) => {
+        handleInputChange(field, checked ? 1 : 0);
+        // reset dependent selects when toggled off
+        if (!checked) {
+            if (field === 'isScopus') {
+                handleInputChange('scopusType', '');
+                handleInputChange('scopusValue', '');
+            }
+            if (field === 'isABDC') handleInputChange('abdcType', '');
+            if (field === 'isAJG') handleInputChange('ajgType', '');
+            if (field === 'isWOS') handleInputChange('wosType', '');
+        }
+    };
+
     return (
         <>
             <Block>
@@ -151,22 +175,60 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormDoubleInput id="pages" label="จากหน้า" before="" after="ถึง" value1={formData.pageStart} onChange1={e => handleInputChange('pageStart', e.target.value)} value2={formData.pageEnd} onChange2={e => handleInputChange('pageEnd', e.target.value)} />
                     <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
                     <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
-                    {/* Checklist like flags (simplified as radios/checkbox pattern could be custom later) */}
-                    <div className="space-y-1 flex items-center forminput">
-                        <div className="w-1/3">
+                    {/* Standards Section */}
+                    <div className="space-y-3">
+                        <div className="text-sm font-medium text-gray-700">ดัชนี / มาตรฐานวารสาร</div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isScopus} onChange={e => handleStandardToggle('isScopus', e.target.checked)} />
+                                <span>Scopus</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isACI} onChange={e => handleStandardToggle('isACI', e.target.checked)} />
+                                <span>ACI</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isTCI1} onChange={e => handleStandardToggle('isTCI1', e.target.checked)} />
+                                <span>TCI1</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isABDC} onChange={e => handleStandardToggle('isABDC', e.target.checked)} />
+                                <span>ABDC</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isTCI2} onChange={e => handleStandardToggle('isTCI2', e.target.checked)} />
+                                <span>TCI2</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isAJG} onChange={e => handleStandardToggle('isAJG', e.target.checked)} />
+                                <span>AJG</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isSSRN} onChange={e => handleStandardToggle('isSSRN', e.target.checked)} />
+                                <span>SSRN</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input type="checkbox" checked={!!formData.isWOS} onChange={e => handleStandardToggle('isWOS', e.target.checked)} />
+                                <span>Web of Science</span>
+                            </label>
                         </div>
-                        <div className="flex-1 space-x-3">
-                            <div className="space-y-2">
-                                <div className="grid grid-cols-2 gap-5 text-sm">
-                                    {['Scopus', 'ACI', 'TCI1', 'ABDC', 'TCI2', 'AJG', 'Social Science Research Network', 'Web of Science'].map(key => (
-                                        <label key={key} className="flex items-center gap-2">
-                                            <input type="checkbox" checked={!!formData[key]} onChange={e => handleInputChange(key, e.target.checked ? 1 : 0)} />
-                                            <span>{key.replace('is', '')}</span>
-                                        </label>
-                                    ))}
-                                </div>
+
+                        {/* Conditional selects */}
+                        {formData.isScopus ? (
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <FormSelect id="scopusValue" label="Scopus Quartile" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={val => handleInputChange('scopusValue', val)} options={scopusQuartileOptions} />
+                                <FormSelect id="scopusType" label="สาขา (Scopus Subject)" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={val => handleInputChange('scopusType', val)} options={scopusSubjectOptions} />
                             </div>
-                        </div>
+                        ) : null}
+                        {formData.isABDC ? (
+                            <FormSelect id="abdcType" label="ABDC Ranking" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('abdcType', val)} options={abdcOptions} />
+                        ) : null}
+                        {formData.isAJG ? (
+                            <FormSelect id="ajgType" label="AJG Ranking" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('ajgType', val)} options={ajgOptions} />
+                        ) : null}
+                        {formData.isWOS ? (
+                            <FormSelect id="wosType" label="Web of Science Type" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={val => handleInputChange('wosType', val)} options={wosOptions} />
+                        ) : null}
                     </div>
                     
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
