@@ -48,3 +48,12 @@ export const UPDATE_PROJECT = gql`
     }
   }
 `;
+
+export const UPDATE_PROJECT_PARTNERS = gql`
+  mutation UpdateProjectPartners($documentId: ID!, $data: ProjectInput!) {
+    updateProject(documentId: $documentId, data: $data) {
+      documentId
+      partners
+    }
+  }
+`;

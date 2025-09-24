@@ -43,7 +43,6 @@ export const GET_PROJECT = gql`
       impacts { documentId name }
       sdgs { documentId name }
       departments { documentId title }
-      users { documentId username email }
       attachments { 
         documentId
         name

@@ -4,6 +4,7 @@ import React from 'react';
 import { Country, State, City } from 'country-state-city';
 import { useEffect, useMemo, useState } from 'react'
 import { useSession } from "next-auth/react";
+import { useMutation } from "@apollo/client/react";
 import Block from '../layout/Block';
 import FormInput from '@/components/myui/FormInput';
 import FormInputSelect from '@/components/myui/FormInputSelect';
@@ -16,14 +17,101 @@ import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
+import { UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
 
 export default function ConferenceForm({ }) {
     const { data: session } = useSession();
     const [formData, setFormData] = useState(CONFERENCE_FORM_INITIAL);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
+        },
+        onCompleted: (data) => {
+            console.log('Project partners updated successfully:', data);
+        },
+        onError: (error) => {
+            console.error('Error updating project partners:', error);
+        }
+    });
+
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         if (field === 'partners') {
-            console.log('Partners updated in ProjectForm:', value);
+            console.log('Partners updated in ConferenceForm:', value);
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!session?.jwt) {
+            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+            return;
+        }
+
+        // Basic validation
+        if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
+            alert('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
+            return;
+        }
+
+        setIsSubmitting(true);
+        
+        try {
+            // สร้างข้อมูล conference (ในอนาคตถ้ามี API สำหรับ conference)
+            const conferenceData = {
+                titleTH: formData.titleTH.trim() || null,
+                titleEN: formData.titleEN.trim() || null,
+                isEnvironmentallySustainable: parseInt(formData.isEnvironmentallySustainable) || null,
+                journalName: formData.journalName || null,
+                doi: formData.doi || null,
+                isbn: formData.isbn || null,
+                durationStart: formData.durationStart || null,
+                durationEnd: formData.durationEnd || null,
+                cost: parseInt(formData.cost) || null,
+                costType: formData.costType || null,
+                presentationWork: formData.presentationWork || null,
+                presentType: formData.presentType || null,
+                articleType: formData.articleType || null,
+                abstractTH: formData.abstractTH || null,
+                abstractEN: formData.abstractEN || null,
+                summary: formData.summary || null,
+                level: formData.level || null,
+                country: formData.country || null,
+                state: formData.state || null,
+                city: formData.city || null,
+                fundName: formData.fundName || null,
+                keywords: formData.keywords || null,
+                // เก็บข้อมูล attachments ของ conference
+                attachments: formData.attachments || []
+            };
+
+            console.log('Conference data:', conferenceData);
+
+            // อัปเดต partners ใน project ถ้ามี
+            if (formData.__projectObj?.documentId && formData.partners) {
+                await updateProjectPartners({
+                    variables: {
+                        documentId: formData.__projectObj.documentId,
+                        data: {
+                            partners: formData.partners
+                        }
+                    }
+                });
+                console.log('Project partners updated successfully');
+            }
+
+            alert('บันทึกข้อมูลสำเร็จแล้ว!');
+            // Reset form หรือ redirect ตามต้องการ
+            // setFormData(CONFERENCE_FORM_INITIAL);
+            
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('เกิดข้อผิดพลาดในการบันทึก: ' + (error.message || 'ไม่ทราบสาเหตุ'));
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const countryOptions = useMemo(() => {
@@ -125,7 +213,13 @@ export default function ConferenceForm({ }) {
                 </div>
             </Block>
             <div className='p-6'>
-                <Button type="submit">บันทึก</Button>
+                <Button 
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
+                </Button>
             </div>
         </>
     );
