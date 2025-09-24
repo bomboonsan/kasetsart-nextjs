@@ -90,11 +90,25 @@ export default function DashboardPage() {
   // Academic personnel distribution (from usersPermissionsUsers.academic_types)
   // Optionally filter users by selected department (if selectedDept !== 'all')
   // Always show faculty personnel across all departments (ignore selectedDept)
-  const facultyPersonnelData = useMemo(() => {
+  const facultyDonutData = useMemo(() => {
     const counts = aggregateAcademicTypes(users);
     const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
     return Object.entries(counts).map(([label, raw]) => ({ label, value: ((raw / total) * 100).toFixed(1), raw }));
   }, [users]);
+
+  const departmentDonutData = facultyDonutData.map(d => ({ category: d.label, personnel: d.raw, percentage: d.value }));
+
+
+  const facultyPersonnelData = useMemo(() => {
+    const filteredUsers = selectedDeptPersonnel === 'all' ? users : users.filter(u => {
+      const depts = u?.departments || [];
+      return depts.some(d => d?.documentId === selectedDeptPersonnel);
+    });
+
+    const counts = aggregateAcademicTypes(filteredUsers);
+    const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
+    return Object.entries(counts).map(([label, raw]) => ({ label, value: ((raw / total) * 100).toFixed(1), raw }));
+  }, [users, selectedDeptPersonnel]);
 
   const departmentPersonnelData = facultyPersonnelData.map(d => ({ category: d.label, personnel: d.raw, percentage: d.value }));
 
@@ -136,7 +150,7 @@ export default function DashboardPage() {
         </div>
 
         <div className='col-span-6 md:col-span-2 h-full'>
-          <DonutChart title="ภาพรวมประเภทบุคคลากรของคณะ" subtitle="% จำนวนบุคคลากรแบ่งตามประเภท" data={facultyPersonnelData} colors={['#AAB3DE', '#E0E0E0', '#24B364', '#00BAD1', '#FF9F43']} height={350} />
+          <DonutChart title="ภาพรวมประเภทบุคคลากรของคณะ" subtitle="% จำนวนบุคคลากรแบ่งตามประเภท" data={facultyDonutData} colors={['#AAB3DE', '#E0E0E0', '#24B364', '#00BAD1', '#FF9F43']} height={350} />
         </div>
 
         <div className='col-span-6 md:col-span-4 h-full'>
