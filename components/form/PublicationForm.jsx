@@ -152,22 +152,23 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
                     <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
                     {/* Checklist like flags (simplified as radios/checkbox pattern could be custom later) */}
-                    <div className="space-y-2">
-                        <p className="text-sm font-medium">ดัชนี/มาตรฐาน</p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                            {['isScopus', 'isACI', 'isTCI1', 'isABDC', 'isTCI2', 'isAJG', 'isSSRN', 'isWOS'].map(key => (
-                                <label key={key} className="flex items-center gap-2">
-                                    <input type="checkbox" checked={!!formData[key]} onChange={e => handleInputChange(key, e.target.checked ? 1 : 0)} />
-                                    <span>{key.replace('is', '')}</span>
-                                </label>
-                            ))}
+                    <div className="space-y-1 flex items-center forminput">
+                        <div className="w-1/3">
+                        </div>
+                        <div className="flex-1 space-x-3">
+                            <div className="space-y-2">
+                                <div className="grid grid-cols-2 gap-5 text-sm">
+                                    {['Scopus', 'ACI', 'TCI1', 'ABDC', 'TCI2', 'AJG', 'Social Science Research Network', 'Web of Science'].map(key => (
+                                        <label key={key} className="flex items-center gap-2">
+                                            <input type="checkbox" checked={!!formData[key]} onChange={e => handleInputChange(key, e.target.checked ? 1 : 0)} />
+                                            <span>{key.replace('is', '')}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <FormInput id="scopusType" label="Scopus Type" value={formData.scopusType} onChange={e => handleInputChange('scopusType', e.target.value)} />
-                    <FormInput id="scopusValue" label="Scopus Quartile" value={formData.scopusValue} onChange={e => handleInputChange('scopusValue', e.target.value)} />
-                    <FormInput id="abdcType" label="ABDC Type" value={formData.abdcType} onChange={e => handleInputChange('abdcType', e.target.value)} />
-                    <FormInput id="ajgType" label="AJG Type" value={formData.ajgType} onChange={e => handleInputChange('ajgType', e.target.value)} />
-                    <FormInput id="wosType" label="WOS Type" value={formData.wosType} onChange={e => handleInputChange('wosType', e.target.value)} />
+                    
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={e => handleInputChange('keywords', e.target.value)} rows={3} />
                     <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={e => handleInputChange('abstractTH', e.target.value)} rows={4} />
