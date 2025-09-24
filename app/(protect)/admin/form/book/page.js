@@ -51,7 +51,8 @@ export default function BookTable() {
         }
     });
 
-    const books = data?.workBooks || [];
+
+    const books = data?.books || [];
 
     return (
         <div>
