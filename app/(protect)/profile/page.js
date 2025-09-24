@@ -3,6 +3,7 @@
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileEducation from '@/components/profile/ProfileEducation';
 import ProfileStats from '@/components/profile/ProfileState';
+import ProfilePortfolio from '@/components/profile/ProfilePortfolio';
 // Hooks
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
@@ -44,6 +45,7 @@ export default function ProfilePage() {
             <ProfileHeader data={userData} />
             <ProfileStats userId={userData} />
             <ProfileEducation data={userData.education} />
+            <ProfilePortfolio data={userData} />
         </div>
     );
 }

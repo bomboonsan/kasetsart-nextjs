@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 
 export default function ProfileStats(data) {
-    console.log("ProfileStats data:", data);
 
     const [loading, setLoading] = useState(true);
     const [counts, setCounts] = useState({
