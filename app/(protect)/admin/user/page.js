@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
     const filtered = useMemo(() => {
         return users.filter(u => {
             const matchesSearch = !search || [u.username, u.email, u.firstNameTH, u.lastNameTH, u.firstNameEN, u.lastNameEN].filter(Boolean).join(' ').toLowerCase().includes(search.toLowerCase())
-            const matchesRole = roleFilter === 'all' || (u.role && u.role === roleFilter)
+            const matchesRole = roleFilter === 'all' || (u.role && (u.role.id == roleFilter || u.role.name === roleFilter))
             return matchesSearch && matchesRole
         })
     }, [users, search, roleFilter])
@@ -80,9 +80,9 @@ export default function AdminUsersPage() {
                     <label className="text-sm text-gray-600">บทบาท</label>
                     <select className="w-full px-3 py-2 border rounded" value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
                         <option value="all">ทั้งหมด</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Moderator">Moderator</option>
-                        <option value="User">User</option>
+                        <option value="1">User</option>
+                        <option value="3">Admin</option>
+                        <option value="4">Super admin</option>
                     </select>
                 </div>
                 <div>
@@ -116,10 +116,10 @@ export default function AdminUsersPage() {
                                     <TableCell className="px-5 text-sm">{u.role.name || '-'}</TableCell>
                                     <TableCell className="text-right  text-sm">
                                         <div className="flex items-center justify-end gap-2">
-                                            <select defaultValue={u.role || 'User'} onChange={(e) => handleRoleChange(u.documentId || u.id, e.target.value)} className="px-2 py-1 border rounded text-sm">
-                                                <option value="User">User</option>
-                                                <option value="Moderator">Moderator</option>
-                                                <option value="Admin">Admin</option>
+                                            <select defaultValue={u.role?.documentId || 'nf9v7nyjebiy06f5kjpshual'} onChange={(e) => handleRoleChange(u.documentId || u.id, e.target.value)} className="px-2 py-1 border rounded text-sm">
+                                                <option value="nf9v7nyjebiy06f5kjpshual">User</option>
+                                                <option value="nv62t3lijrmcf91kf97zc18j">Admin</option>
+                                                <option value="paz95zzzpd60h4c9toxlbqkl">Super admin</option>
                                             </select>
                                             <Button size="sm" variant={u.blocked ? 'destructive' : 'outline'} onClick={() => handleToggleBlocked(u.documentId || u.id, !u.blocked)}>
                                                 {u.blocked ? 'ยกเลิกบล็อก' : 'บล็อก'}

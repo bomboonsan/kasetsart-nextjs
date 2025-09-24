@@ -152,6 +152,7 @@ export const GET_ALL_USERS = gql`
         name
         documentId
       }
+      blocked
     }
   }
 `;
