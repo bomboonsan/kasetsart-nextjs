@@ -17,7 +17,7 @@ import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
-import { UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
+import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
 
 export default function ConferenceForm({ }) {
     const { data: session } = useSession();
@@ -35,6 +35,20 @@ export default function ConferenceForm({ }) {
         },
         onError: (error) => {
             console.error('Error updating project partners:', error);
+        }
+    });
+
+    const [createConference] = useMutation(CREATE_CONFERENCE, {
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
+        },
+        onCompleted: (data) => {
+            console.log('Conference created successfully:', data);
+        },
+        onError: (error) => {
+            console.error('Error creating conference:', error);
         }
     });
 
@@ -60,7 +74,14 @@ export default function ConferenceForm({ }) {
         setIsSubmitting(true);
         
         try {
-            // สร้างข้อมูล conference (ในอนาคตถ้ามี API สำหรับ conference)
+            // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว
+            const attachmentIds = Array.isArray(formData.attachments)
+                ? formData.attachments
+                    .filter(attachment => attachment.id)
+                    .map(attachment => attachment.id)
+                : [];
+
+            // สร้างข้อมูล conference
             const conferenceData = {
                 titleTH: formData.titleTH.trim() || null,
                 titleEN: formData.titleEN.trim() || null,
@@ -85,13 +106,31 @@ export default function ConferenceForm({ }) {
                 fundName: formData.fundName || null,
                 keywords: formData.keywords || null,
                 // เก็บข้อมูล attachments ของ conference
-                attachments: formData.attachments || []
+                attachments: attachmentIds.length ? attachmentIds : [],
+                // เชื่อมโยงกับ project ที่เลือก
+                projects: formData.__projectObj?.documentId ? [formData.__projectObj.documentId] : []
             };
 
-            console.log('Conference data:', conferenceData);
+            // ลบค่า null ออกเพื่อไม่ให้เกิดปัญหา
+            Object.keys(conferenceData).forEach(key => {
+                if (conferenceData[key] === null || conferenceData[key] === "") {
+                    delete conferenceData[key];
+                }
+            });
 
-            // อัปเดต partners ใน project ถ้ามี
-            if (formData.__projectObj?.documentId && formData.partners) {
+            console.log('Creating conference with data:', conferenceData);
+
+            // สร้าง conference
+            const conferenceResult = await createConference({
+                variables: {
+                    data: conferenceData
+                }
+            });
+
+            console.log('Conference created:', conferenceResult);
+
+            // อัปเดต partners ใน project ถ้ามีและถ้า partners มีการเปลี่ยนแปลง
+            if (formData.__projectObj?.documentId && formData.partners && Array.isArray(formData.partners)) {
                 await updateProjectPartners({
                     variables: {
                         documentId: formData.__projectObj.documentId,
@@ -103,9 +142,9 @@ export default function ConferenceForm({ }) {
                 console.log('Project partners updated successfully');
             }
 
-            alert('บันทึกข้อมูลสำเร็จแล้ว!');
-            // Reset form หรือ redirect ตามต้องการ
-            // setFormData(CONFERENCE_FORM_INITIAL);
+            alert('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
+            // Reset form
+            setFormData(CONFERENCE_FORM_INITIAL);
             
         } catch (error) {
             console.error('Submission error:', error);

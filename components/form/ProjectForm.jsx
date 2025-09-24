@@ -32,7 +32,6 @@ export default function ProjectForm({ initialData, onSubmit }) {
             }
         },
         onCompleted: (data) => {
-            console.log('Project created successfully:', data);
             alert('บันทึกโครงการสำเร็จแล้ว!');
             // Reset form or redirect as needed
             setFormData(PROJECT_FORM_INITIAL);
@@ -105,16 +104,17 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 budget: parseInt(formData.budget) || null,
                 keywords: formData.keywords || null,
                 // Handle relations - need to pass documentIds as arrays
-                departments: formData.department ? [formData.department] : [],
+                departments: formData.departments ? [formData.departments] : [],
                 ic_types: formData.icTypes ? [formData.icTypes] : [],
                 impacts: formData.impact ? [formData.impact] : [],
                 sdgs: formData.sdg ? [formData.sdg] : [],
                 partners: formData.partners || [],
                 // Add attachments relation - pass file IDs from uploaded files
-                attachments: attachmentIds.length ? attachmentIds : [],
+                attachments: attachmentIds.length ? attachmentIds : formData.attachments,
                 // Strapi relation field for users-permissions user manyToMany
                 users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
             };
+
 
             // Remove null values to avoid issues
             Object.keys(projectData).forEach(key => {
@@ -123,7 +123,6 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 }
             });
 
-            console.log('Submitting project data:', projectData);
 
             if (onSubmit) {
                 await onSubmit(projectData);
@@ -155,13 +154,13 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 icTypes: initialData.ic_types?.[0]?.documentId ?? initialData.icTypes ?? "",
                 impact: initialData.impacts?.[0]?.documentId ?? initialData.impact ?? "",
                 sdg: initialData.sdgs?.[0]?.documentId ?? initialData.sdg ?? "",
+                departments: initialData.departments?.[0]?.documentId ?? initialData.departments ?? "",
             };
             setFormData(hydrated);
         }
     }, [initialData]);
 
     useEffect(() => {
-        console.log('fundType changed:', formData.fundType);
         if (formData.fundType == "12") {
             setFundSubTypeOptions(subFundType1);
         } else if (formData.fundType == "11") {
@@ -183,7 +182,6 @@ export default function ProjectForm({ initialData, onSubmit }) {
     });
     useEffect(() => {
         if (projectOptions) {
-            console.log('Fetched project options:', projectOptions);
             setIcTypesOptions(projectOptions.icTypes.map(ic => ({ value: ic.documentId, label: ic.name })));
             setImpactsOptions(projectOptions.impacts.map(imp => ({ value: imp.documentId, label: imp.name })));
             setSdgsOptions(projectOptions.sdgs.map(sdg => ({ value: sdg.documentId, label: sdg.name })));
@@ -192,7 +190,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
     }, [projectOptions]);
     if (projectOptionsLoading) return <p>Loading...</p>;
 
-    console.log('projectOptions', projectOptions);
+
+    // console.log('projectOptions', projectOptions);
 
     return (
         <>
@@ -221,7 +220,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                         <span className="text-red-500 ml-1">*</span>
                     </FormDateSelect>
                     {/* <FormTextarea id="responsibleOrganization" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.responsibleOrganization} onChange={(e) => handleInputChange('responsibleOrganization', e.target.value)} placeholder="" rows={5} /> */}
-                    <FormSelect id="departments" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.departments ?? ""} placeholder="เลือกหน่วยงาน" onChange={(val) => handleInputChange('department', val)} options={departmentsOptions} />
+                    <FormSelect id="departments" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.departments ?? ""} placeholder="เลือกหน่วยงาน" onChange={(val) => handleInputChange('departments', val)} options={departmentsOptions} />
                     <FormSelect id="researchKind" label="ประเภทงานวิจัย" value={formData.researchKind ?? ""} placeholder="เลือกประเภทงานวิจัย" onChange={(val) => handleInputChange('researchKind', val)} options={researchKindOptions} />
                     <FormSelect id="fundType" label="ประเภทแหล่งทุน" value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
                     <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />

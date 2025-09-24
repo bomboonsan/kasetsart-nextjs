@@ -35,6 +35,14 @@ export const CREATE_PROJECT = gql`
         documentId
         name
       }
+      attachments {
+        id
+        documentId
+        name
+        url
+        size
+        mime
+      }
       partners
 
     }
@@ -54,6 +62,49 @@ export const UPDATE_PROJECT_PARTNERS = gql`
     updateProject(documentId: $documentId, data: $data) {
       documentId
       partners
+    }
+  }
+`;
+
+export const CREATE_CONFERENCE = gql`
+  mutation CreateConference($data: ConferenceInput!) {
+    createConference(data: $data) {
+      documentId
+      titleTH
+      titleEN
+      isEnvironmentallySustainable
+      journalName
+      doi
+      isbn
+      durationStart
+      durationEnd
+      cost
+      costType
+      presentationWork
+      presentType
+      articleType
+      abstractTH
+      abstractEN
+      summary
+      level
+      country
+      state
+      city
+      fundName
+      keywords
+      attachments {
+        id
+        documentId
+        name
+        url
+        size
+        mime
+      }
+      project_research {
+        documentId
+        nameTH
+        nameEN
+      }
     }
   }
 `;
