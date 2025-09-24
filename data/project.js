@@ -18,6 +18,7 @@ export const PROJECT_FORM_INITIAL = {
     icTypes: "",
     impact: "",
     sdg: "",
+    departments: "",
     partners: [],
     users: [],
     attachments: []

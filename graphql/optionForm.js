@@ -14,5 +14,9 @@ query ProjectOptions {
         documentId
         name
     }
+    departments {
+        documentId
+        title
+    }
 }
 `;

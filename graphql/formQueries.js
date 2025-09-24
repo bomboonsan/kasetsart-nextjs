@@ -19,6 +19,10 @@ export const CREATE_PROJECT = gql`
       fundName
       budget
       keywords
+      departments {
+        documentId
+        title
+      }
       ic_types {
         documentId
         name

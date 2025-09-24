@@ -22,6 +22,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
     const [icTypesOptions, setIcTypesOptions] = useState([]);
     const [impactsOptions, setImpactsOptions] = useState([]);
     const [sdgsOptions, setSdgsOptions] = useState([]);
+    const [departmentsOptions, setDepartmentsOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [createProject] = useMutation(CREATE_PROJECT, {
@@ -104,6 +105,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 budget: parseInt(formData.budget) || null,
                 keywords: formData.keywords || null,
                 // Handle relations - need to pass documentIds as arrays
+                departments: formData.department ? [formData.department] : [],
                 ic_types: formData.icTypes ? [formData.icTypes] : [],
                 impacts: formData.impact ? [formData.impact] : [],
                 sdgs: formData.sdg ? [formData.sdg] : [],
@@ -185,6 +187,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
             setIcTypesOptions(projectOptions.icTypes.map(ic => ({ value: ic.documentId, label: ic.name })));
             setImpactsOptions(projectOptions.impacts.map(imp => ({ value: imp.documentId, label: imp.name })));
             setSdgsOptions(projectOptions.sdgs.map(sdg => ({ value: sdg.documentId, label: sdg.name })));
+            setDepartmentsOptions(projectOptions.departments.map(dep => ({ value: dep.documentId, label: dep.title }))); 
         }
     }, [projectOptions]);
     if (projectOptionsLoading) return <p>Loading...</p>;
@@ -217,7 +220,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
                         <span className="text-blue-700">(ปี พ.ศ. 4 หลัก)</span>
                         <span className="text-red-500 ml-1">*</span>
                     </FormDateSelect>
-                    <FormTextarea id="responsibleOrganization" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.responsibleOrganization} onChange={(e) => handleInputChange('responsibleOrganization', e.target.value)} placeholder="" rows={5} />
+                    {/* <FormTextarea id="responsibleOrganization" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.responsibleOrganization} onChange={(e) => handleInputChange('responsibleOrganization', e.target.value)} placeholder="" rows={5} /> */}
+                    <FormSelect id="departments" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.departments ?? ""} placeholder="เลือกหน่วยงาน" onChange={(val) => handleInputChange('department', val)} options={departmentsOptions} />
                     <FormSelect id="researchKind" label="ประเภทงานวิจัย" value={formData.researchKind ?? ""} placeholder="เลือกประเภทงานวิจัย" onChange={(val) => handleInputChange('researchKind', val)} options={researchKindOptions} />
                     <FormSelect id="fundType" label="ประเภทแหล่งทุน" value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
                     <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
