@@ -135,32 +135,38 @@ export const GET_ALL_USERS = gql`
       firstNameEN
       lastNameEN
       academicPosition
-      
-      departments {
-        documentId
-        title
-      }
-      faculties {
-        documentId
-        title
-      }
-      organizations {
-        documentId
-        title
-      }
-      role {
-        name
-        documentId
-      }
+      departments { documentId title }
+      faculties { documentId title }
+      organizations { documentId title }
+      role { name documentId }
       blocked
     }
   }
 `;
 
-export const UPDATE_USER_PROFILE = gql`
-  mutation UpdateUserProfile($id: ID!, $data: UsersPermissionsUserInput!) {
-    updateUsersPermissionsUser(id: $id, data: $data) {
-      __typename
+// อัปเดตบทบาท: ส่ง role เป็น ID โดยตรง
+export const UPDATE_USER_ROLE = gql`
+  mutation UpdateUserRole($id: ID!, $roleId: ID!) {
+    updateUsersPermissionsUser(
+      id: $id
+      data: { role: $roleId }
+    ) {
+      data {
+        documentId
+        role { documentId name }
+      }
+    }
+  }
+`;
+
+// บล็อก/ยกเลิกบล็อก
+export const UPDATE_USER_BLOCKED = gql`
+  mutation UpdateUserBlocked($id: ID!, $blocked: Boolean!) {
+    updateUsersPermissionsUser(
+      id: $id
+      data: { blocked: $blocked }
+    ) {
+      data { documentId blocked }
     }
   }
 `;
