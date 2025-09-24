@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Country, State, City } from 'country-state-city';
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useSession } from "next-auth/react";
 import { useMutation } from "@apollo/client/react";
 import Block from '../layout/Block';
@@ -24,6 +24,15 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     const [formData, setFormData] = useState(CONFERENCE_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loadingObj, setLoadingObj] = useState({});
+    // เก็บค่า attachments เดิมตอน hydrate เพื่อเช็คการเปลี่ยนแปลงเวลา update
+    const originalAttachmentIdsRef = useRef([]);
+
+    const extractAttachmentIds = (arr) => {
+        if (!Array.isArray(arr)) return [];
+        return arr
+            .filter(a => a && (a.id || a.documentId))
+            .map(a => String(a.documentId || a.id));
+    };
 
     // Hydrate form data when editing
     useEffect(() => {
@@ -41,6 +50,8 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 partners: initialData.projects?.[0]?.partners || [],
             };
             setFormData(hydrated);
+            // บันทึกรายการ attachments เดิม (ใช้ภายหลังเพื่อตรวจว่ามีการแก้ไขไหม)
+            originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
         }
     }, [initialData]);
 
@@ -101,7 +112,13 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     .map(att => String(att.documentId || att.id))
                 : [];
 
-            // สร้างข้อมูล conference
+            // ตรวจสอบรายการปัจจุบัน
+            const currentIds = attachmentIds;
+            const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
+            const currentIdsSorted = [...currentIds].sort();
+            const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
+
+            // สร้างข้อมูล conference (อาจลบ field attachments ภายหลังหากไม่เปลี่ยนและเป็นการแก้ไข)
             const conferenceData = {
                 titleTH: formData.titleTH.trim() || null,
                 titleEN: formData.titleEN.trim() || null,
@@ -138,7 +155,12 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 }
             });
 
-            console.log('Conference data:', conferenceData);
+            // ถ้าเป็นการแก้ไข และ attachments ไม่ได้เปลี่ยน -> ลบ field ทิ้งเพื่อหลีกเลี่ยง error ของ Strapi
+            if (isEdit && !attachmentsChanged) {
+                delete conferenceData.attachments;
+            }
+
+            console.log('Conference data:', conferenceData, { attachmentsChanged, original: originalAttachmentIdsRef.current, current: currentIds });
 
             // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
             if (isEdit && onSubmit) {

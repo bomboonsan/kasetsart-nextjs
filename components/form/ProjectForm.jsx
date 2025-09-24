@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useSession } from "next-auth/react";
 import Block from '../layout/Block';
 import FormInput from '@/components/myui/FormInput';
@@ -24,6 +24,15 @@ export default function ProjectForm({ initialData, onSubmit }) {
     const [sdgsOptions, setSdgsOptions] = useState([]);
     const [departmentsOptions, setDepartmentsOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    // เก็บ attachments เดิมเพื่อเช็คความเปลี่ยนแปลงเวลา update
+    const originalAttachmentIdsRef = useRef([]);
+
+    const extractAttachmentIds = (arr) => {
+        if (!Array.isArray(arr)) return [];
+        return arr
+            .filter(a => a && (a.id || a.documentId))
+            .map(a => String(a.documentId || a.id));
+    };
 
     const [createProject] = useMutation(CREATE_PROJECT, {
         context: {
@@ -80,13 +89,19 @@ export default function ProjectForm({ initialData, onSubmit }) {
                     .filter(Boolean)
                 : [];
 
-            // Prepare attachments data - extract file IDs from uploaded files
+            // Prepare attachments data - extract file IDs from uploaded files as strings
             const attachmentIds = Array.isArray(formData.attachments)
                 ? formData.attachments
-                    .filter(attachment => attachment.id)
-                    .map(attachment => attachment.id)
+                    .filter(attachment => attachment && (attachment.documentId || attachment.id))
+                    .map(attachment => String(attachment.documentId || attachment.id))
                 : [];
         
+            console.log('Prepared attachment IDs:', attachmentIds); // Debug log
+
+            const currentAttachmentIds = attachmentIds;
+            const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
+            const currentIdsSorted = [...currentAttachmentIds].sort();
+            const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             const projectData = {
                 fiscalYear: parseInt(formData.fiscalYear) || null,
@@ -125,12 +140,32 @@ export default function ProjectForm({ initialData, onSubmit }) {
             });
 
 
+            // Sanitize projectData to avoid sending BigInt values (GraphQL cannot serialize BigInt)
+            const sanitize = (value) => {
+                if (typeof value === 'bigint') return value.toString()
+                if (Array.isArray(value)) return value.map(sanitize)
+                if (value && typeof value === 'object') {
+                    const out = {}
+                    Object.keys(value).forEach(k => {
+                        out[k] = sanitize(value[k])
+                    })
+                    return out
+                }
+                return value
+            }
+
+            if (initialData && !attachmentsChanged) {
+                delete projectData.attachments;
+            }
+
+            const safeProjectData = sanitize(projectData)
+
             if (onSubmit) {
-                await onSubmit(projectData);
+                await onSubmit(safeProjectData);
             } else {
                 await createProject({
                     variables: {
-                        data: projectData
+                        data: safeProjectData
                     }
                 });
             }
@@ -158,6 +193,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 departments: initialData.departments?.[0]?.documentId ?? initialData.departments ?? "",
             };
             setFormData(hydrated);
+            originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
         }
     }, [initialData]);
 
@@ -234,7 +270,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                     <FormSelect id="sdgs" label="SDG" value={formData.sdg ?? ""} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
                     <FileUploadField
                         label="เอกสารแนบ"
-                        value={formData.attachments}
+                        value={formData.attachments || []}
                         onFilesChange={(files) => handleInputChange('attachments', files)}
                     />
                     <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
