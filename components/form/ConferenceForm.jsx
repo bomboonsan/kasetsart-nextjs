@@ -97,8 +97,8 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว
             const attachmentIds = Array.isArray(formData.attachments)
                 ? formData.attachments
-                    .filter(attachment => attachment.id)
-                    .map(attachment => attachment.id)
+                    .filter(att => att && (att.id || att.documentId))
+                    .map(att => String(att.documentId || att.id))
                 : [];
 
             // สร้างข้อมูล conference
@@ -259,7 +259,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     <FormTextarea id="summary" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
                     <FileUploadField
                         label="เอกสารแนบ"
-                        value={formData.attachments ?? ""}
+                        value={Array.isArray(formData.attachments) ? formData.attachments : []}
                         onFilesChange={(files) => handleInputChange('attachments', files)}
                     />
                     <FormRadio id="level" label="ระดับการนำเสนอ" value={formData.level} onChange={(e) => handleInputChange('level', e.target.value)} options={[

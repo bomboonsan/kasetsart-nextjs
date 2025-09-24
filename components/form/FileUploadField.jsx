@@ -16,7 +16,7 @@ export default function FileUploadField({
     const [dragActive, setDragActive] = useState(false)
     
     const [files, setFiles] = useState([]) // เก็บ File objects ที่เพิ่งเลือก (ยังไม่รวม metadata จาก Strapi)
-    const [attachments, setAttachments] = useState(value || []) // เก็บผลการอัปโหลด (id, name, url) จาก Strapi
+    const [attachments, setAttachments] = useState(Array.isArray(value) ? value : []) // เก็บผลการอัปโหลด (id, name, url) จาก Strapi
     const [uploading, setUploading] = useState(false)
     const [error, setError] = useState('')
 
@@ -29,44 +29,38 @@ export default function FileUploadField({
             if (incoming !== lastAppliedRef.current) {
                 lastAppliedRef.current = incoming
                 // ปรับให้รองรับทั้งข้อมูลจาก upload ใหม่และข้อมูลจาก GraphQL
-                const normalizedAttachments = (value || []).map(file => {
-                    // หากเป็นไฟล์จาก GraphQL (มี documentId) ให้ normalize URL
-                    if (file.documentId || (file.url && !file.url.startsWith('http'))) {
-                        const url = file.url?.startsWith('http') 
-                            ? file.url 
-                            : `${API_BASE}${file.url || ''}`
-                        return {
-                            // id: file.id,
-                            documentId: file.documentId,
-                            name: file.name,
-                            url,
-                            size: file.size,
-                            mime: file.mime
-                        }
+                const normalizedAttachments = (Array.isArray(value) ? value : []).map(file => {
+                    if (!file) return null
+                    // รักษา id / documentId ทั้งสองกรณี เพื่อให้ parent สามารถใช้ได้
+                    const hasGraphQLId = file.documentId
+                    const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
+                    const url = needsUrlNormalization ? `${API_BASE}${file.url}` : file.url
+                    return {
+                        id: file.id ?? file.documentId ?? file.document_id, // รองรับ field ต่างรูปแบบ
+                        documentId: file.documentId ?? file.document_id ?? file.id,
+                        name: file.name || file.filename || 'unnamed-file',
+                        url: url || '',
+                        size: file.size,
+                        mime: file.mime || file.mimetype,
                     }
-                    // หากเป็นไฟล์จาก upload ใหม่ ให้คืนค่าตามเดิม
-                    return file
-                })
+                }).filter(Boolean)
                 setAttachments(normalizedAttachments)
             }
         } catch (e) {
-            // หาก stringify ล้มเหลว ให้ fallback เป็นการเซ็ตปกติ
-            const normalizedAttachments = (value || []).map(file => {
-                if (file.documentId || (file.url && !file.url.startsWith('http'))) {
-                    const url = file.url?.startsWith('http') 
-                        ? file.url 
-                        : `${API_BASE}${file.url || ''}`
-                    return {
-                        // id: file.id,
-                        documentId: file.documentId,
-                        name: file.name,
-                        url,
-                        size: file.size,
-                        mime: file.mime
-                    }
+            // หาก stringify ล้มเหลว ให้ fallback เป็นการเซ็ตปกติ (ใช้ logic เดียวกัน)
+            const normalizedAttachments = (Array.isArray(value) ? value : []).map(file => {
+                if (!file) return null
+                const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
+                const url = needsUrlNormalization ? `${API_BASE}${file.url}` : file.url
+                return {
+                    id: file.id ?? file.documentId ?? file.document_id,
+                    documentId: file.documentId ?? file.document_id ?? file.id,
+                    name: file.name || file.filename || 'unnamed-file',
+                    url: url || '',
+                    size: file.size,
+                    mime: file.mime || file.mimetype,
                 }
-                return file
-            })
+            }).filter(Boolean)
             setAttachments(normalizedAttachments)
         }
         // หมายเหตุ: ใช้เฉพาะ `value` เป็น dependency เพื่อลด risk ของ loop
@@ -102,17 +96,15 @@ export default function FileUploadField({
 
             const uploadedFiles = await response.json()
             const newAttachments = uploadedFiles.map(file => {
-                const url = typeof file.url === 'string'
-                    ? (file.url.startsWith('http') ? file.url : `${API_BASE}${file.url}`)
-                    : ''
+                const rawUrl = typeof file.url === 'string' ? file.url : ''
+                const url = rawUrl.startsWith('http') ? rawUrl : `${API_BASE}${rawUrl}`
                 return {
-                    // id: file.id,
-                    name: file.name,
+                    id: file.id ?? file.documentId,
+                    documentId: file.documentId ?? file.id, // mirror for consistency
+                    name: file.name || file.alternativeText || 'unnamed-file',
                     url,
                     size: file.size,
-                    // documentId มักไม่มีใน REST upload response ของ Strapi
-                    // เก็บไว้เผื่อ parent ต้องการ mapping ภายหลัง
-                    documentId: file.documentId,
+                    mime: file.mime,
                 }
             })
 
@@ -238,6 +230,9 @@ export default function FileUploadField({
                                         >
                                             {file.name || 'ไฟล์ไม่มีชื่อ'}
                                         </a>
+                                        {(file.id || file.documentId) && (
+                                            <span className="text-xs text-gray-300 ml-2"># {(file.documentId || file.id)}</span>
+                                        )}
                                         {typeof file.size === 'number' && !Number.isNaN(file.size) && (
                                             <span className="text-xs text-gray-400 ml-2">
                                                 {(file.size / 1024 / 1024).toFixed(2)} MB
