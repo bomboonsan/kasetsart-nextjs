@@ -1,9 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
-import useSWR from "swr";
-import { valueFromAPI } from "@/lib/api/lookup";
-import { dashboardAPI } from "@/lib/api/dashboard";
+import { useState, useEffect } from "react";
 
 const TYPE_TABS = [
   { key: "icTypes", label: "IC Type" },
@@ -11,83 +8,22 @@ const TYPE_TABS = [
   { key: "sdgs", label: "SDG" },
 ];
 
-export default function ScholarshipTable({
-  title,
-  subtitle,
-  researchStats = {},
-}) {
+export default function ScholarshipTable({ title, subtitle, researchStats = {} }) {
   const [activeType, setActiveType] = useState("icTypes");
-  // use null for 'all' internally to make API call easier (dashboardAPI expects null for all)
-  const [selectedDeptId, setSelectedDeptId] = useState("all");
-  const [departments, setDepartments] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const debounceRef = useRef(null);
-  const [isPending, startTransition] = useTransition();
-
-  // โหลด departments ตอน mount
-  useEffect(() => {
-    const loadDepartments = async () => {
-      try {
-        const response = await valueFromAPI.getDepartments();
-        const depts = response?.data || response || [];
-        setDepartments(depts);
-      } catch {
-        setDepartments([]);
-      }
-    };
-    loadDepartments();
-  }, []);
-
-  // กำหนด key สำหรับ SWR
-  const researchKey =
-    selectedDeptId === ""
-      ? null
-      : ["researchStats", selectedDeptId === "all" ? "all" : selectedDeptId];
-
-  // ใช้ SWR โหลด research stats
-  const {
-    data: currentStats,
-    isLoading: swrLoading,
-    isValidating: isFetching,
-  } = useSWR(
-    researchKey,
-    () =>
-      dashboardAPI.getResearchStatsByTypes(
-        selectedDeptId === "all" ? null : selectedDeptId,
-      ),
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 6000,
-      keepPreviousData: true,
-      fallbackData: researchStats, // ใช้ prop เป็นค่าเริ่มต้น
-    },
-  );
-
-  const activeData = currentStats?.[activeType] || [];
+  const activeData = researchStats?.[activeType] || [];
 
   // Default: mark all items checked whenever activeData changes
   useEffect(() => {
-    if (Array.isArray(activeData) && activeData.length) {
-      setSelectedItems(activeData.map((_, i) => i));
-    } else {
-      setSelectedItems([]);
-    }
+    if (Array.isArray(activeData) && activeData.length) setSelectedItems(activeData.map((_, i) => i));
+    else setSelectedItems([]);
   }, [activeData]);
 
   // นับรวม
   const counts = {
-    icTypes: (currentStats?.icTypes || []).reduce(
-      (sum, item) => sum + (item.count || 0),
-      0,
-    ),
-    impacts: (currentStats?.impacts || []).reduce(
-      (sum, item) => sum + (item.count || 0),
-      0,
-    ),
-    sdgs: (currentStats?.sdgs || []).reduce(
-      (sum, item) => sum + (item.count || 0),
-      0,
-    ),
+    icTypes: (researchStats?.icTypes || []).reduce((s, i) => s + (i.count || 0), 0),
+    impacts: (researchStats?.impacts || []).reduce((s, i) => s + (i.count || 0), 0),
+    sdgs: (researchStats?.sdgs || []).reduce((s, i) => s + (i.count || 0), 0),
   };
 
   const totalCount = counts[activeType] || 1;
@@ -116,38 +52,7 @@ export default function ScholarshipTable({
           <h2 className="text-lg text-gray-900 font-medium">{title}</h2>
           {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500">เลือกภาควิชา</label>
-            <select
-              value={selectedDeptId}
-              onChange={(e) => {
-                // Normalize the selected value: empty -> 'all', keep string ids
-                const raw = e.target.value;
-                const v = raw === "" ? "all" : raw;
-                startTransition(() => {
-                  if (debounceRef.current) clearTimeout(debounceRef.current);
-                  debounceRef.current = setTimeout(() => setSelectedDeptId(v), 250);
-                });
-              }}
-            className="px-3 py-1 bg-white border border-gray-200 text-sm rounded-md text-gray-900"
-          >
-            <option value="all">ทั้งหมด</option>
-              {departments.map((dept) => {
-                // Normalize department id/documentId/name from various shapes
-                const id = dept?.id ?? dept?.documentId ?? (dept?.attributes && (dept.attributes.id ?? dept.attributes.documentId)) ?? null;
-                const documentId = dept?.documentId ?? (dept?.attributes && dept.attributes.documentId) ?? null;
-                const name = dept?.name ?? (dept?.attributes && dept.attributes.name) ?? String(dept);
-                const value = id != null ? String(id) : (documentId != null ? String(documentId) : null);
-                // Skip departments without usable id/documentId
-                if (!value) return null;
-                return (
-                  <option key={value} value={value}>
-                    {name}
-                  </option>
-                );
-              })}
-          </select>
-        </div>
+        <div />
       </div>
 
       <div className="overflow-hidden">
@@ -225,13 +130,7 @@ export default function ScholarshipTable({
               </tr>
             </thead>
             <tbody>
-              {swrLoading && (!activeData || activeData.length === 0) ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
-                    กำลังโหลดข้อมูล...
-                  </td>
-                </tr>
-              ) : activeData.length === 0 ? (
+              {activeData.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-8 text-gray-500">
                     ไม่พบข้อมูล
@@ -257,8 +156,7 @@ export default function ScholarshipTable({
                   return (
                     <tr
                       key={item.name || index}
-                      className={`border-b border-b-gray-200 hover:bg-gray-50 ${isFetching || isPending ? "opacity-80" : ""
-                        }`}
+                      className={`border-b border-b-gray-200 hover:bg-gray-50`}
                     >
                       <td className="py-3 px-4">
                         <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
@@ -324,9 +222,6 @@ export default function ScholarshipTable({
           </div>
         )}
 
-        {(isFetching || isPending) && (
-          <div className="mt-2 text-xs text-gray-500">อัปเดตข้อมูล...</div>
-        )}
       </div>
     </div>
   );
