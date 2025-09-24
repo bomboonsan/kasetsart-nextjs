@@ -312,3 +312,67 @@ export const UPDATE_PUBLICATION = gql`
     }
   }
 `;
+
+// Fund operations
+export const GET_FUNDS = gql`
+  query GetFunds($pagination: PaginationArg, $sort: [String], $filters: FundFiltersInput) {
+    funds(pagination: $pagination, sort: $sort, filters: $filters) {
+      documentId
+      fundType
+      fundTypeText
+      duration
+      pages
+      updatedAt
+    }
+  }
+`;
+
+export const GET_FUND = gql`
+  query GetFund($documentId: ID!) {
+    fund(documentId: $documentId) {
+      documentId
+      writers
+      fundType
+      fundTypeText
+      contentDesc
+      pastPublications
+      purpose
+      targetGroup
+      chapterDetails
+      pages
+      duration
+      references
+      partners
+      attachments { documentId name url size mime }
+      users_permissions_users { documentId username email }
+      books { documentId title }
+    }
+  }
+`;
+
+export const CREATE_FUND = gql`
+  mutation CreateFund($data: FundInput!) {
+    createFund(data: $data) {
+      documentId
+      fundType
+      fundTypeText
+    }
+  }
+`;
+
+export const UPDATE_FUND = gql`
+  mutation UpdateFund($documentId: ID!, $data: FundInput!) {
+    updateFund(documentId: $documentId, data: $data) {
+      documentId
+    }
+  }
+`;
+
+export const UPDATE_FUND_PARTNERS = gql`
+  mutation UpdateFundPartners($documentId: ID!, $data: FundInput!) {
+    updateFund(documentId: $documentId, data: $data) {
+      documentId
+      partners
+    }
+  }
+`;
