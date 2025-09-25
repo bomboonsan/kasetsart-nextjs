@@ -9,7 +9,6 @@ import FileUploadField from '@/components/form/FileUploadField'
 import Partners from '@/components/form/Partners'
 import { Button } from '@/components/ui/button'
 import { FUND_FORM_INITIAL } from '@/data/fund'
-import { FUND_FORM_INITIAL } from '@/data/fund'
 import toast from 'react-hot-toast'
 
 // The form supports create and edit. If initialData provided => edit mode.

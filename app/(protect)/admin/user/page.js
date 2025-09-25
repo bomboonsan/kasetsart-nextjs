@@ -40,7 +40,7 @@ export default function AdminUsersPage() {
     });
 
     // โหลดตัวเลือกแผนก
-    const { data: filterData } = useQuery(GET_USERS_FILTER_OPTIONS, {
+    const { data: filterData , loading: filterLoading } = useQuery(GET_USERS_FILTER_OPTIONS, {
         context: authContext,
     });
 
@@ -134,6 +134,7 @@ export default function AdminUsersPage() {
         }[doc] || 1;
     }
 
+    if (loading || filterLoading) return <p>Loading...</p>;
 
     return (
         <div>
