@@ -125,9 +125,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 impacts: formData.impact ? [formData.impact] : [],
                 sdgs: formData.sdg ? [formData.sdg] : [],
                 partners: formData.partners || [],
-                // Add attachments relation - pass file IDs from uploaded files
                 attachments: attachmentIds.length ? attachmentIds : [],
-                // Strapi relation field for users-permissions user manyToMany
                 users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
             };
 
@@ -229,6 +227,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
 
 
     // console.log('projectOptions', projectOptions);
+
+    if(!formData) return <p>Loading form...</p>
 
     return (
         <>

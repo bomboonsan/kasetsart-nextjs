@@ -279,6 +279,10 @@ export default function ProfileEditPage() {
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
 
+    console.log("Form data:", formData);
+    if (!formData) {
+        return <p>No profile data found.</p>;
+    }
 
     console.log("Form selectData:", selectData);
     return (

@@ -333,7 +333,7 @@ export default function Partners({ data, onChange }) {
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     สัดส่วนการวิจัย (%)
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     การจัดการ
                                 </th>
                             </tr>
@@ -397,7 +397,7 @@ export default function Partners({ data, onChange }) {
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         {(displayRows.length >= 1) && (
-                                            <div className="flex items-center gap-3 justify-end">
+                                            <div className="flex items-center gap-3 justify-center">
                                                 <Button size="sm" variant="ghost" onClick={() => handleEditPartner(i)}>
                                                     แก้ไข
                                                 </Button>
