@@ -26,6 +26,7 @@ export default function AdminUsersPage() {
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
+    console.log('session', session);
 
     // สถานะบนหน้าจอ
     const [search, setSearch] = useState("");
@@ -134,7 +135,7 @@ export default function AdminUsersPage() {
         }[doc] || 1;
     }
 
-    if (loading || filterLoading) return <p>Loading...</p>;
+    if (loading || filterLoading || !roleFilter) return <p>Loading...</p>;
 
     return (
         <div>
@@ -158,7 +159,7 @@ export default function AdminUsersPage() {
                     >
                         <option value="all">ทั้งหมด</option>
                         {filterData?.departments?.map(d => (
-                            <option key={d.id} value={d.documentId}>{d.title}</option>
+                            <option key={d.documentId} value={d.documentId}>{d.title}</option>
                         ))}
                     </select>
                 </div>
