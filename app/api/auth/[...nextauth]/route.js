@@ -1,11 +1,72 @@
-
+// app/api/auth/[...nextauth]/route.js  หรือ  pages/api/auth/[...nextauth].js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { gql } from "@apollo/client";
-import { getClient } from "@/lib/apollo-client";
+
+/** ใช้เรียก GraphQL โดยตรง หลีกเลี่ยง getClient()/getSession() เพื่อกันลูป */
+const GRAPHQL_URL =
+  process.env.NEXT_PUBLIC_STRAPI_GRAPHQL_API_URL || "http://localhost:1338/graphql";
+
+async function fetchGraphQL({ query, variables, jwt }) {
+  const headers = { "Content-Type": "application/json" };
+  if (jwt) headers.Authorization = `Bearer ${jwt}`;
+  const resp = await fetch(GRAPHQL_URL, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => "");
+    throw new Error(`GraphQL HTTP ${resp.status}: ${text}`);
+  }
+  const json = await resp.json();
+  if (json.errors?.length) throw new Error(json.errors[0].message || "GraphQL error");
+  return json.data;
+}
+
+/** ดึงโปรไฟล์หลังล็อกอินครั้งเดียว แล้วเก็บลง token */
+async function hydrateProfile(jwt, documentId) {
+  const PROFILE_Q = `
+    query GetUserSummary($documentId: ID!) {
+      usersPermissionsUser(documentId: $documentId) {
+        documentId
+        username
+        email
+        firstNameTH
+        lastNameTH
+        academicPosition
+        role { name documentId }
+        avatar { url }
+      }
+    }
+  `;
+  const data = await fetchGraphQL({
+    query: PROFILE_Q,
+    variables: { documentId },
+    jwt,
+  });
+  const u = data?.usersPermissionsUser;
+  if (!u) return {};
+
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE || process.env.API_BASE || "http://localhost:1338";
+  const raw = u.avatar?.url || null;
+  const avatarUrl = raw ? (raw.startsWith("http") ? raw : `${apiBase}${raw}`) : null;
+
+  const name =
+    `${u.firstNameTH || ""} ${u.lastNameTH || ""}`.trim() || u.username || u.email || "";
+
+  return {
+    documentId: u.documentId || documentId,
+    role: u.role ? { name: u.role.name, documentId: u.role.documentId } : null,
+    academicPosition: u.academicPosition || null,
+    avatarUrl,
+    name,
+    email: u.email || null,
+  };
+}
 
 export const authOptions = {
-  debug: process.env.NODE_ENV !== 'production',
+  debug: process.env.NODE_ENV !== "production",
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -14,96 +75,87 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Don't call `getClient()` here because it uses `getSession()` which
-        // triggers a request to `/api/auth` and causes a recursive loop when
-        // this authorize() is running. Use a direct fetch to the GraphQL
-        // endpoint for the login mutation instead.
         try {
-          const graphqlUrl =
-            process.env.NEXT_PUBLIC_STRAPI_GRAPHQL_API_URL ||
-            "http://localhost:1338/graphql";
-
-          const query = `mutation ($identifier: String!, $password: String!) {\n` +
-            `  login(input: { identifier: $identifier, password: $password }) {\n` +
-            `    jwt\n` +
-            `    user { id username email documentId }\n` +
-            `  }\n` +
-            `}`;
-
-          const resp = await fetch(graphqlUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              query,
-              variables: {
-                identifier: credentials.email,
-                password: credentials.password,
-              },
-            }),
+          const LOGIN_MUT = `
+            mutation ($identifier: String!, $password: String!) {
+              login(input: { identifier: $identifier, password: $password }) {
+                jwt
+                user { id username email documentId }
+              }
+            }
+          `;
+          const data = await fetchGraphQL({
+            query: LOGIN_MUT,
+            variables: {
+              identifier: credentials.email,
+              password: credentials.password,
+            },
           });
-
-          // If server returned non-OK, capture body for diagnosis
-          if (!resp.ok) {
-            const text = await resp.text().catch(() => "");
-            console.error("GraphQL endpoint returned non-OK status:", resp.status, text);
-            throw new Error(`Authentication service unavailable (status ${resp.status})`);
-          }
-
-          const json = await resp.json().catch((e) => {
-            console.error('Failed to parse JSON from GraphQL response', e);
-            throw new Error('Invalid response from authentication service');
-          });
-
-          // GraphQL may return errors array
-          if (json.errors && Array.isArray(json.errors) && json.errors.length > 0) {
-            console.error('GraphQL errors on login:', json.errors);
-            // Surface first error message to NextAuth so it can be shown to the user
-            throw new Error(json.errors[0].message || 'Login failed');
-          }
-
-          const data = json?.data;
-          if (data && data.login) {
-            return { ...data.login.user, jwt: data.login.jwt };
-          }
-
-          // No login data -> invalid credentials
-          console.warn('Login mutation returned no login data', json);
-          // Throwing makes NextAuth redirect with an error code we can inspect
-          throw new Error('Invalid email or password');
-        } catch (error) {
-          console.error("Login error:", error);
+          const login = data?.login;
+          if (!login) throw new Error("Invalid email or password");
+          // ส่ง jwt+user กลับไปยัง jwt() callback
+          return { ...login.user, jwt: login.jwt };
+        } catch (err) {
+          console.error("Login error:", err);
           return null;
         }
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
+
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    /** รันทุกรีเควสฝั่งเซิร์ฟเวอร์ */
+    async jwt({ token, user, trigger, session }) {
+      // ครั้งแรกหลัง authorize
+      if (user?.jwt) {
         token.id = user.id;
         token.jwt = user.jwt;
         token.documentId = user.documentId;
+
+        // ดึงโปรไฟล์ครั้งเดียว แล้วฝังลง token
+        try {
+          const p = await hydrateProfile(user.jwt, user.documentId);
+          token.documentId = p.documentId || token.documentId;
+          token.role = p.role || null;
+          token.academicPosition = p.academicPosition || null;
+          token.avatar = p.avatar || null;
+          token.name = p.name || token.name;
+          token.email = p.email || token.email;
+        } catch (e) {
+          console.warn("Profile hydrate failed:", e.message);
+        }
       }
+
+      // อนุญาตอัปเดตบางฟิลด์จาก client โดยไม่ดึงใหม่
+      if (trigger === "update" && session?.user) {
+        if (session.user.role !== undefined) token.role = session.user.role;
+        if (session.user.avatarUrl !== undefined) token.avatarUrl = session.user.avatarUrl;
+        if (session.user.name !== undefined) token.name = session.user.name;
+      }
+
       return token;
     },
+
+    /** ส่งค่าลง session สำหรับ client ทุกหน้าใช้ได้ทันที */
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.jwt = token.jwt;
-        session.user.documentId = token.documentId;
+        session.jwt = token.jwt || null;
+        session.user.id = token.id || null;
+        session.user.documentId = token.documentId || null;
+        session.user.role = token.role || null;                // ← ใช้ได้ทุกหน้า
+        session.user.academicPosition = token.academicPosition || null;
+        session.user.avatar = token.avatar|| null;
+        session.user.name = token.name || session.user.name || "";
+        session.user.email = token.email || session.user.email || "";
       }
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };
