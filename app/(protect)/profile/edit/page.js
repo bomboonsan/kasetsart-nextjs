@@ -274,10 +274,9 @@ export default function ProfileEditPage() {
         }
     };
 
-    if (meLoading || (loading && !profileData)) return <p>Loading...</p>;
+    if (meLoading || (loading && !profileData) || optionsLoading || optionsXLoading) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
 
-    if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
 
     console.log("Form data:", formData);

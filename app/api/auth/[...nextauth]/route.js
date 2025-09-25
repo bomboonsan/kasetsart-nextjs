@@ -5,6 +5,7 @@ import { gql } from "@apollo/client";
 import { getClient } from "@/lib/apollo-client";
 
 export const authOptions = {
+  debug: process.env.NODE_ENV !== 'production',
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -41,13 +42,34 @@ export const authOptions = {
             }),
           });
 
-          const json = await resp.json();
-          const data = json?.data;
+          // If server returned non-OK, capture body for diagnosis
+          if (!resp.ok) {
+            const text = await resp.text().catch(() => "");
+            console.error("GraphQL endpoint returned non-OK status:", resp.status, text);
+            throw new Error(`Authentication service unavailable (status ${resp.status})`);
+          }
 
+          const json = await resp.json().catch((e) => {
+            console.error('Failed to parse JSON from GraphQL response', e);
+            throw new Error('Invalid response from authentication service');
+          });
+
+          // GraphQL may return errors array
+          if (json.errors && Array.isArray(json.errors) && json.errors.length > 0) {
+            console.error('GraphQL errors on login:', json.errors);
+            // Surface first error message to NextAuth so it can be shown to the user
+            throw new Error(json.errors[0].message || 'Login failed');
+          }
+
+          const data = json?.data;
           if (data && data.login) {
             return { ...data.login.user, jwt: data.login.jwt };
           }
-          return null;
+
+          // No login data -> invalid credentials
+          console.warn('Login mutation returned no login data', json);
+          // Throwing makes NextAuth redirect with an error code we can inspect
+          throw new Error('Invalid email or password');
         } catch (error) {
           console.error("Login error:", error);
           return null;
