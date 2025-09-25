@@ -11,6 +11,7 @@ export const GET_REPORT_E = gql`
                 isJournalDatabase
                 volume
                 level
+                durationStart
             }
         }
     }

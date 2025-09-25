@@ -116,8 +116,8 @@ adminMenuItems = [
 				active: false,
 			},
 			{
-				id: "dashboard/admin/add-user",
-				url: "/dashboard/admin/add-user",
+				id: "admin/user/add",
+				url: "/admin/user/add",
 				icon: <UsersRound />,
 				label: "เพิ่มผู้ใช้",
 				active: false,

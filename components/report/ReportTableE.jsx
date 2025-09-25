@@ -70,8 +70,8 @@ export default function ReportTableE_Publications() {
                     meeting: p?.journalName || '',              // ชื่อวารสาร
                     authors,
                     level: mapLevelToLabel(p?.level),           // ประเภท
-                    date: formatYear(p?.volume),                // ปี
-                    yearSort: p?.volume ?? -Infinity,
+                    date: formatYear(p?.durationStart),                // ปี
+                    yearSort: p?.durationStart ?? -Infinity,
                     dbFlag: p?.isJournalDatabase ?? null,       // เก็บไว้ใช้ต่อ ถ้าต้องโชว์ภายหลัง
                 })
             }
