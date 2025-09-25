@@ -89,7 +89,7 @@ adminMenuItems = [
 	},
 	{
 		id: "reports",
-		url: "/dashboard/report",
+		url: "/report",
 		icon: <ChartArea />,
 		label: "ดูรายงาน",
 		active: false,
