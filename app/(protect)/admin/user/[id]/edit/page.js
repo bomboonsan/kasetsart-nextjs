@@ -233,7 +233,9 @@ export default function AdminUserEditPage({ params }) {
 
         try {
             // Resolve numeric id first (faster subsequent updates could cache, but simple for now)
-            const resolveRes = await fetch(`/api/admin/users/resolve-id?documentId=${encodeURIComponent(documentId)}`);
+            const resolveRes = await fetch(`/api/admin/users/resolve-id?documentId=${encodeURIComponent(documentId)}`, {
+                headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' }
+            });
             if (!resolveRes.ok) {
                 const t = await resolveRes.text();
                 throw new Error(`Resolve id failed: ${resolveRes.status} ${t}`);
@@ -244,7 +246,7 @@ export default function AdminUserEditPage({ params }) {
 
             const adminApiRes = await fetch('/api/admin/users/update', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' },
                 body: JSON.stringify({ id: numericId, payload })
             });
             const adminText = await adminApiRes.text();

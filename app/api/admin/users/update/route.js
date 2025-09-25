@@ -20,9 +20,9 @@ export async function POST(req) {
       return NextResponse.json({ error: 'payload object required' }, { status: 400 });
     }
 
-    const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-    const adminToken = process.env.STRAPI_ADMIN_TOKEN;
-    if (!adminToken) return NextResponse.json({ error: 'Missing STRAPI_ADMIN_TOKEN on server' }, { status: 500 });
+  const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
 
     let numericId = id; // trust caller if provided (must be number or numeric string)
     if (numericId && !/^\d+$/.test(String(numericId))) {
@@ -60,7 +60,7 @@ export async function POST(req) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${adminToken}`
+        Authorization: authHeader
       },
       body: JSON.stringify(payload)
     });

@@ -18,15 +18,15 @@ export async function POST(req) {
     if (!payload.username) payload.username = payload.email; // default username = email
     if (!payload.password) return NextResponse.json({ error: 'password required' }, { status: 400 });
 
-    const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-    const adminToken = process.env.STRAPI_ADMIN_TOKEN;
-    if (!adminToken) return NextResponse.json({ error: 'Missing STRAPI_ADMIN_TOKEN on server' }, { status: 500 });
+  const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
 
     // Create user (Strapi expects direct fields, not wrapped in data)
     console.debug('[API][admin/users/create] calling Strapi', `${strapiUrl}/api/users`, payload);
     const createRes = await fetch(`${strapiUrl}/api/users`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
       body: JSON.stringify(payload)
     });
     const text = await createRes.text();

@@ -172,7 +172,7 @@ export default function AddUserPage() {
             console.debug('[AddUser] creating user with payload:', payload);
             const res = await fetch('/api/admin/users/create', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' },
                 body: JSON.stringify({ payload })
             });
             const respText = await res.text();

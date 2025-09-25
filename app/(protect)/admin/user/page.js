@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
             setLoadingFor(key, true);
             const res = await fetch('/api/admin/users/update-role', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' },
                 body: JSON.stringify({ user: { documentId: userDocId }, role: { id: Number(numericRoleId) } })
             });
             if (!res.ok) {
@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
             setLoadingFor(key, true);
             const res = await fetch('/api/admin/users/toggle-block', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' },
                 body: JSON.stringify({ user: { documentId: userDocId }, blocked: nextBlocked })
             });
             if (!res.ok) {

@@ -5,28 +5,34 @@ import { NextResponse } from 'next/server';
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const documentId = searchParams.get('documentId');
-  return handleResolve(documentId);
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
+  return handleResolve(documentId, authHeader);
 }
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    return handleResolve(body?.documentId);
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
+    return handleResolve(body?.documentId, authHeader);
   } catch (e) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 }
 
-async function handleResolve(documentId) {
+async function handleResolve(documentId, authHeader) {
   if (!documentId) {
     return NextResponse.json({ error: 'documentId required' }, { status: 400 });
   }
+  if (!authHeader) {
+    return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
+  }
+
   const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-  const adminToken = process.env.STRAPI_ADMIN_TOKEN;
-  if (!adminToken) return NextResponse.json({ error: 'Missing STRAPI_ADMIN_TOKEN on server' }, { status: 500 });
 
   const findRes = await fetch(`${strapiUrl}/api/users?filters[documentId][$eq]=${encodeURIComponent(documentId)}&pagination[limit]=1`, {
-    headers: { Authorization: `Bearer ${adminToken}` }
+    headers: { Authorization: authHeader }
   });
   if (!findRes.ok) {
     const text = await findRes.text();

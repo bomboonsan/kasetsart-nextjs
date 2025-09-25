@@ -16,15 +16,15 @@ export async function POST(req) {
     if (!role.id) {
       return NextResponse.json({ error: 'role.id (numeric) required' }, { status: 400 });
     }
-    const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
-    const adminToken = process.env.STRAPI_ADMIN_TOKEN;
-    if (!adminToken) return NextResponse.json({ error: 'Missing STRAPI_ADMIN_TOKEN on server' }, { status: 500 });
+  const strapiUrl = process.env.STRAPI_API_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (!authHeader) return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
 
     // helper to resolve numeric id from documentId for users or roles
     async function resolveUser({ id, documentId }) {
       if (id) return id;
       const q = new URLSearchParams({ 'filters[documentId][$eq]': documentId, 'pagination[limit]': '1' });
-      const res = await fetch(`${strapiUrl}/api/users?${q.toString()}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+  const res = await fetch(`${strapiUrl}/api/users?${q.toString()}`, { headers: { Authorization: authHeader } });
       if (!res.ok) throw new Error(`Resolve users failed: ${res.status}`);
       const json = await res.json();
       let found = null;
@@ -42,7 +42,7 @@ export async function POST(req) {
     // Strapi expects direct field update for /users/:id with role id
     const updateRes = await fetch(`${strapiUrl}/api/users/${userId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
       body: JSON.stringify({ role: roleId })
     });
     const text = await updateRes.text();
