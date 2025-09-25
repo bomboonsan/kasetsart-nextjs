@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
     const showAdmin = useMemo(() => {
         if (!roleName) return false;
         const r = roleName.toLowerCase();
-        return r.includes("admin")
+        return r == "admin"
     }, [roleName]);
 
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
