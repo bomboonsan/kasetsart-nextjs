@@ -16,6 +16,7 @@ import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
+import toast from 'react-hot-toast';
 
 export default function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
@@ -75,11 +76,11 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
 
     const handleSubmit = async () => {
         if (!session?.jwt) {
-            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+            toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
         if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
-            alert('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
+            toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;
         }
         setIsSubmitting(true);
@@ -150,7 +151,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                 await onSubmit(data);
             } else {
                 await createPublication({ variables: { data } });
-                alert('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
+                toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
                 setFormData(PUBLICATION_FORM_INITIAL);
             }
 
@@ -170,7 +171,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             }
         } catch (e) {
             console.error('Publication submit error:', e);
-            alert('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+            toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
         } finally {
             setIsSubmitting(false);
         }

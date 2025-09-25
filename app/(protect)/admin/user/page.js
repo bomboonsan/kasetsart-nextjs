@@ -10,6 +10,7 @@ import Link from "next/link";
 import {
     Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
+import toast from 'react-hot-toast';
 
 import { GET_ALL_USERS } from "@/graphql/userQueries";
 import { GET_USERS_FILTER_OPTIONS } from "@/graphql/optionForm";
@@ -94,7 +95,7 @@ export default function AdminUsersPage() {
             }
             await refetch();
         } catch (e) {
-            alert(e.message);
+            toast.error(e.message);
         } finally {
             setLoadingFor(key, false);
         }
@@ -116,7 +117,7 @@ export default function AdminUsersPage() {
             }
             await refetch();
         } catch (e) {
-            alert(e.message);
+            toast.error(e.message);
         } finally {
             setLoadingFor(key, false);
         }

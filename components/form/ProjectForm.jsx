@@ -1,3 +1,5 @@
+import { useQuery, useMutation } from "@apollo/client/react";
+import toast from 'react-hot-toast';
 'use client'
 import React from 'react';
 import { useEffect, useMemo, useState, useRef } from 'react'
@@ -41,13 +43,13 @@ export default function ProjectForm({ initialData, onSubmit }) {
             }
         },
         onCompleted: (data) => {
-            alert('บันทึกโครงการสำเร็จแล้ว!');
+            toast.success('บันทึกโครงการสำเร็จแล้ว!');
             // Reset form or redirect as needed
             setFormData(PROJECT_FORM_INITIAL);
         },
         onError: (error) => {
             console.error('Error creating project:', error);
-            alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
         }
     });
 
@@ -60,18 +62,18 @@ export default function ProjectForm({ initialData, onSubmit }) {
 
     const handleSubmit = async () => {
         if (!session?.jwt) {
-            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+            toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
 
         // Basic validation
         if (!formData.nameTH.trim()) {
-            alert('กรุณากรอกชื่อโครงการภาษาไทย');
+            toast.error('กรุณากรอกชื่อโครงการภาษาไทย');
             return;
         }
 
         if (!formData.fiscalYear) {
-            alert('กรุณากรอกปีงบประมาณ');
+            toast.error('กรุณากรอกปีงบประมาณ');
             return;
         }
 

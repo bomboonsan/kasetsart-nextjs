@@ -13,6 +13,7 @@ import FundPicker from './FundPicker';
 import { Button } from '@/components/ui/button';
 import { BOOK_FORM_INITIAL } from '@/data/book';
 import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK } from '@/graphql/formQueries';
+import toast from 'react-hot-toast';
 
 // Writers simple inputs
 function WritersEditor({ writers, onChange }) {
@@ -113,11 +114,11 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 
 	const handleSubmit = async () => {
 		if (!session?.jwt) {
-			alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+			toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
 			return;
 		}
 		if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
-			alert('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
+			toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
 			return;
 		}
 		setIsSubmitting(true);
@@ -151,15 +152,15 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				} else {
 					await updateBook({ variables: { documentId, data: bookData } });
 				}
-				alert('อัปเดตข้อมูลหนังสือสำเร็จ');
+				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
 			} else {
 				await createBook({ variables: { data: bookData } });
-				alert('สร้างข้อมูลหนังสือสำเร็จ');
+				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
 				setFormData(BOOK_FORM_INITIAL);
 			}
 		} catch (e) {
 			console.error(e);
-			alert('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+			toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
 		} finally {
 			setIsSubmitting(false);
 		}

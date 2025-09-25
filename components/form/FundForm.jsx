@@ -9,6 +9,8 @@ import FileUploadField from '@/components/form/FileUploadField'
 import Partners from '@/components/form/Partners'
 import { Button } from '@/components/ui/button'
 import { FUND_FORM_INITIAL } from '@/data/fund'
+import { FUND_FORM_INITIAL } from '@/data/fund'
+import toast from 'react-hot-toast'
 
 // The form supports create and edit. If initialData provided => edit mode.
 export default function FundForm({ initialData, onSubmit, isEdit = false }) {
@@ -62,13 +64,13 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
 
     const handleSubmit = async () => {
         if (!session?.jwt) {
-            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล')
+            toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล')
             return
         }
 
         // Basic required: fundType
         if (formData.fundType === '') {
-            alert('กรุณาเลือกประเภททุน')
+            toast.error('กรุณาเลือกประเภททุน')
             return
         }
 
@@ -117,7 +119,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             if (onSubmit) await onSubmit(safe)
         } catch (err) {
             console.error('Fund submit error:', err)
-            alert('เกิดข้อผิดพลาด: ' + err.message)
+            toast.error('เกิดข้อผิดพลาด: ' + err.message)
         } finally {
             setIsSubmitting(false)
         }

@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import { useQuery } from "@apollo/client/react"; // Only for fetching profile data; updates done via REST now
+import toast from 'react-hot-toast';
 // Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
 // GraphQL Queries
@@ -200,7 +201,7 @@ export default function AdminUserEditPage({ params }) {
                 const uploadData = await uploadRes.json();
                 uploadedAvatarId = uploadData[0].id;
             } catch (uploadError) {
-                alert(`Error uploading image: ${uploadError.message}`);
+                toast.error(`Error uploading image: ${uploadError.message}`);
                 return;
             }
         }
@@ -257,11 +258,11 @@ export default function AdminUserEditPage({ params }) {
             if (!adminJson?.success) {
                 throw new Error(`Update did not succeed: ${adminText}`);
             }
-            alert('User profile updated successfully!');
+            toast.success('User profile updated successfully!');
             refetch();
         } catch (err) {
             console.error('Admin user update error:', err);
-            alert(`Failed to update profile: ${err.message}`);
+            toast.error(`Failed to update profile: ${err.message}`);
         }
     };
 

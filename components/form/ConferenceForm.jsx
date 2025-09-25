@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
+import toast from 'react-hot-toast';
 
 export default function ConferenceForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
@@ -92,13 +93,13 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
 
     const handleSubmit = async () => {
         if (!session?.jwt) {
-            alert('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
+            toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
 
         // Basic validation
         if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
-            alert('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
+            toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;
         }
 
@@ -173,7 +174,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     }
                 });
                 console.log('Conference created:', conferenceResult);
-                alert('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
+                toast.success('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
                 // Reset form only for create
                 setFormData(CONFERENCE_FORM_INITIAL);
             }
@@ -193,7 +194,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             
         } catch (error) {
             console.error('Submission error:', error);
-            alert('เกิดข้อผิดพลาดในการบันทึก: ' + (error.message || 'ไม่ทราบสาเหตุ'));
+            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + (error.message || 'ไม่ทราบสาเหตุ'));
         } finally {
             setIsSubmitting(false);
         }

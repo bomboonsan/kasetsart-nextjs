@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation } from "@apollo/client/react";
+import toast from 'react-hot-toast';
 // Custom Hooks
 import { useFormOptions } from '@/hooks/useFormOptions';
 // GraphQL Queries
@@ -203,7 +204,7 @@ export default function ProfileEditPage() {
                 const uploadData = await uploadRes.json();
                 uploadedAvatarId = uploadData[0].id;
             } catch (uploadError) {
-                alert(`Error uploading image: ${uploadError.message}`);
+                toast.error(`Error uploading image: ${uploadError.message}`);
                 return;
             }
         }
@@ -266,10 +267,10 @@ export default function ProfileEditPage() {
                     data: payload
                 }
             });
-            alert('Profile updated successfully!');
+            toast.success('Profile updated successfully!');
             refetch();
         } catch (err) {
-            alert(`Failed to update profile: ${err.message}`);
+            toast.error(`Failed to update profile: ${err.message}`);
         }
     };
 
