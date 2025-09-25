@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react'
+'use client'
 import { worksAPI } from '@/lib/api'
 import { CSVLink, CSVDownload } from "react-csv";
 import { Button } from "@/components/ui/button";
+
+import React, { useState, useEffect, useMemo, use } from 'react'
+import { useSession } from "next-auth/react";
+// GraphQL
+import { useQuery } from "@apollo/client/react";
+import { GET_REPORT_F } from '@/graphql/reportQueries';
 
 function formatDate(d) {
     if (!d) return ''
@@ -49,11 +55,17 @@ function extractPartners(projectResearch) {
     }).filter(Boolean)
 }
 
+
+
 export default function ReportTableE() {
+    const session = useSession()
     const [rows, setRows] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [csvData, setCsvData] = useState([])
+
+    // new data fetching
+    const [dataRaw , setDataRaw] = useState([])
 
     useEffect(() => {
         let mounted = true
@@ -110,6 +122,37 @@ export default function ReportTableE() {
         load()
         return () => { mounted = false }
     }, [])
+
+    // ========================================================================================================================
+    // ========================================================================================================================
+    // ========================================================================================================================
+    // ========================================================================================================================
+
+    
+    const { data, loadingData, errorData } = useQuery(GET_REPORT_F, {
+        variables: {
+            pagination: { limit: 50 },
+            sort: ["publicationDate:desc"],
+            userId: session?.user?.documentId,
+        },
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
+        }
+    });
+    console.log({ data, loadingData, errorData });
+    
+    useEffect(() => {
+        setDataRaw(data || []);
+    }, [data , loadingData, errorData]);
+
+    // ========================================================================================================================
+    // ========================================================================================================================
+    // ========================================================================================================================
+    // ========================================================================================================================
+
+    if (!data && loading) return <p>Loading...</p>;
 
     return (
         <>

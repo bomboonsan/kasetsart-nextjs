@@ -258,10 +258,10 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     <ProjectPicker label="โครงการวิจัยที่เกี่ยวข้อง" required={false} selectedProject={formData.__projectObj} onSelect={(project) => handleInputChange('__projectObj', project)} />
                     <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI" value={formData.doi ?? ""} placeholder="กรอก DOI" onChange={(e) => handleInputChange('doi', e.target.value)} />
                     <FormInput id="isbn" label="ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)" value={formData.isbn ?? ""} placeholder="กรอก ISBN" onChange={(e) => handleInputChange('isbn', e.target.value)} />
-                    {/* <FormDateSelect durationStart={formData.durationStart ?? ""} durationEnd={formData.durationEnd ?? ""} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
+                    <FormDateSelect durationStart={formData.durationStart ?? ""} durationEnd={formData.durationEnd ?? ""} durationStartChange={(field, value) => handleInputChange(field, value)} durationEndChange={(field, value) => handleInputChange(field, value)} noDay >
                         วัน/เดือน/ปี ที่นำเสนอ
                         <span className="text-red-500 ml-1">*</span>
-                    </FormDateSelect> */}
+                    </FormDateSelect>
                     <FormInputSelect id="cost" label="ค่าใช้จ่าย (Int)" value={formData.costType ?? ""} valueInput={formData.cost ?? ""} onInputChange={(value) => handleInputChange('cost', value)} onChange={(value) => handleInputChange('costType', value)} placeholder="กรุณาเลือก" options={COST_TYPE_OPTIONS} after="จาก" />
                     <FormRadio id="presentationWork" label="การนำเสนอผลงาน" value={formData.presentationWork} onChange={(e) => handleInputChange('presentationWork', e.target.value)} options={[
                         { value: '0', label: 'ได้รับเชิญ (Invited Paper.)' },
