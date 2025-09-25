@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 
 import { GET_ALL_USERS } from "@/graphql/userQueries";
+import { GET_USERS_FILTER_OPTIONS } from "@/graphql/optionForm";
 
 // อธิบายฟังก์ชัน: สร้าง context ให้ Apollo ใส่ Authorization header ทุกคำขอ
 const useAuthContext = (jwt) => ({
@@ -28,6 +29,7 @@ export default function AdminUsersPage() {
     // สถานะบนหน้าจอ
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
+    const [departmentFilter, setDepartmentFilter] = useState("all");
 
     // โหลดรายการผู้ใช้
     const { data, loading, error, refetch } = useQuery(GET_ALL_USERS, {
@@ -36,6 +38,12 @@ export default function AdminUsersPage() {
         fetchPolicy: "network-only",
     });
 
+    // โหลดตัวเลือกแผนก
+    const { data: filterData } = useQuery(GET_USERS_FILTER_OPTIONS, {
+        context: authContext,
+    });
+
+    console.log('filterData', filterData);
 
     // จัดการข้อมูลผู้ใช้
     const users = data?.usersPermissionsUsers ?? [];
@@ -137,6 +145,19 @@ export default function AdminUsersPage() {
                     />
                 </div>
                 <div className="w-48">
+                    <label className="text-sm text-gray-600">ภาควิชา</label>
+                    <select
+                        className="w-full px-3 py-0.5 border rounded-lg shadow-xs shadow-gray-600/5"
+                        value={departmentFilter}
+                        onChange={(e) => setDepartmentFilter(e.target.value)}
+                    >
+                        <option value="all">ทั้งหมด</option>
+                        {filterData?.departments?.map(d => (
+                            <option key={d.id} value={d.documentId}>{d.title}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="w-48">
                     <label className="text-sm text-gray-600">บทบาท</label>
                     <select
                         className="w-full px-3 py-0.5 border rounded-lg shadow-xs shadow-gray-600/5"
@@ -144,7 +165,6 @@ export default function AdminUsersPage() {
                         onChange={(e) => setRoleFilter(e.target.value)}
                     >
                         <option value="all">ทั้งหมด</option>
-                        {/* ใช้ documentId ของ role จริงในระบบคุณ */}
                         <option value="nf9v7nyjebiy06f5kjpshual">User</option>
                         <option value="nv62t3lijrmcf91kf97zc18j">Admin</option>
                         <option value="paz95zzzpd60h4c9toxlbqkl">Super admin</option>
