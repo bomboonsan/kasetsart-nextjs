@@ -48,7 +48,7 @@ export default function AdminUsersPage() {
     // จัดการข้อมูลผู้ใช้
     const users = data?.usersPermissionsUsers ?? [];
 
-    // คำนวณผลการกรอง
+    // คำนวณผลการกรอง (รวมทั้งการกรองตามภาควิชาและบทบาท)
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
         return users.filter((u) => {
@@ -66,9 +66,12 @@ export default function AdminUsersPage() {
             const matchesSearch = !q || text.includes(q);
             const matchesRole =
                 roleFilter === "all" || (u.role && u.role.documentId === roleFilter);
-            return matchesSearch && matchesRole;
+            const matchesDepartment =
+                departmentFilter === "all" || (u.departments && u.departments.some(d => d.documentId === departmentFilter));
+
+            return matchesSearch && matchesRole && matchesDepartment;
         });
-    }, [users, search, roleFilter]);
+    }, [users, search, roleFilter, departmentFilter]);
 
     // Cache for resolving rapid updates (documentId -> in-progress flag)
     const [rowLoading, setRowLoading] = useState({});
@@ -171,7 +174,7 @@ export default function AdminUsersPage() {
                     </select>
                 </div>
                 <div>
-                    <Button onClick={() => { setSearch(""); setRoleFilter("all"); }} variant="outline">
+                    <Button onClick={() => { setSearch(""); setRoleFilter("all"); setDepartmentFilter("all"); }} variant="outline">
                         รีเซ็ต
                     </Button>
                 </div>
