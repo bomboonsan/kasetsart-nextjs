@@ -156,7 +156,7 @@ export default function Sidebar() {
 	const showUser = useMemo(() => {
 		if (!roleName) return false;
 		const r = roleName.toLowerCase();
-		return r.includes("user")
+		return r.includes("user") || r.includes("super admin")
 	}, [roleName]);
 
 	const handleLogout = useCallback(async (e) => {
@@ -175,7 +175,7 @@ export default function Sidebar() {
 				</div>
 
 				{/* เมนูหลัก */}
-				{showUser || showSuperAdmin && (
+				{showUser && (
 					<nav className="mt-4 desktop-nav">
 						<MenuList items={MAIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
 					</nav>

@@ -9,6 +9,11 @@ import PersonnelChart from '@/components/dashboard/PersonnelChart';
 import ScholarshipTable from '@/components/dashboard/ScholarshipTable';
 import { FileBadge, Presentation, HandCoins, BookOpen } from 'lucide-react';
 
+// router
+import { useRouter } from 'next/navigation';
+
+import { useSession } from "next-auth/react";
+
 // Map academic type names (from usersPermissionsUsers.academic_types) into code -> count.
 function aggregateAcademicTypes(users = []) {
   const counts = {}; // key -> number
@@ -55,6 +60,9 @@ function buildResearchStats(projects = [], icTypesMaster = [], impactsMaster = [
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const roleName = session?.user?.role?.name || '';  
   const { data, loading, error } = useQuery(GET_DASHBOARD, { fetchPolicy: 'cache-and-network' });
   const [selectedDeptPersonnel, setSelectedDeptPersonnel] = useState('all');
   const [selectedDept, setSelectedDept] = useState('all');
@@ -114,6 +122,14 @@ export default function DashboardPage() {
 
   // Research stats built from project relations
   const researchStats = useMemo(() => buildResearchStats(projects, icTypesMaster, impactsMaster, sdgsMaster, selectedDept === 'all' ? null : selectedDept), [projects, icTypesMaster, impactsMaster, sdgsMaster, selectedDept]);
+
+  if (!roleName || (!roleName.toLowerCase().includes('admin') && !roleName.toLowerCase().includes('super admin'))) {
+    // Not admin or super admin => redirect to home page
+    if (typeof window !== 'undefined') {
+      router.push('/profile');
+    }
+    return null;
+  }
 
   if (loading && !data) {
     return (
