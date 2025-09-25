@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { signOut } from "@/utils/auth";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSession } from 'next-auth/react'
+// import { useQuery, gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react';
+import { gql } from '@apollo/client';
+import { API_BASE } from '@/lib/api-base'
 import {
 	LayoutDashboard,
 	UserPen,
@@ -129,6 +134,48 @@ adminMenuItems = [
 
 export default function Sidebar() {
 	const [openGroups, setOpenGroups] = useState({});
+	const { data: session, status } = useSession()
+
+	const GET_USER_SUMMARY = gql`
+		query GetUserSummary($documentId: ID!) {
+			usersPermissionsUser(documentId: $documentId) {
+				documentId
+				firstNameEN
+				lastNameEN
+				firstNameTH
+				lastNameTH
+				academicPosition
+				role { name documentId }
+				avatar { url }
+			}
+		}
+	`
+
+	const documentId = session?.user?.documentId
+	const { data: profileData, loading: profileLoading } = useQuery(GET_USER_SUMMARY, {
+		skip: !documentId,
+		variables: { documentId },
+		context: {
+			headers: {
+				Authorization: session?.jwt ? `Bearer ${session.jwt}` : ''
+			}
+		}
+	})
+
+	const profile = profileData?.usersPermissionsUser
+
+	const avatarUrl = (() => {
+		const url = profile?.avatar?.url || null
+		if (!url) return null
+		return url.startsWith('http') ? url : `${API_BASE}${url}`
+	})()
+
+	const displayName = (() => {
+		if (profile?.firstNameTH || profile?.lastNameTH) return `${profile?.firstNameTH || ''} ${profile?.lastNameTH || ''}`.trim()
+		return session?.user?.name || session?.user?.email || ''
+	})()
+
+	const roleName = profile?.role?.name || profile?.academicPosition || ''
 	const handleLogout = async (e) => {
 		e.preventDefault();
 		// call helper which uses next-auth signOut
@@ -311,6 +358,22 @@ export default function Sidebar() {
 							</div>
 							<div className="text-xs text-gray-500">{role}</div>
 						</div> */}
+
+
+						{/* USER INFO */}
+						<div className="flex items-center gap-3">
+							{avatarUrl ? (
+								<Image src={avatarUrl} alt={displayName || 'avatar'} width={40} height={40} className="rounded-full" unoptimized />
+							) : (
+								<div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+									{(displayName || '').slice(0, 1).toUpperCase()}
+								</div>
+							)}
+							<div>
+								<div className="text-sm font-medium text-gray-900">{displayName}</div>
+								{roleName && <div className="text-xs text-gray-500">{roleName}</div>}
+							</div>
+						</div>
 					</div>
 				</div>
 				<div className="mt-4">
