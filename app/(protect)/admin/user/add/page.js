@@ -166,6 +166,8 @@ export default function AddUserPage() {
                 departments: departmentId ? [departmentId] : null,
                 faculties: facultyId ? [facultyId] : null,
                 organizations: organizationId ? [organizationId] : null,
+                confirmed: true,
+                Blocked: false,
             };
             if (uploadedAvatarId) payload.avatar = uploadedAvatarId;
 
