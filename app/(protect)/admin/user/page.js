@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
-    console.log('session', session);
+    // console.log('session', session);
 
     // สถานะบนหน้าจอ
     const [search, setSearch] = useState("");
@@ -54,7 +54,7 @@ export default function AdminUsersPage() {
     }, [roleName]);
 
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    const { data: meData } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
@@ -88,10 +88,9 @@ export default function AdminUsersPage() {
                 if (session?.user?.role?.name === "Admin") {
                     
                     // Admin เห็นเฉพาะแผนกตัวเอง
-                    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
+                    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
                     matchesDepartment =
-                        departmentFilter === "all" || (u.departments && u.departments.some(d => d.documentId === myDeptId));
-                    
+                        myDeptId === "all" || (u.departments && u.departments.some(d => d.documentId === myDeptId));
                 } else {
                     // Super admin เห็นได้หมด
                     matchesDepartment =
@@ -100,7 +99,7 @@ export default function AdminUsersPage() {
 
             return matchesSearch && matchesRole && matchesDepartment;
         });
-    }, [users, search, roleFilter, departmentFilter, roleName]);
+    }, [users, search, roleFilter, departmentFilter, roleName, meData]);
 
     // Cache for resolving rapid updates (documentId -> in-progress flag)
     const [rowLoading, setRowLoading] = useState({});
