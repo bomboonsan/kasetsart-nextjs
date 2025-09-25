@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { API_BASE } from '@/lib/api-base'
 import { useSession } from "next-auth/react";
+import toast from 'react-hot-toast'
+import { v4 as uuidv4 } from 'uuid'
 
 export default function FileUploadField({
     label,
@@ -19,6 +21,8 @@ export default function FileUploadField({
     const [attachments, setAttachments] = useState(Array.isArray(value) ? value : []) // เก็บผลการอัปโหลด (id, name, url) จาก Strapi
     const [uploading, setUploading] = useState(false)
     const [error, setError] = useState('')
+    // unique id per component instance so multiple FileUploadField won't clash
+    const instanceIdRef = useRef(uuidv4())
 
     // ซิงค์ค่าจากภายนอก (กรณีแก้ไข/รีเฟรช state จาก parent)
     // ป้องกันการเรียก setAttachments ซ้ำๆ เมื่อ prop `value` มี reference ใหม่แต่ข้อมูลเดิม
@@ -66,6 +70,40 @@ export default function FileUploadField({
         // หมายเหตุ: ใช้เฉพาะ `value` เป็น dependency เพื่อลด risk ของ loop
     }, [value])
 
+    // helper: normalize attachment object shape to consistent minimal representation
+    const parseId = (v) => {
+        if (v === undefined || v === null) return null
+        const n = Number(v)
+        return Number.isFinite(n) ? n : null
+    }
+
+    const normalize = (file) => {
+        if (!file) return null
+        const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
+        const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || file.preview || '')
+        const name = file.name || file.filename || file.alternativeText || file.caption || 'unnamed-file'
+        const idNum = parseId(file.id ?? file.documentId ?? file.document_id)
+        const docIdNum = parseId(file.documentId ?? file.document_id ?? file.id)
+        return {
+            id: idNum,
+            documentId: docIdNum,
+            name,
+            url,
+            size: file.size,
+            mime: file.mime || file.mimetype,
+        }
+    }
+
+    const dedupe = (arr) => {
+        const seen = new Map()
+        for (const a of arr || []) {
+            const key = a?.documentId ?? a?.id ?? a?.url ?? a?.name ?? JSON.stringify(a)
+            if (!key) continue
+            if (!seen.has(key)) seen.set(key, a)
+        }
+        return Array.from(seen.values())
+    }
+
     const doUpload = async (fileList) => {
         const filesArray = Array.from(fileList)
         if (filesArray.length === 0) return
@@ -91,30 +129,30 @@ export default function FileUploadField({
             })
 
             if (!response.ok) {
-                throw new Error(`Upload failed: ${response.statusText}`)
+                const text = await response.text().catch(() => response.statusText)
+                throw new Error(`Upload failed: ${response.status} ${text}`)
             }
 
             const uploadedFiles = await response.json()
-            const newAttachments = uploadedFiles.map(file => {
-                const rawUrl = typeof file.url === 'string' ? file.url : ''
-                const url = rawUrl.startsWith('http') ? rawUrl : `${API_BASE}${rawUrl}`
-                return {
-                    id: file.id ?? file.documentId,
-                    documentId: file.documentId ?? file.id, // mirror for consistency
-                    name: file.name || file.alternativeText || 'unnamed-file',
-                    url,
-                    size: file.size,
-                    mime: file.mime,
-                }
-            })
+            // Strapi REST returns an array of uploaded file objects
+            const newAttachments = (Array.isArray(uploadedFiles) ? uploadedFiles : []).map(normalize).filter(Boolean)
 
-            // รวมไฟล์ใหม่กับไฟล์เดิม (incremental)
-            const merged = [...attachments, ...newAttachments]
+            // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
+            const merged = dedupe([...attachments, ...newAttachments])
             setAttachments(merged)
-            // แจ้ง parent ด้วยรายการรวม
-            onFilesChange && onFilesChange(merged)
+            // แจ้ง parent ด้วยรายการรวม (normalized)
+            try {
+                onFilesChange && onFilesChange(merged)
+            } catch (e) {
+                console.warn('onFilesChange threw', e)
+            }
+            // success toast
+            if (newAttachments.length > 0) {
+                toast.success(`อัปโหลด ${newAttachments.length} ไฟล์สำเร็จ`)
+            }
         } catch (err) {
             setError('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message)
+            toast.error('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message)
         } finally {
             setUploading(false)
         }
@@ -123,8 +161,9 @@ export default function FileUploadField({
     const removeAttachment = (idx) => {
         // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
         const next = attachments.filter((_, i) => i !== idx)
-        setAttachments(next)
-        onFilesChange && onFilesChange(next)
+        const normalized = dedupe(next.map(normalize).filter(Boolean))
+        setAttachments(normalized)
+        onFilesChange && onFilesChange(normalized)
     }
 
     const handleDrag = (e) => {
@@ -174,10 +213,13 @@ export default function FileUploadField({
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById('file-upload-field-input').click()}
+                onClick={() => {
+                    const el = document.getElementById(`file-upload-field-input-${instanceIdRef.current}`)
+                    if (el && typeof el.click === 'function') el.click()
+                }}
             >
                 <input
-                    id="file-upload-field-input"
+                    id={`file-upload-field-input-${instanceIdRef.current}`}
                     type="file"
                     accept={accept}
                     multiple={multiple}
@@ -208,7 +250,7 @@ export default function FileUploadField({
 
             {/* File List */}
             {/* แสดงรายการไฟล์ที่อัปโหลดแล้วแบบสะสม */}
-            {attachments.length > 0 && (
+                    {attachments.length > 0 && (
                 <div className="space-y-2">
                     <p className="text-sm font-medium text-gray-700">ไฟล์ที่อัปโหลดแล้ว:</p>
                     <ul className="space-y-1">
@@ -220,7 +262,7 @@ export default function FileUploadField({
                             })()
                             
                             return (
-                                <li key={file.id || file.documentId || index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
+                                <li key={file.documentId ?? file.id ?? file.url ?? index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
                                     <div className="flex-1 truncate">
                                         <a
                                             href={href}
@@ -230,7 +272,7 @@ export default function FileUploadField({
                                         >
                                             {file.name || 'ไฟล์ไม่มีชื่อ'}
                                         </a>
-                                        {(file.id || file.documentId) && (
+                                        {(file.documentId || file.id) && (
                                             <span className="text-xs text-gray-300 ml-2"># {(file.documentId || file.id)}</span>
                                         )}
                                         {typeof file.size === 'number' && !Number.isNaN(file.size) && (

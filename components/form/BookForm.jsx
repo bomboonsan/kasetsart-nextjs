@@ -105,7 +105,10 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 
 	const extractAttachmentIds = (arr) => {
 		if (!Array.isArray(arr)) return [];
-		return arr.filter(a => a && (a.id || a.documentId)).map(a => String(a.documentId || a.id));
+		return arr
+			.filter(a => a && (a.documentId || a.id))
+			.map(a => Number(a.documentId ?? a.id))
+			.filter(n => Number.isFinite(n) && n > 0);
 	};
 
 	const handleInputChange = (field, value) => {

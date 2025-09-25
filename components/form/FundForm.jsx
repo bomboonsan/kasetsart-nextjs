@@ -22,7 +22,8 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
         if (!Array.isArray(arr)) return []
         return arr
             .filter(a => a && (a.documentId || a.id))
-            .map(a => String(a.documentId || a.id))
+            .map(a => Number(a.documentId ?? a.id))
+            .filter(n => Number.isFinite(n) && n > 0)
     }
 
     const handleInputChange = (field, value) => {

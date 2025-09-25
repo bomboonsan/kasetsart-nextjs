@@ -27,13 +27,9 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
     const extractAttachmentIds = (arr) => {
         if (!Array.isArray(arr)) return [];
         return arr
-            .filter(a => a && (a.id || a.documentId))
-            .map(a => {
-                const raw = a.documentId ?? a.id;
-                const n = Number(raw);
-                return Number.isNaN(n) ? null : n;
-            })
-            .filter(Boolean);
+            .filter(a => a && (a.documentId || a.id))
+            .map(a => Number(a.documentId ?? a.id))
+            .filter(n => Number.isFinite(n) && n > 0);
     };
 
     useEffect(() => {
