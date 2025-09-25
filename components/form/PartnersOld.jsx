@@ -1,6 +1,4 @@
-// 'use client';
 import React, { useEffect, useState } from 'react';
-// import { useState, useEffect } from 'react';
 import Block from '../layout/Block';
 import FormInput from '../myui/FormInput';
 import FormSelect from '../myui/FormSelect';
@@ -166,135 +164,135 @@ export default function Partners({ data, onChange }) {
                                     ภายนอก มก. (หัวหน้าโครงการวิจัยภายนอก มก. นิสิต และลูกจ้าง)
                                 </label>
                             </div>
-                        {
-                            modalIsInternal === true ? (
-                                <>
-                                    <div>
-                                        <UserPicker
-                                            label="ผู้ร่วมโครงการวิจัย"
-                                            selectedUser={modalUserObj}
-                                            onSelect={(u) => {
-                                                setModalUserObj(u)
-                                                const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile
-                                                const display = prof ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim() : u.email
-                                                const org = [u.department?.name, u.faculty?.name, u.organization?.name].filter(Boolean).join(' ')
-                                                setModalPartnerFullName(display)
-                                                setModalOrgName(org)
-                                            }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <FormInput
-                                            label="ชื่อผู้ร่วมโครงการวิจัย"
-                                            type="text"
-                                            value={(() => {
-                                                if (modalUserObj) {
-                                                    return modalUserObj.firstNameTH ? `${modalUserObj.firstNameTH || ''} ${modalUserObj.lastNameTH || ''}`.trim() : modalUserObj.email
-                                                }
-                                                return modalPartnerFullName || ''
-                                            })()}
-                                            readOnly={!!modalUserObj}
-                                            onChange={(value) => {
-                                                // allow manual name editing when internal but not linked to a user
-                                                if (!modalUserObj) setModalPartnerFullName(value)
-                                            }}
-                                        />
-                                    </div>
-                                    <div>
-                                        <FormInput
-                                            label="ชื่อหน่วยงาน"
-                                            type="text"
-                                            value={(() => {
-                                                if (modalUserObj) {
-                                                    return [
-                                                        modalUserObj.departments[0]?.name,
-                                                        modalUserObj.faculties[0]?.name,
-                                                        modalUserObj.organizations[0]?.name
-                                                    ].filter(Boolean).join(' ')
-                                                }
-                                                return modalOrgName || ''
-                                            })()}
-                                            readOnly={!!modalUserObj}
-                                            onChange={(value) => {
-                                                if (!modalUserObj) setModalOrgName(value)
-                                            }}
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div>
-                                        <FormInput
-                                            label="ชื่อผู้ร่วมโครงการวิจัย"
-                                            type="text"
-                                            value={modalPartnerFullName}
-                                            onChange={(e) => setModalPartnerFullName(e.target.value)}
-                                            placeholder="กรอกชื่อ-นามสกุล"
-                                        />
-                                    </div>
-                                    <div>
-                                        <FormInput
-                                            label="ชื่อหน่วยงาน"
-                                            type="text"
-                                            value={modalOrgName}
-                                            onChange={(e) => setModalOrgName(e.target.value)}
-                                            placeholder="กรอกชื่อหน่วยงาน"
-                                        />
-                                    </div>
-                                </>
-                            )
-                        }
-                        <div>
-                            <FormSelect
-                                label="ประเภทผู้ร่วมโครงการวิจัย"
-                                value={modalPartnerType}
-                                onChange={(value) => setModalPartnerType(value)}
-                                className="max-w-lg"
-                                placeholder="เลือกประเภท"
-                                options={[
-                                    { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
-                                    { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
-                                    { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
-                                    { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
-                                    { value: 'อื่นๆ', label: 'อื่นๆ' },
-                                ]}
-                            />
-                        </div>
-                        <div>
-                            <FormInput
-                                label="สัดส่วนการมีส่วนร่วม (%)"
-                                type="number"
-                                step="0.001"
-                                min="0"
-                                max="100"
-                                value={modalPartnerProportionCustom || ''}
-                                onChange={(e) => {
-                                    // allow empty or valid number between 0-100
-                                    if (e.target.value === '' || e.target.value === null) {
-                                        setModalPartnerProportionCustom('')
-                                        return
-                                    }
-                                    const num = parseFloat(String(e.target.value))
-                                    if (Number.isNaN(num)) return
-                                    const clamped = Math.max(0, Math.min(100, num))
-                                    setModalPartnerProportionCustom(String(clamped))
-                                }}
-                                placeholder="0%"
-                            />
-                        </div>
-                        <div>
-                            <FormCheckbox
-                                label="หมายเหตุ"
-                                inline={true}
-                                value={Array.isArray(modalPartnerCommentArr) ? modalPartnerCommentArr : (modalPartnerCommentArr ? String(modalPartnerCommentArr).split(',').map(s => s.trim()).filter(Boolean) : [])}
-                                onChange={(e) => setModalPartnerCommentArr(e.target.value)}
-                                className="max-w-lg"
-                                options={[
-                                    ...(!hasFirstAuthor || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('First Author')) ? [{ value: 'First Author', label: 'First Author' }] : []),
-                                    ...(!hasCorresponding || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('Corresponding Author')) ? [{ value: 'Corresponding Author', label: 'Corresponding Author' }] : []),
-                                ]}
-                            />
-                        </div>
+                            {
+                                modalIsInternal === true ? (
+                                    <>
+                                        <div>
+                                            <UserPicker
+                                                label="ผู้ร่วมโครงการวิจัย"
+                                                selectedUser={modalUserObj}
+                                                onSelect={(u) => {
+                                                    setModalUserObj(u)
+                                                    const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile
+                                                    const display = prof ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim() : u.email
+                                                    const org = [u.department?.name, u.faculty?.name, u.organization?.name].filter(Boolean).join(' ')
+                                                    setModalPartnerFullName(display)
+                                                    setModalOrgName(org)
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <FormInput
+                                                label="ชื่อผู้ร่วมโครงการวิจัย"
+                                                type="text"
+                                                value={(() => {
+                                                    if (modalUserObj) {
+                                                        return modalUserObj.firstNameTH ? `${modalUserObj.firstNameTH || ''} ${modalUserObj.lastNameTH || ''}`.trim() : modalUserObj.email
+                                                    }
+                                                    return modalPartnerFullName || ''
+                                                })()}
+                                                readOnly={!!modalUserObj}
+                                                onChange={(value) => {
+                                                    // allow manual name editing when internal but not linked to a user
+                                                    if (!modalUserObj) setModalPartnerFullName(value)
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <FormInput
+                                                label="ชื่อหน่วยงาน"
+                                                type="text"
+                                                value={(() => {
+                                                    if (modalUserObj) {
+                                                        return [
+                                                            modalUserObj.departments[0]?.name,
+                                                            modalUserObj.faculties[0]?.name,
+                                                            modalUserObj.organizations[0]?.name
+                                                        ].filter(Boolean).join(' ')
+                                                    }
+                                                    return modalOrgName || ''
+                                                })()}
+                                                readOnly={!!modalUserObj}
+                                                onChange={(value) => {
+                                                    if (!modalUserObj) setModalOrgName(value)
+                                                }}
+                                            />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <FormInput
+                                                label="ชื่อผู้ร่วมโครงการวิจัย"
+                                                type="text"
+                                                value={modalPartnerFullName}
+                                                onChange={(e) => setModalPartnerFullName(e.target.value)}
+                                                placeholder="กรอกชื่อ-นามสกุล"
+                                            />
+                                        </div>
+                                        <div>
+                                            <FormInput
+                                                label="ชื่อหน่วยงาน"
+                                                type="text"
+                                                value={modalOrgName}
+                                                onChange={(e) => setModalOrgName(e.target.value)}
+                                                placeholder="กรอกชื่อหน่วยงาน"
+                                            />
+                                        </div>
+                                    </>
+                                )
+                            }
+                            <div>
+                                <FormSelect
+                                    label="ประเภทผู้ร่วมโครงการวิจัย"
+                                    value={modalPartnerType}
+                                    onChange={(value) => setModalPartnerType(value)}
+                                    className="max-w-lg"
+                                    placeholder="เลือกประเภท"
+                                    options={[
+                                        { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
+                                        { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
+                                        { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
+                                        { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
+                                        { value: 'อื่นๆ', label: 'อื่นๆ' },
+                                    ]}
+                                />
+                            </div>
+                            <div>
+                                <FormInput
+                                    label="สัดส่วนการมีส่วนร่วม (%)"
+                                    type="number"
+                                    step="0.001"
+                                    min="0"
+                                    max="100"
+                                    value={modalPartnerProportionCustom || ''}
+                                    onChange={(e) => {
+                                        // allow empty or valid number between 0-100
+                                        if (e.target.value === '' || e.target.value === null) {
+                                            setModalPartnerProportionCustom('')
+                                            return
+                                        }
+                                        const num = parseFloat(String(e.target.value))
+                                        if (Number.isNaN(num)) return
+                                        const clamped = Math.max(0, Math.min(100, num))
+                                        setModalPartnerProportionCustom(String(clamped))
+                                    }}
+                                    placeholder="0%"
+                                />
+                            </div>
+                            <div>
+                                <FormCheckbox
+                                    label="หมายเหตุ"
+                                    inline={true}
+                                    value={Array.isArray(modalPartnerCommentArr) ? modalPartnerCommentArr : (modalPartnerCommentArr ? String(modalPartnerCommentArr).split(',').map(s => s.trim()).filter(Boolean) : [])}
+                                    onChange={(e) => setModalPartnerCommentArr(e.target.value)}
+                                    className="max-w-lg"
+                                    options={[
+                                        ...(!hasFirstAuthor || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('First Author')) ? [{ value: 'First Author', label: 'First Author' }] : []),
+                                        ...(!hasCorresponding || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('Corresponding Author')) ? [{ value: 'Corresponding Author', label: 'Corresponding Author' }] : []),
+                                    ]}
+                                />
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>

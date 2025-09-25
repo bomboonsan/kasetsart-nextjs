@@ -19,6 +19,7 @@ async function fetchGraphQL({ query, variables, jwt }) {
     throw new Error(`GraphQL HTTP ${resp.status}: ${text}`);
   }
   const json = await resp.json();
+  console.debug("GraphQL response:", json);
   if (json.errors?.length) throw new Error(json.errors[0].message || "GraphQL error");
   return json.data;
 }
@@ -118,7 +119,6 @@ export const authOptions = {
           const p = await hydrateProfile(user.jwt, user.documentId);
           token.documentId = p.documentId || token.documentId;
           token.role = p.role || null;
-          token.academicPosition = p.academicPosition || null;
           token.avatar = p.avatar || null;
           token.name = p.name || token.name;
           token.email = p.email || token.email;
@@ -144,8 +144,7 @@ export const authOptions = {
         session.user.id = token.id || null;
         session.user.documentId = token.documentId || null;
         session.user.role = token.role || null;                // ← ใช้ได้ทุกหน้า
-        session.user.academicPosition = token.academicPosition || null;
-        session.user.avatar = token.avatar|| null;
+        session.user.avatar = token.avatar || null;
         session.user.name = token.name || session.user.name || "";
         session.user.email = token.email || session.user.email || "";
       }
