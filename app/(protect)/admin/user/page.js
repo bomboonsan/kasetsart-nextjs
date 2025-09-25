@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 
 import { GET_ALL_USERS } from "@/graphql/userQueries";
 import { GET_USERS_FILTER_OPTIONS } from "@/graphql/optionForm";
+import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 
 // อธิบายฟังก์ชัน: สร้าง context ให้ Apollo ใส่ Authorization header ทุกคำขอ
 const useAuthContext = (jwt) => ({
@@ -45,7 +46,20 @@ export default function AdminUsersPage() {
         context: authContext,
     });
 
-    console.log('filterData', filterData);
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const showAdmin = useMemo(() => {
+        if (!roleName) return false;
+        const r = roleName.toLowerCase();
+        return r.includes("admin")
+    }, [roleName]);
+
+    // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
+    const { data: meData } = useQuery(GET_USER_DEPARTMENTS, {
+        variables: { documentId: session?.user?.documentId },
+        context: authContext,
+    });
+    console.log('meData', meData?.usersPermissionsUser?.departments[0]?.title);
+
 
     // จัดการข้อมูลผู้ใช้
     const users = data?.usersPermissionsUsers ?? [];
@@ -68,12 +82,25 @@ export default function AdminUsersPage() {
             const matchesSearch = !q || text.includes(q);
             const matchesRole =
                 roleFilter === "all" || (u.role && u.role.documentId === roleFilter);
-            const matchesDepartment =
-                departmentFilter === "all" || (u.departments && u.departments.some(d => d.documentId === departmentFilter));
+            let matchesDepartment;
+                
+            console.log('u.departments', session?.user?.role?.name);
+                if (session?.user?.role?.name === "Admin") {
+                    
+                    // Admin เห็นเฉพาะแผนกตัวเอง
+                    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
+                    matchesDepartment =
+                        departmentFilter === "all" || (u.departments && u.departments.some(d => d.documentId === myDeptId));
+                    
+                } else {
+                    // Super admin เห็นได้หมด
+                    matchesDepartment =
+                        departmentFilter === "all" || (u.departments && u.departments.some(d => d.documentId === departmentFilter));
+                }
 
             return matchesSearch && matchesRole && matchesDepartment;
         });
-    }, [users, search, roleFilter, departmentFilter]);
+    }, [users, search, roleFilter, departmentFilter, roleName]);
 
     // Cache for resolving rapid updates (documentId -> in-progress flag)
     const [rowLoading, setRowLoading] = useState({});
@@ -150,7 +177,7 @@ export default function AdminUsersPage() {
                         placeholder="ชื่อหรืออีเมล"
                     />
                 </div>
-                <div className="w-48">
+                {!showAdmin && (<div className="w-48">
                     <label className="text-sm text-gray-600">ภาควิชา</label>
                     <select
                         className="w-full px-3 py-0.5 border rounded-lg shadow-xs shadow-gray-600/5"
@@ -162,7 +189,7 @@ export default function AdminUsersPage() {
                             <option key={d.documentId} value={d.documentId}>{d.title}</option>
                         ))}
                     </select>
-                </div>
+                </div>)}
                 <div className="w-48">
                     <label className="text-sm text-gray-600">บทบาท</label>
                     <select
