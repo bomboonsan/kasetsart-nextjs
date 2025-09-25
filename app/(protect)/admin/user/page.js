@@ -139,7 +139,7 @@ export default function AdminUsersPage() {
                 <div className="w-48">
                     <label className="text-sm text-gray-600">บทบาท</label>
                     <select
-                        className="w-full px-3 py-2 border rounded"
+                        className="w-full px-3 py-0.5 border rounded-lg shadow-xs shadow-gray-600/5"
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value)}
                     >

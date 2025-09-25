@@ -32,7 +32,7 @@ export async function POST(req) {
     // Lookup if id not directly provided
     if (!numericId) {
       const findRes = await fetch(`${strapiUrl}/api/users?filters[documentId][$eq]=${encodeURIComponent(documentId)}&pagination[limit]=1`, {
-        headers: { Authorization: `Bearer ${adminToken}` }
+        headers: { Authorization: authHeader }
       });
       if (!findRes.ok) {
         const text = await findRes.text();
