@@ -124,18 +124,23 @@ export default function AddUserPage() {
                 uploadFormData.append('files', avatarFile);
                 const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
                 const token = session?.jwt; // user token (May not have permission to upload? assume yes)
+                console.debug('[AddUser] uploading avatar to', `${strapiUrl}/api/upload`, { fileName: avatarFile.name, fileType: avatarFile.type });
                 const uploadRes = await fetch(`${strapiUrl}/api/upload`, {
                     method: 'POST',
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
                     body: uploadFormData
                 });
+                const uploadText = await uploadRes.text();
+                let uploadJson = null;
+                try { uploadJson = JSON.parse(uploadText); } catch (e) { /* not json */ }
+                console.debug('[AddUser] avatar upload response status:', uploadRes.status, 'body:', uploadJson || uploadText);
                 if (!uploadRes.ok) {
-                    const t = await uploadRes.text();
-                    throw new Error(`Upload failed: ${uploadRes.status} ${t}`);
+                    throw new Error(`Upload failed: ${uploadRes.status} - ${uploadText}`);
                 }
-                const uploadJson = await uploadRes.json();
                 if (Array.isArray(uploadJson) && uploadJson[0]?.id) uploadedAvatarId = uploadJson[0].id;
                 else if (uploadJson?.[0]?.data?.id) uploadedAvatarId = uploadJson[0].data.id;
+                else if (uploadJson?.data?.[0]?.id) uploadedAvatarId = uploadJson.data[0].id;
+                console.debug('[AddUser] uploadedAvatarId', uploadedAvatarId);
             }
 
             const academicTypeId = resolveRelationId(formData.academic_types, options.academicTypes);
@@ -147,6 +152,7 @@ export default function AddUserPage() {
                 username: formData.username || formData.email,
                 email: formData.email,
                 password: password,
+                role: 1,
                 firstNameTH: formData.firstNameTH,
                 lastNameTH: formData.lastNameTH,
                 firstNameEN: formData.firstNameEN,
@@ -163,21 +169,30 @@ export default function AddUserPage() {
             };
             if (uploadedAvatarId) payload.avatar = uploadedAvatarId;
 
+            console.debug('[AddUser] creating user with payload:', payload);
             const res = await fetch('/api/admin/users/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ payload })
             });
-            const text = await res.text();
-            let json = null; try { json = JSON.parse(text); } catch (e) {}
-            if (!res.ok || !json?.success) {
-                throw new Error(json?.error || `Create failed: ${res.status}`);
+            const respText = await res.text();
+            let json = null;
+            try { json = JSON.parse(respText); } catch (e) { /* ignore */ }
+            console.debug('[AddUser] create response status:', res.status, 'body:', json || respText);
+            if (!res.ok) {
+                // Try to surface server error message if available
+                const serverMessageRaw = json?.error || json?.message || respText || `status ${res.status}`;
+                const serverMessage = typeof serverMessageRaw === 'object' ? JSON.stringify(serverMessageRaw) : String(serverMessageRaw);
+                throw new Error(`Create failed: ${serverMessage}`);
+            }
+            if (json && json.success === false) {
+                throw new Error(json?.error || json?.message || 'Create failed');
             }
             // Redirect
             router.push('/admin/user');
         } catch (err) {
             console.error(err);
-            setErrorMsg(err.message);
+            setErrorMsg(err.message || String(err));
         } finally {
             setSubmitting(false);
         }
