@@ -2,7 +2,7 @@
 import { useQuery, useMutation } from "@apollo/client/react";
 import toast from 'react-hot-toast';
 import React from 'react';
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSession } from "next-auth/react";
 import Block from '../layout/Block';
 import FormInput from '@/components/myui/FormInput';
@@ -15,8 +15,47 @@ import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
 import { PROJECT_FORM_INITIAL, researchKindOptions, fundTypeOptions, subFundType1, subFundType2, subFundType3, subFundType4, fundNameOptions } from '@/data/project';
 import { GET_PROJECT_OPTIONS } from '@/graphql/optionForm';
-import { CREATE_PROJECT } from '@/graphql/formQueries';
-export default function ProjectForm({ initialData, onSubmit }) {
+import { CREATE_PROJECT, UPDATE_PROJECT } from '@/graphql/formQueries';
+
+const normalizeId = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const numeric = Number(value);
+    if (Number.isFinite(numeric) && numeric >= 0) {
+        return String(numeric);
+    }
+    const str = String(value).trim();
+    return str.length ? str : null;
+};
+
+const parseIntegerOrNull = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const parsed = Number.parseInt(String(value), 10);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const stripTypenameDeep = (input) => {
+    if (typeof input === 'bigint') {
+        return input.toString();
+    }
+    if (Array.isArray(input)) {
+        return input
+            .map(stripTypenameDeep)
+            .filter((item) => item !== undefined);
+    }
+    if (input && typeof input === 'object') {
+        return Object.entries(input).reduce((acc, [key, val]) => {
+            if (key === '__typename') return acc;
+            const sanitized = stripTypenameDeep(val);
+            if (sanitized !== undefined) {
+                acc[key] = sanitized;
+            }
+            return acc;
+        }, {});
+    }
+    return input;
+};
+
+export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session, status } = useSession();
     const [formData, setFormData] = useState(PROJECT_FORM_INITIAL);
     const [fundSubTypeOptions, setFundSubTypeOptions] = useState([]);
@@ -25,6 +64,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
     const [sdgsOptions, setSdgsOptions] = useState([]);
     const [departmentsOptions, setDepartmentsOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const isEditing = isEdit || Boolean(initialData?.documentId);
     // เก็บ attachments เดิมเพื่อเช็คความเปลี่ยนแปลงเวลา update
     const originalAttachmentIdsRef = useRef([]);
 
@@ -32,8 +72,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
         if (!Array.isArray(arr)) return [];
         return arr
             .filter(a => a && (a.documentId || a.id))
-            .map(a => Number(a.documentId ?? a.id))
-            .filter(n => Number.isFinite(n) && n > 0);
+            .map(a => normalizeId(a.documentId ?? a.id))
+            .filter(Boolean);
     };
 
     const [createProject] = useMutation(CREATE_PROJECT, {
@@ -42,22 +82,23 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
             }
         },
-        onCompleted: (data) => {
+        onCompleted: () => {
             toast.success('บันทึกโครงการสำเร็จแล้ว!');
             // Reset form or redirect as needed
             setFormData(PROJECT_FORM_INITIAL);
-        },
-        onError: (error) => {
-            console.error('Error creating project:', error);
-            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+        }
+    });
+
+    const [updateProject] = useMutation(UPDATE_PROJECT, {
+        context: {
+            headers: {
+                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+            }
         }
     });
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        if (field === 'partners') {
-            console.log('Partners updated in ProjectForm:', value);
-        }
     };
 
     const handleSubmit = async () => {
@@ -80,36 +121,29 @@ export default function ProjectForm({ initialData, onSubmit }) {
         setIsSubmitting(true);
         
         try {
-            // Prepare data for submission based on Strapi schema
-            // derive users_permissions_users (manyToMany) from partners that are internal and linked to a user
-            const users_permissions_users = Array.isArray(formData.partners)
+            const usersPermissionsUsers = Array.isArray(formData.partners)
                 ? formData.partners
                     .filter(p => p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
-                    .map(p => {
-                        return p.userID || p.User?.documentId || p.User?.id;
-                    })
+                    .map(p => normalizeId(p.userID ?? p.User?.documentId ?? p.User?.id))
                     .filter(Boolean)
                 : [];
 
-            // Prepare attachments data - extract file IDs from uploaded files as strings
-            const attachmentIds = Array.isArray(formData.attachments)
-                ? formData.attachments
-                    .filter(attachment => attachment && (attachment.documentId || attachment.id))
-                    .map(attachment => String(attachment.documentId || attachment.id))
-                : [];
-        
-            console.log('Prepared attachment IDs:', attachmentIds); // Debug log
+            const attachmentIds = Array.from(new Set(extractAttachmentIds(formData.attachments)));
 
-            const currentAttachmentIds = attachmentIds;
             const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
-            const currentIdsSorted = [...currentAttachmentIds].sort();
+            const currentIdsSorted = [...attachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
+            const toIdArray = (value) => {
+                const normalized = normalizeId(value);
+                return normalized ? [normalized] : [];
+            };
+
             const projectData = {
-                fiscalYear: parseInt(formData.fiscalYear) || null,
+                fiscalYear: parseIntegerOrNull(formData.fiscalYear),
                 projectType: formData.projectType || null,
                 projectMode: formData.projectMode || null,
-                subProjectCount: formData.subProjectCount || null,
+                subProjectCount: formData.subProjectCount,
                 nameTH: formData.nameTH.trim() || null,
                 nameEN: formData.nameEN.trim() || null,
                 isEnvironmentallySustainable: formData.isEnvironmentallySustainable || null,
@@ -119,49 +153,51 @@ export default function ProjectForm({ initialData, onSubmit }) {
                 fundType: formData.fundType || null,
                 fundSubType: formData.fundSubType || null,
                 fundName: formData.fundName || null,
-                budget: parseInt(formData.budget) || null,
+                budget: parseIntegerOrNull(formData.budget),
                 keywords: formData.keywords || null,
-                // Handle relations - need to pass documentIds as arrays
-                departments: formData.departments ? [formData.departments] : [],
-                ic_types: formData.icTypes ? [formData.icTypes] : [],
-                impacts: formData.impact ? [formData.impact] : [],
-                sdgs: formData.sdg ? [formData.sdg] : [],
-                partners: formData.partners || [],
+                departments: toIdArray(formData.departments),
+                ic_types: toIdArray(formData.icTypes),
+                impacts: toIdArray(formData.impact),
+                sdgs: toIdArray(formData.sdg),
+                partners: Array.isArray(formData.partners) ? stripTypenameDeep(formData.partners) : [],
                 attachments: attachmentIds.length ? attachmentIds : [],
-                users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
+                users_permissions_users: usersPermissionsUsers.length ? Array.from(new Set(usersPermissionsUsers)) : undefined
             };
 
 
             // Remove null values to avoid issues
             Object.keys(projectData).forEach(key => {
-                if (projectData[key] === null || projectData[key] === "") {
+                if (projectData[key] === undefined || projectData[key] === null || projectData[key] === "") {
                     delete projectData[key];
                 }
             });
 
 
             // Sanitize projectData to avoid sending BigInt values (GraphQL cannot serialize BigInt)
-            const sanitize = (value) => {
-                if (typeof value === 'bigint') return value.toString()
-                if (Array.isArray(value)) return value.map(sanitize)
-                if (value && typeof value === 'object') {
-                    const out = {}
-                    Object.keys(value).forEach(k => {
-                        out[k] = sanitize(value[k])
-                    })
-                    return out
-                }
-                return value
-            }
-
-            if (initialData && !attachmentsChanged) {
+            if (isEditing && !attachmentsChanged) {
                 delete projectData.attachments;
             }
 
-            const safeProjectData = sanitize(projectData)
+            const safeProjectData = stripTypenameDeep(projectData);
 
             if (onSubmit) {
                 await onSubmit(safeProjectData);
+                if (isEditing) {
+                    originalAttachmentIdsRef.current = attachmentIds;
+                }
+            } else if (isEditing) {
+                const targetId = normalizeId(initialData?.documentId);
+                if (!targetId) {
+                    throw new Error('ไม่พบรหัสโครงการสำหรับการแก้ไข');
+                }
+                await updateProject({
+                    variables: {
+                        documentId: targetId,
+                        data: safeProjectData
+                    }
+                });
+                toast.success('อัปเดตโครงการสำเร็จแล้ว!');
+                originalAttachmentIdsRef.current = attachmentIds;
             } else {
                 await createProject({
                     variables: {
@@ -171,26 +207,27 @@ export default function ProjectForm({ initialData, onSubmit }) {
             }
         } catch (error) {
             console.error('Submission error:', error);
+            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    useEffect(() => {
-        console.log(formData);
-    }, [formData]);
-
     // hydrate when editing
     useEffect(() => {
         if (initialData) {
+            const normalizedIcType = normalizeId(initialData.ic_types?.[0]?.documentId ?? initialData.icTypes);
+            const normalizedImpact = normalizeId(initialData.impacts?.[0]?.documentId ?? initialData.impact);
+            const normalizedSdg = normalizeId(initialData.sdgs?.[0]?.documentId ?? initialData.sdg);
+            const normalizedDepartment = normalizeId(initialData.departments?.[0]?.documentId ?? initialData.departments);
             const hydrated = {
                 ...PROJECT_FORM_INITIAL,
                 ...initialData,
                 // map relations to expected single select values
-                icTypes: initialData.ic_types?.[0]?.documentId ?? initialData.icTypes ?? "",
-                impact: initialData.impacts?.[0]?.documentId ?? initialData.impact ?? "",
-                sdg: initialData.sdgs?.[0]?.documentId ?? initialData.sdg ?? "",
-                departments: initialData.departments?.[0]?.documentId ?? initialData.departments ?? "",
+                icTypes: normalizedIcType ?? "",
+                impact: normalizedImpact ?? "",
+                sdg: normalizedSdg ?? "",
+                departments: normalizedDepartment ?? "",
             };
             setFormData(hydrated);
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
@@ -206,6 +243,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
             setFundSubTypeOptions(subFundType3);
         } else if (formData.fundType == "10") {
             setFundSubTypeOptions(subFundType4);
+        } else {
+            setFundSubTypeOptions([]);
         }
     }, [formData.fundType]);
 
@@ -219,10 +258,15 @@ export default function ProjectForm({ initialData, onSubmit }) {
     });
     useEffect(() => {
         if (projectOptions) {
-            setIcTypesOptions(projectOptions.icTypes.map(ic => ({ value: ic.documentId, label: ic.name })));
-            setImpactsOptions(projectOptions.impacts.map(imp => ({ value: imp.documentId, label: imp.name })));
-            setSdgsOptions(projectOptions.sdgs.map(sdg => ({ value: sdg.documentId, label: sdg.name })));
-            setDepartmentsOptions(projectOptions.departments.map(dep => ({ value: dep.documentId, label: dep.title }))); 
+            setIcTypesOptions((projectOptions.icTypes ?? []).map(ic => ({ value: String(ic.documentId), label: ic.name })));
+            setImpactsOptions((projectOptions.impacts ?? []).map(imp => ({ value: String(imp.documentId), label: imp.name })));
+            setSdgsOptions((projectOptions.sdgs ?? []).map(sdg => ({ value: String(sdg.documentId), label: sdg.name })));
+            setDepartmentsOptions((projectOptions.departments ?? []).map(dep => ({ value: String(dep.documentId), label: dep.title })));
+        } else {
+            setIcTypesOptions([]);
+            setImpactsOptions([]);
+            setSdgsOptions([]);
+            setDepartmentsOptions([]);
         }
     }, [projectOptions]);
 
@@ -241,7 +285,7 @@ export default function ProjectForm({ initialData, onSubmit }) {
                         { value: '0', label: 'โครงการวิจัยเดี่ยว' },
                         { value: '1', label: 'แผนงานวิจัย หรือชุดโครงการวิจัย' },
                     ]} />
-                    <FormInput id="subProjectCount" type='number' label="จำนวนโครงการย่อย" value={formData.subProjectCount} placeholder="กรอกจำนวนโครงการย่อย" onChange={(e) => handleInputChange('subProjectCount', e.target.value)} />
+                    <FormInput id="subProjectCount" type="number" label="จำนวนโครงการย่อย" value={formData.subProjectCount} placeholder="กรอกจำนวนโครงการย่อย" onChange={(e) => handleInputChange('subProjectCount', e.target.value)} />
                     {/* <FormInput id="project-name" label="ชื่อโครงการ" value="" placeholder="กรอกชื่อโครงการ" /> */}
                     <FormTextarea id="nameTH" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" value={formData.nameTH} onChange={(e) => handleInputChange('nameTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="nameEN" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" value={formData.nameEN} onChange={(e) => handleInputChange('nameEN', e.target.value)} placeholder="" rows={5} />
@@ -258,7 +302,9 @@ export default function ProjectForm({ initialData, onSubmit }) {
                     <FormSelect id="departments" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.departments ?? ""} placeholder="เลือกหน่วยงาน" onChange={(val) => handleInputChange('departments', val)} options={departmentsOptions} />
                     <FormSelect id="researchKind" label="ประเภทงานวิจัย" value={formData.researchKind ?? ""} placeholder="เลือกประเภทงานวิจัย" onChange={(val) => handleInputChange('researchKind', val)} options={researchKindOptions} />
                     <FormSelect id="fundType" label="ประเภทแหล่งทุน" value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
-                    <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
+                    {fundSubTypeOptions.length > 0 && (
+                        <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
+                    )}
                     <FormSelect id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
                     <FormTextarea label=" " value={formData.fundName} readOnly disabled />
                     <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="0" onChange={(e) => handleInputChange('budget', e.target.value)} />
