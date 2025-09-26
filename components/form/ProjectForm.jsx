@@ -225,12 +225,8 @@ export default function ProjectForm({ initialData, onSubmit }) {
             setDepartmentsOptions(projectOptions.departments.map(dep => ({ value: dep.documentId, label: dep.title }))); 
         }
     }, [projectOptions]);
-    if (projectOptionsLoading) return <p>Loading...</p>;
 
-
-    // console.log('projectOptions', projectOptions);
-
-    if(!formData) return <p>Loading form...</p>
+    if (!formData || projectOptionsLoading) return <p>Loading form...</p>
 
     return (
         <>

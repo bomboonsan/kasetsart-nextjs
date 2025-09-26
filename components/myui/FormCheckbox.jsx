@@ -1,7 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
-export default function FormCheckbox({ id = Math.floor(Math.random() * 10000), onChange, options, label, ...props }) {
+export default function FormCheckbox({ id , onChange, options, label, ...props }) {
     return (
         <div className="space-y-1 flex items-center forminput">
             {label && <div className="w-1/3">

@@ -53,7 +53,7 @@ export default function FormSelect({
 
             <div className="flex-1 space-x-3 flex gap-4 items-center">
                 <Select
-                    value={selectValue}
+                    value={selectValue || ''}
                     onValueChange={handleValueChange}
                     {...props}
                 >

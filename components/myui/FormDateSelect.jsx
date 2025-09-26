@@ -1,5 +1,5 @@
 import DateSelect from './DateSelect';
-export default function FormDateSelect({ id = Math.floor(Math.random() * 10000), label, durationStart, durationEnd, durationStartChange, durationEndChange, noDay = false, ...props }) {
+export default function FormDateSelect({ id , label, durationStart, durationEnd, durationStartChange, durationEndChange, noDay = false, ...props }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>

@@ -1,7 +1,7 @@
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
-export default function FormTextarea({ id = Math.floor(Math.random() * 10000), value, label, ...props }) {
+export default function FormTextarea({ id, value, label, ...props }) {
     return (
         <div className="space-y-1 flex items-start forminput">
             <div className="w-1/3">

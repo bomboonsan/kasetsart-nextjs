@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function FormDoubleInput({ id = Math.floor(Math.random() * 10000), before , after , value1 , value2, onChange1 , onChange2, type = "text", label, ...props }) {
+export default function FormDoubleInput({ id , before , after , value1 , value2, onChange1 , onChange2, type = "text", label, ...props }) {
     return (
         <div className="space-y-1 flex items-center forminput">
             <div className="w-1/3">

@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function FormInput({ id = Math.floor(Math.random() * 10000), value, onChange, type = "text", label, ...props }) {
+export default function FormInput({ id , value, onChange, type = "text", label, ...props }) {
     return (
         <div className="space-y-1 flex items-center forminput">
             <div className="w-1/3">
