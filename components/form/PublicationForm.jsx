@@ -218,8 +218,12 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
 
     // Memoized callback functions for commonly used form field changes
     const handleProjectSelect = useCallback((project) => {
-        handleInputChange('__projectObj', project);
-    }, [handleInputChange]);
+        setFormData(prev => ({
+            ...prev,
+            __projectObj: project ?? null,
+            partners: Array.isArray(project?.partners) ? project.partners : [],
+        }));
+    }, [setFormData]);
 
     const handlePartnersChange = useCallback((partners) => {
         handleInputChange('partners', partners);
@@ -255,18 +259,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         return Array.isArray(formData.attachments) ? formData.attachments : [];
     }, [formData.attachments]);
     
-    // Fix partners update to prevent hydration issues
-    useEffect(() => {
-        if (!isHydrated || !formData.__projectObj) return;
-        
-        const currentPartners = formData.partners || [];
-        const projectPartners = formData.__projectObj.partners || [];
-        
-        // Only update if partners actually changed to prevent unnecessary re-renders
-        if (JSON.stringify(currentPartners) !== JSON.stringify(projectPartners)) {
-            setFormData((prev) => ({ ...prev, partners: projectPartners }));
-        }
-    }, [formData.__projectObj?.documentId, formData.__projectObj?.partners, formData.partners, isHydrated]);
 
     if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
     
