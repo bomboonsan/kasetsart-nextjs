@@ -327,15 +327,7 @@ export default function AdminUserEditPage({ params }) {
                         <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={selectData.departments?.map(d => ({ value: d.documentId, label: d.title })) || []} />
                         <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties?.map(f => ({ value: f.documentId, label: f.title })) || []} />
                         <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={selectData.organizations?.map(o => ({ value: o.documentId, label: o.title })) || []} />
-                    </div>
-                    <div className="flex gap-4">
-                        <Button type="submit" disabled={updateLoading}>
-                            {updateLoading ? 'กำลังบันทึก...' : 'บันทึก'}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={handleReset} disabled={updateLoading}>
-                            ยกเลิก
-                        </Button>
-                    </div>
+                    </div>                    
                 </div>
             </Block>
             <Block>
@@ -411,6 +403,15 @@ export default function AdminUserEditPage({ params }) {
                     </div>
                 </div>
             </Block>
+
+            <div className="flex gap-4 mt-4 justify-end">
+                <Button type="submit" disabled={updateLoading}>
+                    {updateLoading ? 'กำลังบันทึก...' : 'บันทึก'}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleReset} disabled={updateLoading}>
+                    ยกเลิก
+                </Button>
+            </div>
             {/* updateError removed: using REST alerts inline */}
         </form>
     );

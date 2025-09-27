@@ -12,7 +12,8 @@ export default async function ViewPublicationPage({ params }) {
       fetchPolicy: 'no-cache'
     });
     const pub = data?.publication;
-    if (!pub) redirect('/');
+    
+    
     return (
       <div className="max-w-5xl mx-auto py-6 space-y-4">
         <h1 className="text-xl font-semibold">รายละเอียดผลงานตีพิมพ์</h1>
