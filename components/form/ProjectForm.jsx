@@ -2,7 +2,7 @@
 import { useQuery, useMutation } from "@apollo/client/react";
 import toast from 'react-hot-toast';
 import React from 'react';
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { useSession } from "next-auth/react";
 import Block from '../layout/Block';
 import FormInput from '@/components/myui/FormInput';
@@ -17,6 +17,7 @@ import { PROJECT_FORM_INITIAL, researchKindOptions, fundTypeOptions, subFundType
 import { GET_PROJECT_OPTIONS } from '@/graphql/optionForm';
 import { CREATE_PROJECT, UPDATE_PROJECT } from '@/graphql/formQueries';
 
+// Move utility functions outside component to prevent re-creation
 const normalizeId = (value) => {
     if (value === undefined || value === null || value === '') return null;
     const numeric = Number(value);
@@ -55,26 +56,39 @@ const stripTypenameDeep = (input) => {
     return input;
 };
 
+const extractAttachmentIds = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr
+        .filter(a => a && (a.documentId || a.id))
+        .map(a => normalizeId(a.documentId ?? a.id))
+        .filter(Boolean);
+};
+
 export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session, status } = useSession();
     const [formData, setFormData] = useState(PROJECT_FORM_INITIAL);
-    const [fundSubTypeOptions, setFundSubTypeOptions] = useState([]);
     const [icTypesOptions, setIcTypesOptions] = useState([]);
     const [impactsOptions, setImpactsOptions] = useState([]);
     const [sdgsOptions, setSdgsOptions] = useState([]);
     const [departmentsOptions, setDepartmentsOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const isEditing = isEdit || Boolean(initialData?.documentId);
+    
+    // Memoize computed values
+    const isEditing = useMemo(() => isEdit || Boolean(initialData?.documentId), [isEdit, initialData?.documentId]);
+    
     // เก็บ attachments เดิมเพื่อเช็คความเปลี่ยนแปลงเวลา update
     const originalAttachmentIdsRef = useRef([]);
 
-    const extractAttachmentIds = (arr) => {
-        if (!Array.isArray(arr)) return [];
-        return arr
-            .filter(a => a && (a.documentId || a.id))
-            .map(a => normalizeId(a.documentId ?? a.id))
-            .filter(Boolean);
-    };
+    // Memoize fund sub type options based on fund type
+    const fundSubTypeOptions = useMemo(() => {
+        switch(formData.fundType) {
+            case "12": return subFundType1;
+            case "11": return subFundType2;
+            case "13": return subFundType3;
+            case "10": return subFundType4;
+            default: return [];
+        }
+    }, [formData.fundType]);
 
     const [createProject] = useMutation(CREATE_PROJECT, {
         context: {
@@ -86,6 +100,10 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             toast.success('บันทึกโครงการสำเร็จแล้ว!');
             // Reset form or redirect as needed
             setFormData(PROJECT_FORM_INITIAL);
+        },
+        onError: (error) => {
+            console.error('Create project error:', error);
+            toast.error('เกิดข้อผิดพลาดในการสร้างโครงการ: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
         }
     });
 
@@ -94,21 +112,27 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             headers: {
                 Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
             }
+        },
+        onError: (error) => {
+            console.error('Update project error:', error);
+            toast.error('เกิดข้อผิดพลาดในการอัปเดตโครงการ: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
         }
     });
 
-    const handleInputChange = (field, value) => {
+    // Memoize input change handler to prevent re-renders
+    const handleInputChange = useCallback((field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
-    const handleSubmit = async () => {
+    // Memoize submit handler to prevent re-creation
+    const handleSubmit = useCallback(async () => {
         if (!session?.jwt) {
             toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
 
         // Basic validation
-        if (!formData.nameTH.trim()) {
+        if (!formData.nameTH?.trim()) {
             toast.error('กรุณากรอกชื่อโครงการภาษาไทย');
             return;
         }
@@ -123,14 +147,14 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         try {
             const usersPermissionsUsers = Array.isArray(formData.partners)
                 ? formData.partners
-                    .filter(p => p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
+                    .filter(p => p?.isInternal && (p?.userID || p?.User?.documentId || p?.User?.id))
                     .map(p => normalizeId(p.userID ?? p.User?.documentId ?? p.User?.id))
                     .filter(Boolean)
                 : [];
 
             const attachmentIds = Array.from(new Set(extractAttachmentIds(formData.attachments)));
 
-            const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
+            const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort();
             const currentIdsSorted = [...attachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
@@ -144,8 +168,8 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 projectType: formData.projectType || null,
                 projectMode: formData.projectMode || null,
                 subProjectCount: formData.subProjectCount,
-                nameTH: formData.nameTH.trim() || null,
-                nameEN: formData.nameEN.trim() || null,
+                nameTH: formData.nameTH?.trim() || null,
+                nameEN: formData.nameEN?.trim() || null,
                 isEnvironmentallySustainable: formData.isEnvironmentallySustainable || null,
                 durationStart: formData.durationStart || null,
                 durationEnd: formData.durationEnd || null,
@@ -164,14 +188,12 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 users_permissions_users: usersPermissionsUsers.length ? Array.from(new Set(usersPermissionsUsers)) : undefined
             };
 
-
-            // Remove null values to avoid issues
+            // Remove null/undefined values to avoid issues
             Object.keys(projectData).forEach(key => {
                 if (projectData[key] === undefined || projectData[key] === null || projectData[key] === "") {
                     delete projectData[key];
                 }
             });
-
 
             // Sanitize projectData to avoid sending BigInt values (GraphQL cannot serialize BigInt)
             if (isEditing && !attachmentsChanged) {
@@ -211,9 +233,9 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [session?.jwt, formData, isEditing, initialData?.documentId, onSubmit, updateProject, createProject]);
 
-    // hydrate when editing
+    // hydrate when editing - memoize to prevent unnecessary re-renders
     useEffect(() => {
         if (initialData) {
             const normalizedIcType = normalizeId(initialData.ic_types?.[0]?.documentId ?? initialData.icTypes);
@@ -232,45 +254,78 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             setFormData(hydrated);
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
         }
-    }, [initialData]);
+    }, [initialData]); // Only depend on initialData, not its nested properties
 
-    useEffect(() => {
-        if (formData.fundType == "12") {
-            setFundSubTypeOptions(subFundType1);
-        } else if (formData.fundType == "11") {
-            setFundSubTypeOptions(subFundType2);
-        } else if (formData.fundType == "13") {
-            setFundSubTypeOptions(subFundType3);
-        } else if (formData.fundType == "10") {
-            setFundSubTypeOptions(subFundType4);
-        } else {
-            setFundSubTypeOptions([]);
-        }
-    }, [formData.fundType]);
-
-    const { data: projectOptions, loading: projectOptionsLoading } = useQuery(GET_PROJECT_OPTIONS, {
+    const { data: projectOptions, loading: projectOptionsLoading, error: projectOptionsError } = useQuery(GET_PROJECT_OPTIONS, {
         skip: status !== 'authenticated',
         context: {
             headers: {
                 Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
             }
+        },
+        onError: (error) => {
+            console.error('Project options query error:', error);
+            toast.error('เกิดข้อผิดพลาดในการโหลดตัวเลือก: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
         }
     });
-    useEffect(() => {
-        if (projectOptions) {
-            setIcTypesOptions((projectOptions.icTypes ?? []).map(ic => ({ value: String(ic.documentId), label: ic.name })));
-            setImpactsOptions((projectOptions.impacts ?? []).map(imp => ({ value: String(imp.documentId), label: imp.name })));
-            setSdgsOptions((projectOptions.sdgs ?? []).map(sdg => ({ value: String(sdg.documentId), label: sdg.name })));
-            setDepartmentsOptions((projectOptions.departments ?? []).map(dep => ({ value: String(dep.documentId), label: dep.title })));
-        } else {
-            setIcTypesOptions([]);
-            setImpactsOptions([]);
-            setSdgsOptions([]);
-            setDepartmentsOptions([]);
+    
+    // Memoize options processing to prevent unnecessary recalculations
+    const memoizedOptions = useMemo(() => {
+        if (!projectOptions) {
+            return {
+                icTypes: [],
+                impacts: [],
+                sdgs: [],
+                departments: []
+            };
         }
+        
+        return {
+            icTypes: (projectOptions.icTypes ?? []).map(ic => ({ 
+                value: String(ic.documentId), 
+                label: ic.name 
+            })),
+            impacts: (projectOptions.impacts ?? []).map(imp => ({ 
+                value: String(imp.documentId), 
+                label: imp.name 
+            })),
+            sdgs: (projectOptions.sdgs ?? []).map(sdg => ({ 
+                value: String(sdg.documentId), 
+                label: sdg.name 
+            })),
+            departments: (projectOptions.departments ?? []).map(dep => ({ 
+                value: String(dep.documentId), 
+                label: dep.title 
+            }))
+        };
     }, [projectOptions]);
+    
+    // Update options state only when memoizedOptions change
+    useEffect(() => {
+        setIcTypesOptions(memoizedOptions.icTypes);
+        setImpactsOptions(memoizedOptions.impacts);
+        setSdgsOptions(memoizedOptions.sdgs);
+        setDepartmentsOptions(memoizedOptions.departments);
+    }, [memoizedOptions]);
 
-    if (!formData || projectOptionsLoading) return <p>Loading form...</p>
+    // Early return with loading state and error handling
+    if (status === 'loading' || projectOptionsLoading) {
+        return <div className="flex items-center justify-center p-8">
+            <p>Loading form...</p>
+        </div>;
+    }
+
+    if (projectOptionsError) {
+        return <div className="flex items-center justify-center p-8">
+            <p className="text-red-600">Error loading form options. Please refresh the page.</p>
+        </div>;
+    }
+
+    if (!formData) {
+        return <div className="flex items-center justify-center p-8">
+            <p>Initializing form...</p>
+        </div>;
+    }
 
     return (
         <> 
