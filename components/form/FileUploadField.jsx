@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { API_BASE } from '@/lib/api-base'
 import { useSession } from "next-auth/react";
 import toast from 'react-hot-toast'
@@ -27,84 +27,94 @@ export default function FileUploadField({
     // ซิงค์ค่าจากภายนอก (กรณีแก้ไข/รีเฟรช state จาก parent)
     // ป้องกันการเรียก setAttachments ซ้ำๆ เมื่อ prop `value` มี reference ใหม่แต่ข้อมูลเดิม
     const lastAppliedRef = useRef(JSON.stringify(value || []))
-    useEffect(() => {
+    
+    // Memoize the normalization of incoming value to prevent unnecessary recalculations
+    const normalizedIncomingValue = useMemo(() => {
         try {
-            const incoming = JSON.stringify(value || [])
-            if (incoming !== lastAppliedRef.current) {
-                lastAppliedRef.current = incoming
-                // ปรับให้รองรับทั้งข้อมูลจาก upload ใหม่และข้อมูลจาก GraphQL
-                const normalizedAttachments = (Array.isArray(value) ? value : []).map(file => {
-                    if (!file) return null
-                    // รักษา id / documentId ทั้งสองกรณี เพื่อให้ parent สามารถใช้ได้
-                    const hasGraphQLId = file.documentId
-                    const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
-                    const url = needsUrlNormalization ? `${API_BASE}${file.url}` : file.url
-                    return {
-                        id: file.id ?? file.documentId ?? file.document_id, // รองรับ field ต่างรูปแบบ
-                        documentId: file.documentId ?? file.document_id ?? file.id,
-                        name: file.name || file.filename || 'unnamed-file',
-                        url: url || '',
-                        size: file.size,
-                        mime: file.mime || file.mimetype,
-                    }
-                }).filter(Boolean)
-                setAttachments(normalizedAttachments)
-            }
-        } catch (e) {
-            // หาก stringify ล้มเหลว ให้ fallback เป็นการเซ็ตปกติ (ใช้ logic เดียวกัน)
-            const normalizedAttachments = (Array.isArray(value) ? value : []).map(file => {
+            if (!Array.isArray(value)) return []
+            
+            return value.map(file => {
                 if (!file) return null
+                
+                const hasGraphQLId = file.documentId
                 const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
-                const url = needsUrlNormalization ? `${API_BASE}${file.url}` : file.url
+                const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || '')
+                
                 return {
-                    id: file.id ?? file.documentId ?? file.document_id,
+                    id: file.id ?? file.documentId ?? file.document_id, // รองรับ field ต่างรูปแบบ
                     documentId: file.documentId ?? file.document_id ?? file.id,
                     name: file.name || file.filename || 'unnamed-file',
-                    url: url || '',
+                    url: url,
                     size: file.size,
                     mime: file.mime || file.mimetype,
                 }
             }).filter(Boolean)
-            setAttachments(normalizedAttachments)
+        } catch (error) {
+            console.warn('Error normalizing incoming value:', error)
+            return []
         }
-        // หมายเหตุ: ใช้เฉพาะ `value` เป็น dependency เพื่อลด risk ของ loop
     }, [value])
 
+    useEffect(() => {
+        try {
+            const incoming = JSON.stringify(normalizedIncomingValue)
+            if (incoming !== lastAppliedRef.current) {
+                lastAppliedRef.current = incoming
+                setAttachments(normalizedIncomingValue)
+            }
+        } catch (error) {
+            console.warn('Error in value sync effect:', error)
+            // Fallback to direct assignment without stringification
+            setAttachments(normalizedIncomingValue)
+        }
+    }, [normalizedIncomingValue])
+
     // helper: normalize attachment object shape to consistent minimal representation
-    const parseId = (v) => {
+    const parseId = useCallback((v) => {
         if (v === undefined || v === null) return null
         const n = Number(v)
         return Number.isFinite(n) ? n : null
-    }
+    }, [])
 
-    const normalize = (file) => {
+    const normalize = useCallback((file) => {
         if (!file) return null
-        const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
-        const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || file.preview || '')
-        const name = file.name || file.filename || file.alternativeText || file.caption || 'unnamed-file'
-        const idNum = parseId(file.id ?? file.documentId ?? file.document_id)
-        const docIdNum = parseId(file.documentId ?? file.document_id ?? file.id)
-        return {
-            id: idNum,
-            documentId: docIdNum,
-            name,
-            url,
-            size: file.size,
-            mime: file.mime || file.mimetype,
+        try {
+            const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
+            const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || file.preview || '')
+            const name = file.name || file.filename || file.alternativeText || file.caption || 'unnamed-file'
+            const idNum = parseId(file.id ?? file.documentId ?? file.document_id)
+            const docIdNum = parseId(file.documentId ?? file.document_id ?? file.id)
+            return {
+                id: idNum,
+                documentId: docIdNum,
+                name,
+                url,
+                size: file.size,
+                mime: file.mime || file.mimetype,
+            }
+        } catch (error) {
+            console.warn('Error normalizing file:', error, file)
+            return null
         }
-    }
+    }, [parseId])
 
-    const dedupe = (arr) => {
-        const seen = new Map()
-        for (const a of arr || []) {
-            const key = a?.documentId ?? a?.id ?? a?.url ?? a?.name ?? JSON.stringify(a)
-            if (!key) continue
-            if (!seen.has(key)) seen.set(key, a)
+    const dedupe = useCallback((arr) => {
+        try {
+            const seen = new Map()
+            for (const a of arr || []) {
+                if (!a) continue
+                const key = a?.documentId ?? a?.id ?? a?.url ?? a?.name ?? JSON.stringify(a)
+                if (!key) continue
+                if (!seen.has(key)) seen.set(key, a)
+            }
+            return Array.from(seen.values())
+        } catch (error) {
+            console.warn('Error deduplicating files:', error)
+            return arr || []
         }
-        return Array.from(seen.values())
-    }
+    }, [])
 
-    const doUpload = async (fileList) => {
+    const doUpload = useCallback(async (fileList) => {
         const filesArray = Array.from(fileList)
         if (filesArray.length === 0) return
         // เก็บไฟล์ที่ผู้ใช้เพิ่งเลือกเพื่อแสดง (ไม่จำเป็นต้องเก็บทั้งหมด)
@@ -138,35 +148,47 @@ export default function FileUploadField({
             const newAttachments = (Array.isArray(uploadedFiles) ? uploadedFiles : []).map(normalize).filter(Boolean)
 
             // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
-            const merged = dedupe([...attachments, ...newAttachments])
-            setAttachments(merged)
-            // แจ้ง parent ด้วยรายการรวม (normalized)
-            try {
-                onFilesChange && onFilesChange(merged)
-            } catch (e) {
-                console.warn('onFilesChange threw', e)
-            }
+            setAttachments(prevAttachments => {
+                const merged = dedupe([...prevAttachments, ...newAttachments])
+                // แจ้ง parent ด้วยรายการรวม (normalized)
+                try {
+                    onFilesChange?.(merged)
+                } catch (e) {
+                    console.warn('onFilesChange threw', e)
+                }
+                return merged
+            })
+            
             // success toast
             if (newAttachments.length > 0) {
                 toast.success(`อัปโหลด ${newAttachments.length} ไฟล์สำเร็จ`)
             }
         } catch (err) {
-            setError('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message)
-            toast.error('อัปโหลดไฟล์ไม่สำเร็จ: ' + err.message)
+            const errorMessage = err?.message || 'Unknown error occurred'
+            setError('อัปโหลดไฟล์ไม่สำเร็จ: ' + errorMessage)
+            toast.error('อัปโหลดไฟล์ไม่สำเร็จ: ' + errorMessage)
         } finally {
             setUploading(false)
         }
-    }
+    }, [session?.jwt, normalize, dedupe, onFilesChange])
 
-    const removeAttachment = (idx) => {
+    const removeAttachment = useCallback((idx) => {
         // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
-        const next = attachments.filter((_, i) => i !== idx)
-        const normalized = dedupe(next.map(normalize).filter(Boolean))
-        setAttachments(normalized)
-        onFilesChange && onFilesChange(normalized)
-    }
+        setAttachments(prevAttachments => {
+            const next = prevAttachments.filter((_, i) => i !== idx)
+            const normalized = dedupe(next.map(normalize).filter(Boolean))
+            
+            try {
+                onFilesChange?.(normalized)
+            } catch (e) {
+                console.warn('onFilesChange threw in removeAttachment', e)
+            }
+            
+            return normalized
+        })
+    }, [dedupe, normalize, onFilesChange])
 
-    const handleDrag = (e) => {
+    const handleDrag = useCallback((e) => {
         e.preventDefault()
         e.stopPropagation()
         if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -174,24 +196,35 @@ export default function FileUploadField({
         } else if (e.type === 'dragleave') {
             setDragActive(false)
         }
-    }
+    }, [])
 
-    const handleDrop = (e) => {
+    const handleDrop = useCallback((e) => {
         e.preventDefault()
         e.stopPropagation()
         setDragActive(false)
 
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        if (e.dataTransfer?.files?.[0]) {
             doUpload(e.dataTransfer.files)
         }
-    }
+    }, [doUpload])
 
-    const handleChange = (e) => {
+    const handleChange = useCallback((e) => {
         e.preventDefault()
-        if (e.target.files && e.target.files[0]) {
+        if (e.target?.files?.[0]) {
             doUpload(e.target.files)
         }
-    }
+    }, [doUpload])
+
+    const handleClick = useCallback(() => {
+        try {
+            const el = document.getElementById(`file-upload-field-input-${instanceIdRef.current}`)
+            if (el && typeof el.click === 'function') {
+                el.click()
+            }
+        } catch (error) {
+            console.warn('Error clicking file input:', error)
+        }
+    }, [])
 
     return (
         <div className="space-y-2 pb-4">
@@ -213,10 +246,7 @@ export default function FileUploadField({
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
-                onClick={() => {
-                    const el = document.getElementById(`file-upload-field-input-${instanceIdRef.current}`)
-                    if (el && typeof el.click === 'function') el.click()
-                }}
+                onClick={handleClick}
             >
                 <input
                     id={`file-upload-field-input-${instanceIdRef.current}`}
@@ -250,56 +280,72 @@ export default function FileUploadField({
 
             {/* File List */}
             {/* แสดงรายการไฟล์ที่อัปโหลดแล้วแบบสะสม */}
-                    {attachments.length > 0 && (
-                <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">ไฟล์ที่อัปโหลดแล้ว:</p>
-                    <ul className="space-y-1">
-                        {attachments.map((file, index) => {
-                            // สร้าง href ที่ปลอดภัยสำหรับทั้งไฟล์จาก upload ใหม่และจาก GraphQL
-                            const href = (() => {
-                                if (!file?.url) return '#'
-                                return file.url.startsWith('http') ? file.url : `${API_BASE}${file.url}`
-                            })()
-                            
-                            return (
-                                <li key={file.documentId ?? file.id ?? file.url ?? index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
-                                    <div className="flex-1 truncate">
-                                        <a
-                                            href={href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline"
+            {useMemo(() => {
+                if (attachments.length === 0) return null
+                
+                return (
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-700">ไฟล์ที่อัปโหลดแล้ว:</p>
+                        <ul className="space-y-1">
+                            {attachments.map((file, index) => {
+                                // สร้าง href ที่ปลอดภัยสำหรับทั้งไฟล์จาก upload ใหม่และจาก GraphQL
+                                const href = (() => {
+                                    try {
+                                        if (!file?.url) return '#'
+                                        return file.url.startsWith('http') ? file.url : `${API_BASE}${file.url}`
+                                    } catch (error) {
+                                        console.warn('Error constructing file href:', error, file)
+                                        return '#'
+                                    }
+                                })()
+                                
+                                const fileName = file?.name || 'ไฟล์ไม่มีชื่อ'
+                                const fileId = file?.documentId ?? file?.id
+                                const fileSize = typeof file?.size === 'number' && !Number.isNaN(file.size) 
+                                    ? `${(file.size / 1024 / 1024).toFixed(2)} MB` 
+                                    : null
+                                const fileMime = file?.mime || null
+                                
+                                return (
+                                    <li key={fileId ?? file?.url ?? index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
+                                        <div className="flex-1 truncate">
+                                            <a
+                                                href={href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline"
+                                            >
+                                                {fileName}
+                                            </a>
+                                            {fileId && (
+                                                <span className="text-xs text-gray-300 ml-2"># {fileId}</span>
+                                            )}
+                                            {fileSize && (
+                                                <span className="text-xs text-gray-400 ml-2">
+                                                    {fileSize}
+                                                </span>
+                                            )}
+                                            {fileMime && (
+                                                <span className="text-xs text-gray-400 ml-2">
+                                                    ({fileMime})
+                                                </span>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeAttachment(index)}
+                                            className="text-red-600 text-xs hover:underline"
                                         >
-                                            {file.name || 'ไฟล์ไม่มีชื่อ'}
-                                        </a>
-                                        {(file.documentId || file.id) && (
-                                            <span className="text-xs text-gray-300 ml-2"># {(file.documentId || file.id)}</span>
-                                        )}
-                                        {typeof file.size === 'number' && !Number.isNaN(file.size) && (
-                                            <span className="text-xs text-gray-400 ml-2">
-                                                {(file.size / 1024 / 1024).toFixed(2)} MB
-                                            </span>
-                                        )}
-                                        {file.mime && (
-                                            <span className="text-xs text-gray-400 ml-2">
-                                                ({file.mime})
-                                            </span>
-                                        )}
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeAttachment(index)}
-                                        className="text-red-600 text-xs hover:underline"
-                                    >
-                                        ลบ
-                                    </button>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                    {error && <div className="text-sm text-red-600">{error}</div>}
-                </div>
-            )}
+                                            ลบ
+                                        </button>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                        {error && <div className="text-sm text-red-600">{error}</div>}
+                    </div>
+                )
+            }, [attachments, error, removeAttachment])}
         </div>
     )
 }
