@@ -122,8 +122,8 @@ export default function PublicationTable() {
                                 <TableCell className={'px-5'}>{getLevelText(p.level)}</TableCell>
                                 <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/admin/form/publication/view/${p.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/publication/edit/${p.documentId}`}>แก้ไข</a>
+                                    <a className="text-blue-600 mr-3" href={`/form/publication/view/${p.documentId}`}>ดู</a>
+                                    <a className="text-green-600" href={`/form/publication/edit/${p.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}

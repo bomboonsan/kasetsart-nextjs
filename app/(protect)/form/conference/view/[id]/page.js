@@ -117,7 +117,7 @@ export default function ConferenceView() {
                             {conference.attachments && conference.attachments.length > 0 ? (
                                 conference.attachments.map((file) => (
                                     <div key={file.documentId || file.id}>
-                                        <a href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                        <a href={`${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338'}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                             {file.name} ({(file.size / 1024).toFixed(2)} KB)
                                         </a>
                                     </div>

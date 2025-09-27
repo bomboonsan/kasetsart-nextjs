@@ -11,7 +11,7 @@ import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
 
-export default function ConferenceView() {
+export default function AdminConferenceView() {
     const params = useParams()
     const router = useRouter()
     const { data: session } = useSession()
@@ -79,7 +79,7 @@ export default function ConferenceView() {
 
     return (
         <div>
-            <Pageheader title="ข้อมูลการประชุม" />
+            <Pageheader title="รายละเอียดการประชุม" />
             {loading && <div className="p-6">Loading...</div>}
             {error && <div className="p-6 text-red-600">โหลดข้อมูลผิดพลาด: {error.message}</div>}
             {conference && (
@@ -117,7 +117,7 @@ export default function ConferenceView() {
                             {conference.attachments && conference.attachments.length > 0 ? (
                                 conference.attachments.map((file) => (
                                     <div key={file.documentId || file.id}>
-                                        <a href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                        <a href={`${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338'}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                             {file.name} ({(file.size / 1024).toFixed(2)} KB)
                                         </a>
                                     </div>
