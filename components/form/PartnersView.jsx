@@ -11,7 +11,6 @@ export default function PartnersView({ data }) {
     useEffect(() => {
         // Initialize with sorted data from props
         const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.order - b.order) : [];
-        console.log('Initializing Partners with data:', sortedData);
         setDisplayRows(sortedData);
     }, [data]);
 

@@ -70,7 +70,6 @@ export default function ReportTableE() {
         fetchPolicy: 'cache-and-network',
     })
 
-    console.log("Report F data:", data)
 
     /**
      * สร้างแถว: เดินทุก project → เดินทุก conference

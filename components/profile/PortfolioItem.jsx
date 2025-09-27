@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function PublicationItem({ title, description, editLink, attachments }) {
-    console.log("PublicationItem attachments:", attachments);
     return (
         <div className="border-b border-b-gray-200 py-3 last:border-b-0">
             <div className="flex justify-between items-start gap-4">

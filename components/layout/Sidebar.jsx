@@ -139,7 +139,6 @@ export default function Sidebar() {
 		setOpenGroups((prev) => ({ ...prev, [id]: !prev[id] }));
 	}, []);
 
-	console.log("Sidebar roleName:", session);
 	// เงื่อนไขแสดงเมนูแอดมินตาม role
 	const showAdmin = useMemo(() => {
 		if (!roleName) return false;

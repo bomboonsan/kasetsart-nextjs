@@ -16,7 +16,6 @@ const TYPE_TABS = [
 
 
 export default function ProfilePortfolio({ data }) {
-    console.log("ProfilePortfolio data:", data);
     const [conferences, setConferences] = useState([]);
     const [publications, setPublications] = useState([]);
     const [books, setBooks] = useState([]);

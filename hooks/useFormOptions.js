@@ -155,12 +155,7 @@ export function useFormOptions(session) {
                         fetchFaculties(token),
                         fetchOrganizations(token),
                     ]);
-                    console.log("Fetched form options:", {
-                        academicTypesData,
-                        departmentsData,
-                        facultiesData,
-                        organizationsData,
-                    });
+                    
 
                     setOptions({
                         academicTypes: academicTypesData,

@@ -76,7 +76,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
         ...mutationOptions,
         onCompleted: (data) => {
-            console.log('Project partners updated successfully:', data);
         },
         onError: (error) => {
             console.error('Error updating project partners:', error);
@@ -86,7 +85,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     const [createConference] = useMutation(CREATE_CONFERENCE, {
         ...mutationOptions,
         onCompleted: (data) => {
-            console.log('Conference created successfully:', data);
         },
         onError: (error) => {
             console.error('Error creating conference:', error);
@@ -97,7 +95,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     const handleInputChange = useCallback((field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         if (field === 'partners') {
-            console.log('Partners updated in ConferenceForm:', value);
         }
     }, []);
 
@@ -175,7 +172,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 delete conferenceData.attachments;
             }
 
-            console.log('Conference data:', conferenceData, { attachmentsChanged, original: originalAttachmentIdsRef.current, current: currentIds });
 
             // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
             if (isEdit && onSubmit) {
@@ -187,7 +183,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                         data: conferenceData
                     }
                 });
-                console.log('Conference created:', conferenceResult);
                 toast.success('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
                 // Reset form only for create
                 setFormData(CONFERENCE_FORM_INITIAL);
@@ -203,7 +198,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                         }
                     }
                 });
-                console.log('Project partners updated successfully');
             }
             
         } catch (error) {
@@ -321,7 +315,6 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         keywords: formData.keywords ?? "",
         attachments: Array.isArray(formData.attachments) ? formData.attachments : []
     }), [formData]);
-    console.log('formData', formData);
     return (
         <>
             <Block> 

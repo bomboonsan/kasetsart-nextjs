@@ -13,7 +13,6 @@ function MyForm() {
     const [partnersData, setPartnersData] = useState([]);
 
     const handlePartnersChange = (newData) => {
-        console.log('Partners updated:', newData);
         setPartnersData(newData);
     };
 

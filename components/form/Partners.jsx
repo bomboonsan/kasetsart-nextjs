@@ -32,13 +32,11 @@ export default function Partners({ data, onChange }) {
     useEffect(() => {
         // Initialize with sorted data from props with null safety
         if (!data) {
-            console.log('No data provided, initializing with empty array');
             setDisplayRows([]);
             return;
         }
         
         const sortedData = Array.isArray(data) ? [...data].sort((a, b) => (a?.order || 0) - (b?.order || 0)) : [];
-        console.log('Initializing Partners with data:', sortedData);
         setDisplayRows(sortedData);
     }, [data]);
 
@@ -169,7 +167,6 @@ export default function Partners({ data, onChange }) {
         return modalOrgName || '';
     }, [modalUserObj, modalOrgName]);
 
-    console.log('modalUserObj:', modalUserObj);
 
     return (
         <>

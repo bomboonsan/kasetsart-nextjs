@@ -74,7 +74,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
         context: { headers: { Authorization: session?.jwt ? `Bearer ${session?.jwt}` : '' } },
         onCompleted: (data) => {
-            console.log('Project partners updated successfully:', data);
         },
         onError: (error) => {
             console.error('Error updating project partners:', error);
@@ -139,7 +138,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
             if (isEdit && !attachmentsChanged) delete data.attachments;
 
-            console.log('Submitting publication data:', data);
 
             if (isEdit && onSubmit) {
                 await onSubmit(data);
@@ -256,7 +254,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     }, [formData.__projectObj?.documentId, formData.__projectObj?.partners]);
 
     if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
-    console.log('Render PublicationForm', { formData });
 
     return (
         <>
