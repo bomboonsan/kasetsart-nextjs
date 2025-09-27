@@ -20,9 +20,15 @@ import toast from 'react-hot-toast';
 
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
+    const [isHydrated, setIsHydrated] = useState(false);
     const [formData, setFormData] = useState(PUBLICATION_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const originalAttachmentIdsRef = useRef([]);
+    
+    // Handle hydration
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
 
     // Memoize helper functions
     const extractAttachmentIds = useCallback((arr) => {
@@ -48,7 +54,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     const toSelectOptions = useCallback((arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label })), []);
 
     useEffect(() => {
-        if (initialData) {
+        if (initialData && isHydrated) {
             const hydrated = {
                 ...PUBLICATION_FORM_INITIAL,
                 ...initialData,
@@ -61,7 +67,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             setFormData(hydrated);
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
         }
-    }, [initialData, extractAttachmentIds]);
+    }, [initialData, extractAttachmentIds, isHydrated]);
 
     const [createPublication] = useMutation(CREATE_PUBLICATION, {
         context: { headers: { Authorization: session?.jwt ? `Bearer ${session?.jwt}` : '' } },
@@ -248,12 +254,26 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     const attachmentsArray = useMemo(() => {
         return Array.isArray(formData.attachments) ? formData.attachments : [];
     }, [formData.attachments]);
+    
+    // Fix partners update to prevent hydration issues
     useEffect(() => {
-        if (!formData.__projectObj) return;
-        setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
-    }, [formData.__projectObj?.documentId, formData.__projectObj?.partners]);
+        if (!isHydrated || !formData.__projectObj) return;
+        
+        const currentPartners = formData.partners || [];
+        const projectPartners = formData.__projectObj.partners || [];
+        
+        // Only update if partners actually changed to prevent unnecessary re-renders
+        if (JSON.stringify(currentPartners) !== JSON.stringify(projectPartners)) {
+            setFormData((prev) => ({ ...prev, partners: projectPartners }));
+        }
+    }, [formData.__projectObj?.documentId, formData.__projectObj?.partners, formData.partners, isHydrated]);
 
     if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
+    
+    // Prevent hydration mismatch by not rendering complex form until hydrated
+    if (!isHydrated) {
+        return <div className="p-6">Loading...</div>;
+    }
 
     return (
         <>
