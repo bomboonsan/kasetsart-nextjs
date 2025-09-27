@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Block from '../layout/Block';
 import FormInput from '../myui/FormInput';
 import FormSelect from '../myui/FormSelect';
@@ -20,22 +20,29 @@ export default function Partners({ data, onChange }) {
     const [modalPartnerProportionCustom, setModalPartnerProportionCustom] = useState('');
     const [modalPartnerCommentArr, setModalPartnerCommentArr] = useState([]);
     const [editingIndex, setEditingIndex] = useState(null);
-    const [hasFirstAuthor, setHasFirstAuthor] = useState(false);
-    const [hasCorresponding, setHasCorresponding] = useState(false);
-
-    useEffect(() => {
-        setHasFirstAuthor(displayRows.some(p => p.partnerComment?.includes('First Author')));
-        setHasCorresponding(displayRows.some(p => p.partnerComment?.includes('Corresponding Author')));
+    // Use useMemo to prevent recalculation on every render
+    const hasFirstAuthor = useMemo(() => {
+        return displayRows.some(p => p.partnerComment?.includes('First Author'));
+    }, [displayRows]);
+    
+    const hasCorresponding = useMemo(() => {
+        return displayRows.some(p => p.partnerComment?.includes('Corresponding Author'));
     }, [displayRows]);
 
     useEffect(() => {
-        // Initialize with sorted data from props
-        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => a.order - b.order) : [];
+        // Initialize with sorted data from props with null safety
+        if (!data) {
+            console.log('No data provided, initializing with empty array');
+            setDisplayRows([]);
+            return;
+        }
+        
+        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => (a?.order || 0) - (b?.order || 0)) : [];
         console.log('Initializing Partners with data:', sortedData);
         setDisplayRows(sortedData);
     }, [data]);
 
-    const handleDataChange = (newRows) => {
+    const handleDataChange = useCallback((newRows) => {
         // assign order
         let sortedRows = newRows.map((row, index) => ({ ...row, order: index + 1 }));
 
@@ -55,9 +62,9 @@ export default function Partners({ data, onChange }) {
         if (onChange) {
             onChange(sortedRows);
         }
-    };
+    }, [onChange]);
 
-    const resetForm = () => {
+    const resetForm = useCallback(() => {
         setModalIsInternal(true);
         setModalUserObj(null);
         setModalPartnerFullName('');
@@ -67,9 +74,9 @@ export default function Partners({ data, onChange }) {
         setModalPartnerCommentArr([]);
         setEditingIndex(null);
         setDialogOpen(false);
-    };
+    }, []);
 
-    const handleAddPartner = () => {
+    const handleAddPartner = useCallback(() => {
         const newPartner = {
             id: editingIndex !== null ? displayRows[editingIndex].id : Date.now(), // Generate ID if creating new
             userID: modalUserObj ? modalUserObj.id : undefined,
@@ -94,9 +101,9 @@ export default function Partners({ data, onChange }) {
         handleDataChange(newRows);
         resetForm();
         // dialog controlled by React state; resetForm will close it
-    };
+    }, [displayRows, editingIndex, modalUserObj, modalPartnerFullName, modalOrgName, modalPartnerType, modalPartnerProportionCustom, modalPartnerCommentArr, modalIsInternal, handleDataChange, resetForm]);
 
-    const handleEditPartner = (index) => {
+    const handleEditPartner = useCallback((index) => {
         const partner = displayRows[index];
         setEditingIndex(index);
         setModalIsInternal(partner.isInternal);
@@ -107,26 +114,60 @@ export default function Partners({ data, onChange }) {
         setModalPartnerProportionCustom(partner.partnerProportion_percentage_custom || '');
         setModalPartnerCommentArr(partner.partnerComment ? partner.partnerComment.split(',').map(s => s.trim()) : []);
         setDialogOpen(true);
-    };
+    }, [displayRows]);
 
-    const handleRemovePartner = (index) => {
+    const handleRemovePartner = useCallback((index) => {
         const newRows = displayRows.filter((_, i) => i !== index);
         handleDataChange(newRows);
-    };
+    }, [displayRows, handleDataChange]);
 
-    const moveUp = (index) => {
+    const moveUp = useCallback((index) => {
         if (index === 0) return;
         const newRows = [...displayRows];
         [newRows[index - 1], newRows[index]] = [newRows[index], newRows[index - 1]];
         handleDataChange(newRows);
-    };
+    }, [displayRows, handleDataChange]);
 
-    const moveDown = (index) => {
+    const moveDown = useCallback((index) => {
         if (index === displayRows.length - 1) return;
         const newRows = [...displayRows];
         [newRows[index], newRows[index + 1]] = [newRows[index + 1], newRows[index]];
         handleDataChange(newRows);
-    };
+    }, [displayRows, handleDataChange]);
+
+    // Memoized options to prevent recreation on every render
+    const partnerTypeOptions = useMemo(() => [
+        { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
+        { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
+        { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
+        { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
+        { value: 'อื่นๆ', label: 'อื่นๆ' },
+    ], []);
+    const partnerDisplayName = useMemo(() => {
+        if (modalUserObj) {
+            return modalUserObj.firstNameTH && modalUserObj.lastNameTH
+                ? `${modalUserObj.firstNameTH} ${modalUserObj.lastNameTH}`.trim()
+                : modalUserObj.email || '';
+        }
+        return modalPartnerFullName || '';
+    }, [modalUserObj, modalPartnerFullName]);
+
+    const organizationDisplayName = useMemo(() => {
+        if (modalUserObj) {
+            const orgParts = [];
+            if (modalUserObj.departments && modalUserObj.departments[0]?.name) orgParts.push(modalUserObj.departments[0].name);
+            if (modalUserObj.faculties && modalUserObj.faculties[0]?.name) orgParts.push(modalUserObj.faculties[0].name);
+            if (modalUserObj.organizations && modalUserObj.organizations[0]?.name) orgParts.push(modalUserObj.organizations[0].name);
+            // Fallback to old structure
+            if (orgParts.length === 0) {
+                if (modalUserObj.department?.name) orgParts.push(modalUserObj.department.name);
+                if (modalUserObj.faculty?.name) orgParts.push(modalUserObj.faculty.name);
+                if (modalUserObj.organization?.name) orgParts.push(modalUserObj.organization.name);
+            }
+            return orgParts.join(' ');
+        }
+        return modalOrgName || '';
+    }, [modalUserObj, modalOrgName]);
 
     console.log('modalUserObj:', modalUserObj);
 
@@ -172,26 +213,44 @@ export default function Partners({ data, onChange }) {
                                             <UserPicker
                                                 label="ผู้ร่วมโครงการวิจัย"
                                                 selectedUser={modalUserObj}
-                                                onSelect={(u) => {
-                                                    setModalUserObj(u)
-                                                    const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile
-                                                    const display = prof ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim() : u.email
-                                                    const org = [u.department?.name, u.faculty?.name, u.organization?.name].filter(Boolean).join(' ')
-                                                    setModalPartnerFullName(display)
-                                                    setModalOrgName(org)
-                                                }}
+                                                onSelect={useCallback((u) => {
+                                                    if (!u) {
+                                                        setModalUserObj(null);
+                                                        return;
+                                                    }
+                                                    setModalUserObj(u);
+                                                    
+                                                    // Safe access to profile
+                                                    const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile;
+                                                    const display = prof 
+                                                        ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim() 
+                                                        : (u.firstNameTH && u.lastNameTH 
+                                                            ? `${u.firstNameTH} ${u.lastNameTH}`.trim()
+                                                            : u.email || '');
+                                                    
+                                                    // Safe access to organization data
+                                                    const orgParts = [];
+                                                    if (u.departments && u.departments[0]?.name) orgParts.push(u.departments[0].name);
+                                                    if (u.faculties && u.faculties[0]?.name) orgParts.push(u.faculties[0].name);
+                                                    if (u.organizations && u.organizations[0]?.name) orgParts.push(u.organizations[0].name);
+                                                    // Fallback to old structure if new doesn't exist
+                                                    if (orgParts.length === 0) {
+                                                        if (u.department?.name) orgParts.push(u.department.name);
+                                                        if (u.faculty?.name) orgParts.push(u.faculty.name);
+                                                        if (u.organization?.name) orgParts.push(u.organization.name);
+                                                    }
+                                                    const org = orgParts.join(' ');
+                                                    
+                                                    setModalPartnerFullName(display);
+                                                    setModalOrgName(org);
+                                                }, [])}
                                             />
                                         </div>
                                         <div>
                                             <FormInput
                                                 label="ชื่อผู้ร่วมโครงการวิจัย"
                                                 type="text"
-                                                value={(() => {
-                                                    if (modalUserObj) {
-                                                        return modalUserObj.firstNameTH ? `${modalUserObj.firstNameTH || ''} ${modalUserObj.lastNameTH || ''}`.trim() : modalUserObj.email
-                                                    }
-                                                    return modalPartnerFullName || ''
-                                                })()}
+                                                value={partnerDisplayName}
                                                 readOnly={!!modalUserObj}
                                                 onChange={(value) => {
                                                     // allow manual name editing when internal but not linked to a user
@@ -203,16 +262,7 @@ export default function Partners({ data, onChange }) {
                                             <FormInput
                                                 label="ชื่อหน่วยงาน"
                                                 type="text"
-                                                value={(() => {
-                                                    if (modalUserObj) {
-                                                        return [
-                                                            modalUserObj.departments[0]?.name,
-                                                            modalUserObj.faculties[0]?.name,
-                                                            modalUserObj.organizations[0]?.name
-                                                        ].filter(Boolean).join(' ')
-                                                    }
-                                                    return modalOrgName || ''
-                                                })()}
+                                                value={organizationDisplayName}
                                                 readOnly={!!modalUserObj}
                                                 onChange={(value) => {
                                                     if (!modalUserObj) setModalOrgName(value)
@@ -250,13 +300,7 @@ export default function Partners({ data, onChange }) {
                                     onChange={(value) => setModalPartnerType(value)}
                                     className="max-w-lg"
                                     placeholder="เลือกประเภท"
-                                    options={[
-                                        { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
-                                        { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
-                                        { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
-                                        { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
-                                        { value: 'อื่นๆ', label: 'อื่นๆ' },
-                                    ]}
+                                    options={partnerTypeOptions}
                                 />
                             </div>
                             <div>
@@ -286,7 +330,7 @@ export default function Partners({ data, onChange }) {
                                     label="หมายเหตุ"
                                     inline={true}
                                     value={Array.isArray(modalPartnerCommentArr) ? modalPartnerCommentArr : (modalPartnerCommentArr ? String(modalPartnerCommentArr).split(',').map(s => s.trim()).filter(Boolean) : [])}
-                                    onChange={(e) => setModalPartnerCommentArr(e.target.value)}
+                                    onChange={(e) => setModalPartnerCommentArr(Array.isArray(e.target.value) ? e.target.value : [])}
                                     className="max-w-lg"
                                     options={[
                                         ...(!hasFirstAuthor || (Array.isArray(modalPartnerCommentArr) && modalPartnerCommentArr.includes('First Author')) ? [{ value: 'First Author', label: 'First Author' }] : []),
@@ -381,16 +425,16 @@ export default function Partners({ data, onChange }) {
                                         <div className="text-sm text-gray-900">{p.partnerComment || '-'}</div>
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap">
-                                        {p.partnerProportion_percentage_custom && (
+                                        {p.partnerProportion_percentage_custom && (p.partnerProportion_percentage_custom !== '' && p.partnerProportion_percentage_custom !== null) && (
                                             <div className="text-sm text-gray-900">
-                                                {(parseFloat(p.partnerProportion_percentage_custom))}%
+                                                {(parseFloat(p.partnerProportion_percentage_custom) || 0)}%
                                             </div>
                                         )}
                                     </td>
                                     <td className="px-4 py-4 whitespace-nowrap">
-                                        {p.partnerProportion && (
+                                        {p.partnerProportion && (p.partnerProportion !== '' && p.partnerProportion !== null) && (
                                             <div className="text-sm text-gray-900">
-                                                {(Number(p.partnerProportion).toFixed(1))}
+                                                {(Number(p.partnerProportion) || 0).toFixed(1)}
                                             </div>
                                         )}
                                     </td>
