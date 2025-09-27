@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, useCallback } from "react"
+import { useEffect, useMemo, useState, useCallback, useRef } from "react"
 
 /** รายชื่อเดือนภาษาไทยแบบคงที่ */
 const monthThai = [
@@ -12,21 +12,49 @@ const monthThai = [
 const monthMap = Object.fromEntries(monthThai.map((m, i) => [m, i + 1]))
 
 /** ตรวจปีอธิกสุรทินแบบคริสต์ศักราช */
-const isLeap = (y) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0
+const isLeap = (y) => {
+    try {
+        const year = Number(y)
+        if (!Number.isInteger(year) || year < 1) return false
+        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
+    } catch {
+        return false
+    }
+}
 
 export default function DateSelect({ title, value, onChange, noDay = false }) {
+    // ใช้ ref เพื่อป้องกัน infinite loop ใน onChange effect
+    const isInternalChangeRef = useRef(false)
+    const prevValueRef = useRef(value)
+    
     /** 
      * แปลงค่า value (YYYY-MM-DD, ค.ศ.) -> state เริ่มต้นของ day, month, yearTh
      * ใช้ useMemo เพื่อคำนวณครั้งเดียวต่อ value ที่เปลี่ยน
+     * เพิ่ม error handling เพื่อป้องกัน client-side exception
      */
     const initialParts = useMemo(() => {
-        if (!value) return null
-        const [y, m, d] = value.split("-").map((v) => parseInt(v, 10))
-        if (!y || !m || (!noDay && !d)) return null
-        return {
-            day: noDay ? 1 : d,
-            month: monthThai[m - 1] ?? monthThai[0],
-            yearTh: y + 543,
+        try {
+            if (!value || typeof value !== 'string') return null
+            
+            const parts = value.split("-")
+            if (parts.length !== 3) return null
+            
+            const [y, m, d] = parts.map((v) => {
+                const num = parseInt(v, 10)
+                return Number.isInteger(num) ? num : null
+            })
+            
+            if (!y || !m || (!noDay && !d)) return null
+            if (m < 1 || m > 12) return null
+            if (!noDay && (d < 1 || d > 31)) return null
+            
+            return {
+                day: noDay ? 1 : d,
+                month: monthThai[m - 1] ?? monthThai[0],
+                yearTh: y + 543,
+            }
+        } catch {
+            return null
         }
     }, [value, noDay])
 
@@ -35,13 +63,26 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
     const [month, setMonth] = useState(() => initialParts?.month ?? monthThai[0])
     const [yearTh, setYearTh] = useState(() => initialParts?.yearTh ?? 2568)
 
-    /** sync state เมื่อ value ภายนอกเปลี่ยน */
+    /** sync state เมื่อ value ภายนอกเปลี่ยน - เพิ่ม safety check */
     useEffect(() => {
-        if (!initialParts) return
-        setDay(initialParts.day)
-        setMonth(initialParts.month)
-        setYearTh(initialParts.yearTh)
-    }, [initialParts])
+        // ตรวจสอบว่า value เปลี่ยนจริงๆ หรือไม่
+        if (prevValueRef.current === value) return
+        
+        if (!initialParts) {
+            prevValueRef.current = value
+            return
+        }
+        
+        // อัพเดต state เฉพาะเมื่อ value มาจากภายนอก (ไม่ใช่จาก internal change)
+        if (!isInternalChangeRef.current) {
+            setDay(initialParts.day)
+            setMonth(initialParts.month)
+            setYearTh(initialParts.yearTh)
+        }
+        
+        prevValueRef.current = value
+        isInternalChangeRef.current = false
+    }, [initialParts, value])
 
     /** ตัวเลือกปี (พ.ศ.) ใช้ useMemo ให้สร้างครั้งเดียว */
     const yearOptions = useMemo(() => {
@@ -49,20 +90,31 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         return Array.from({ length: 30 }, (_, i) => 2560 + i)
     }, [])
 
-    /** ปี ค.ศ. ที่ได้จากปี พ.ศ. */
+    /** ปี ค.ศ. ที่ได้จากปี พ.ศ. - เพิ่ม error handling */
     const gYear = useMemo(() => {
-        const y = parseInt(yearTh, 10)
-        // ป้องกันค่าเพี้ยน และกำหนดกรอบล่าง
-        return Math.max(1900, (isNaN(y) ? 2568 : y) - 543)
+        try {
+            const y = Number(yearTh)
+            // ป้องกันค่าเพี้ยน และกำหนดกรอบล่าง
+            if (!Number.isInteger(y) || y < 2460) return 2025 // ค.ศ. 1917 -> 2025
+            return Math.max(1900, y - 543)
+        } catch {
+            return 2025 // fallback year
+        }
     }, [yearTh])
 
-    /** จำนวนวันสูงสุดของเดือนที่เลือก คำนวณใหม่เมื่อเดือนหรือปีเปลี่ยน */
+    /** จำนวนวันสูงสุดของเดือนที่เลือก คำนวณใหม่เมื่อเดือนหรือปีเปลี่ยน - เพิ่ม error handling */
     const maxDays = useMemo(() => {
-        const m = monthMap[month] || 1
-        if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31
-        if ([4, 6, 9, 11].includes(m)) return 30
-        // กุมภาพันธ์
-        return isLeap(gYear) ? 29 : 28
+        try {
+            const m = monthMap[month]
+            if (!m || m < 1 || m > 12) return 31 // fallback
+            
+            if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31
+            if ([4, 6, 9, 11].includes(m)) return 30
+            // กุมภาพันธ์
+            return isLeap(gYear) ? 29 : 28
+        } catch {
+            return 31 // fallback
+        }
     }, [month, gYear])
 
     /** ตัวเลือกวันตามจำนวนวันจริงของเดือนนั้น */
@@ -71,83 +123,133 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         [maxDays]
     )
 
-    /** บีบค่า day ไม่ให้เกิน maxDays เมื่อเดือน/ปีเปลี่ยน */
+    /** บีบค่า day ไม่ให้เกิน maxDays เมื่อเดือน/ปีเปลี่ยน - ป้องกัน unnecessary updates */
     useEffect(() => {
         if (noDay) return
-        if (day > maxDays) setDay(maxDays)
+        if (day > maxDays && day !== maxDays) {
+            setDay(maxDays)
+        }
     }, [maxDays, day, noDay])
 
-    /** ค่าที่จะส่งออกในรูปแบบ YYYY-MM-DD (ค.ศ.) */
+    /** ค่าที่จะส่งออกในรูปแบบ YYYY-MM-DD (ค.ศ.) - เพิ่ม error handling */
     const outValue = useMemo(() => {
-        const mNum = monthMap[month] || 1
-        const mm = String(mNum).padStart(2, "0")
-        const dd = String(noDay ? 1 : day).padStart(2, "0")
-        return `${gYear}-${mm}-${dd}`
+        try {
+            const mNum = monthMap[month]
+            if (!mNum || mNum < 1 || mNum > 12) return `${gYear}-01-01` // fallback
+            
+            const mm = String(mNum).padStart(2, "0")
+            const dayValue = noDay ? 1 : Math.max(1, Math.min(day, 31))
+            const dd = String(dayValue).padStart(2, "0")
+            return `${gYear}-${mm}-${dd}`
+        } catch {
+            return `${gYear}-01-01` // fallback
+        }
     }, [gYear, month, day, noDay])
 
     /** เรียก onChange เฉพาะเมื่อค่าที่คำนวณต่างจาก value ภายนอก เพื่อลด re-render chain */
     useEffect(() => {
-        if (!onChange) return
-        if (value !== outValue) onChange(outValue)
+        if (!onChange || typeof onChange !== 'function') return
+        if (value === outValue) return
+        
+        // ป้องกัน infinite loop โดยการทำ flag
+        isInternalChangeRef.current = true
+        
+        try {
+            onChange(outValue)
+        } catch (error) {
+            console.warn('DateSelect onChange error:', error)
+            isInternalChangeRef.current = false
+        }
     }, [outValue, onChange, value])
 
-    /** handlers ใช้ useCallback ลดการสร้างฟังก์ชันใหม่ในทุก render */
+    /** handlers ใช้ useCallback ลดการสร้างฟังก์ชันใหม่ในทุก render - เพิ่ม error handling */
     const handleDayChange = useCallback((e) => {
-        setDay(parseInt(e.target.value, 10) || 1)
+        try {
+            const newDay = parseInt(e.target.value, 10)
+            if (Number.isInteger(newDay) && newDay >= 1 && newDay <= 31) {
+                setDay(newDay)
+            }
+        } catch {
+            // ignore invalid values
+        }
     }, [])
 
     const handleMonthChange = useCallback((e) => {
-        setMonth(e.target.value)
+        try {
+            const newMonth = e.target.value
+            if (typeof newMonth === 'string' && monthThai.includes(newMonth)) {
+                setMonth(newMonth)
+            }
+        } catch {
+            // ignore invalid values
+        }
     }, [])
 
     const handleYearChange = useCallback((e) => {
-        setYearTh(parseInt(e.target.value, 10) || 2568)
+        try {
+            const newYear = parseInt(e.target.value, 10)
+            if (Number.isInteger(newYear) && newYear >= 2460 && newYear <= 3000) {
+                setYearTh(newYear)
+            }
+        } catch {
+            // ignore invalid values
+        }
     }, [])
 
-    return (
-        <div className="flex items-center gap-x-4">
-            <p className="text-zinc-700 font-medium">{title}</p>
+    // เพิ่ม error boundary สำหรับ render
+    try {
+        return (
+            <div className="flex items-center gap-x-4">
+                <p className="text-zinc-700 font-medium">{title}</p>
 
-            {!noDay && (
+                {!noDay && (
+                    <div className="space-x-2">
+                        <label className="text-zinc-700">วันที่</label>
+                        <select
+                            className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
+                            value={day}
+                            onChange={handleDayChange}
+                        >
+                            {dayOptions.map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <div className="space-x-2">
-                    <label className="text-zinc-700">วันที่</label>
+                    <label className="text-zinc-700">เดือน</label>
                     <select
                         className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
-                        value={day}
-                        onChange={handleDayChange}
+                        value={month}
+                        onChange={handleMonthChange}
                     >
-                        {dayOptions.map((d) => (
-                            <option key={d} value={d}>{d}</option>
+                        {monthThai.map((m) => (
+                            <option key={m} value={m}>{m}</option>
                         ))}
                     </select>
                 </div>
-            )}
 
-            <div className="space-x-2">
-                <label className="text-zinc-700">เดือน</label>
-                <select
-                    className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
-                    value={month}
-                    onChange={handleMonthChange}
-                >
-                    {monthThai.map((m) => (
-                        <option key={m} value={m}>{m}</option>
-                    ))}
-                </select>
+                <div className="space-x-2">
+                    <label className="text-zinc-700">ปี</label>
+                    <select
+                        className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
+                        value={yearTh}
+                        onChange={handleYearChange}
+                    >
+                        {yearOptions.map((y) => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
-
-            <div className="space-x-2">
-                <label className="text-zinc-700">ปี</label>
-                <select
-                    className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
-                    value={yearTh}
-                    onChange={handleYearChange}
-                >
-                    {yearOptions.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                    ))}
-                </select>
+        )
+    } catch (error) {
+        console.error('DateSelect render error:', error)
+        return (
+            <div className="flex items-center gap-x-4">
+                <p className="text-red-500">Error loading date selector</p>
             </div>
-        </div>
-    )
+        )
+    }
 }
