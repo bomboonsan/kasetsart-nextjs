@@ -136,7 +136,7 @@ export default function Partners({ data, onChange }) {
                 <DialogTrigger asChild>
                     <Button variant="default" size="sm" className="mb-4" onClick={() => { resetForm(); setDialogOpen(true); }}>เพิ่มสมาชิก</Button>
                 </DialogTrigger>
-                <DialogContent className="md:max-w-4">
+                <DialogContent className="md:max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>เพิ่ม / แก้ไข ผู้ร่วมโครงการวิจัย</DialogTitle>
                         <DialogDescription>กรอกข้อมูลผู้ร่วมโครงการวิจัยที่เกี่ยวข้องกับโครงการ</DialogDescription>
