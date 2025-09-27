@@ -290,11 +290,18 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormTextarea id="abstractEN" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractEN} onChange={e => handleInputChange('abstractEN', e.target.value)} rows={4} />
                     <FileUploadField label="ส่งไฟล์บทความทางวิชาการ (ขอให้ Scan หน้าปกวารสาร สารบัญ พร้อมบทความ เพื่อการตรวจสอบหลักฐาน)" value={Array.isArray(formData.attachments) ? formData.attachments : []} onFilesChange={files => handleInputChange('attachments', files)} />
                     {/* Partners (reuse component) */}
-                    <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
                 </div>
             </Block>
-            <div className='p-6'>
-                <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            <Block className="mt-4">
+                <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+            </Block>
+            <div className='flex justify-end items-center gap-3 mt-4'>
+                <Button variant="outline">ยกเลิก</Button>
+                <Button
+                    variant="default"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                >
                     {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
                 </Button>
             </div>

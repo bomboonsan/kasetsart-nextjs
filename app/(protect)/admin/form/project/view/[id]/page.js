@@ -46,8 +46,8 @@ export default function ProjectEdit() {
                         </div>
                         <div className="inputGroup">
                             <FieldView label="ปีงบประมาณ" value={project.fiscalYear} />
-                            <FieldView label="ประเภทโครงการ" value={project.projectType === 0 ? 'โครงการวิจัย' : 'โครงการพัฒนาวิชาการประเภทงานวิจัย'} />
-                            <FieldView label="ลักษณะโครงการวิจัย" value={project.projectMode === 0 ? 'โครงการวิจัยเดี่ยว' : 'แผนงานวิจัย หรือชุดโครงการวิจัย'} />
+                            <FieldView label="ประเภทโครงการ" value={project.projectType == '0' ? 'โครงการวิจัย' : 'โครงการพัฒนาวิชาการประเภทงานวิจัย'} />
+                            <FieldView label="ลักษณะโครงการวิจัย" value={project.projectMode == '0' ? 'โครงการวิจัยเดี่ยว' : 'แผนงานวิจัย หรือชุดโครงการวิจัย'} />
                             <FieldView label="จำนวนโครงการย่อย" value={project.subProjectCount} />
                             <FieldView label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" value={project.nameTH} />
                             <FieldView label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" value={project.nameEN} />

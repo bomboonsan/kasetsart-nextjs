@@ -317,19 +317,21 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                         value={formData.attachments || []}
                         onFilesChange={(files) => handleInputChange('attachments', files)}
                     />
-                    <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
-                </div>
-                <div className='flex justify-end items-center gap-3 mt-4'>
-                    <Button variant="outline">ยกเลิก</Button>
-                    <Button 
-                        variant="default" 
-                        onClick={handleSubmit}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
-                    </Button>
                 </div>
             </Block>
+            <Block className="mt-4">
+                <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+            </Block>
+            <div className='flex justify-end items-center gap-3 mt-4'>
+                <Button variant="outline">ยกเลิก</Button>
+                <Button
+                    variant="default"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
+                </Button>
+            </div>
         </>
     );
 }

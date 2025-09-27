@@ -295,12 +295,15 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     <FormSelect id="city" label="เมือง" value={formData.city ?? ""} placeholder="เลือกเมือง" onChange={(val) => handleInputChange('city', val)} options={cityOptions} />
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={(e) => handleInputChange('fundName', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
-                    <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
                 </div>
             </Block>
-            <div className='p-6'>
-                <Button 
-                    type="button"
+            <Block className="mt-4">
+                <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+            </Block>
+            <div className='flex justify-end items-center gap-3 mt-4'>
+                <Button variant="outline">ยกเลิก</Button>
+                <Button
+                    variant="default"
                     onClick={handleSubmit}
                     disabled={isSubmitting}
                 >

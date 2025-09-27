@@ -134,59 +134,67 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
         }
     }, [initialData])
 
-    return (
-        <Block>
-            <div className='inputGroup'>
-                {/* Writers Section */}
-                <div className='space-y-2'>
-                    <div className='flex justify-between items-center'>
-                        <h3 className='font-semibold'>ผู้เขียน</h3>
-                        <Button type='button' variant='outline' onClick={addWriter}>เพิ่มผู้เขียน</Button>
-                    </div>
-                    {formData.writers.map((w, idx) => (
-                        <div key={idx} className=''>
-                            <div className='space-y-2'>
-                                <FormInput label='ชื่อ-นามสกุล' value={w.fullName} onChange={(e) => updateWriterField(idx, 'fullName', e.target.value)} />
-                                <FormInput label='ภาควิชา' value={w.department} onChange={(e) => updateWriterField(idx, 'department', e.target.value)} />
-                                <FormInput label='คณะ' value={w.faculty} onChange={(e) => updateWriterField(idx, 'faculty', e.target.value)} />
-                                <FormInput label='โทรศัพท์' value={w.phone} onChange={(e) => updateWriterField(idx, 'phone', e.target.value)} />
-                                <FormInput label='อีเมล' value={w.email} onChange={(e) => updateWriterField(idx, 'email', e.target.value)} />
-                            </div>
-                            <div className='flex justify-end my-3'>
-                                <Button className="text-xs" type='button' variant='destructive' onClick={() => removeWriter(idx)}>ลบ</Button>
-                            </div>
+    return (        
+        <>
+            <Block>
+                <div className='inputGroup'>
+                    {/* Writers Section */}
+                    <div className='space-y-2'>
+                        <div className='flex justify-between items-center'>
+                            <h3 className='font-semibold'>ผู้เขียน</h3>
+                            <Button type='button' variant='outline' onClick={addWriter}>เพิ่มผู้เขียน</Button>
                         </div>
-                    ))}
+                        {formData.writers.map((w, idx) => (
+                            <div key={idx} className=''>
+                                <div className='space-y-2'>
+                                    <FormInput label='ชื่อ-นามสกุล' value={w.fullName} onChange={(e) => updateWriterField(idx, 'fullName', e.target.value)} />
+                                    <FormInput label='ภาควิชา' value={w.department} onChange={(e) => updateWriterField(idx, 'department', e.target.value)} />
+                                    <FormInput label='คณะ' value={w.faculty} onChange={(e) => updateWriterField(idx, 'faculty', e.target.value)} />
+                                    <FormInput label='โทรศัพท์' value={w.phone} onChange={(e) => updateWriterField(idx, 'phone', e.target.value)} />
+                                    <FormInput label='อีเมล' value={w.email} onChange={(e) => updateWriterField(idx, 'email', e.target.value)} />
+                                </div>
+                                <div className='flex justify-end my-3'>
+                                    <Button className="text-xs" type='button' variant='destructive' onClick={() => removeWriter(idx)}>ลบ</Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={[
+                        { value: '0', label: 'ตำรา ใช้สอนในรายวิชา' },
+                        { value: '1', label: 'หนังสือ (ชื่อไทย และชื่อภาษาอังกฤษ)' }
+                    ]} />
+                    <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} />
+                    <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
+                    <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
+                    <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
+                    <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
+                    <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
+                    <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages} onChange={(e) => handleInputChange('pages', e.target.value)} />
+                    <FormInput id='duration' type='date' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.duration} onChange={(e) => handleInputChange('duration', e.target.value)} />
+                    <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
+
+
+
+                    <FileUploadField
+                        label='เอกสารแนบ'
+                        value={formData.attachments || []}
+                        onFilesChange={(files) => handleInputChange('attachments', files)}
+                    />
                 </div>
-                <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={[
-                    { value: '0', label: 'ตำรา ใช้สอนในรายวิชา' },
-                    { value: '1', label: 'หนังสือ (ชื่อไทย และชื่อภาษาอังกฤษ)' }
-                ]} />
-                <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} />
-                <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
-                <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
-                <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
-                <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
-                <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
-                <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages} onChange={(e) => handleInputChange('pages', e.target.value)} />
-                <FormInput id='duration' type='date' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.duration} onChange={(e) => handleInputChange('duration', e.target.value)} />
-                <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
-
-
-
-                <FileUploadField
-                    label='เอกสารแนบ'
-                    value={formData.attachments || []}
-                    onFilesChange={(files) => handleInputChange('attachments', files)}
-                />
+            </Block>
+            <Block className="mt-4">
                 <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
-            </div>
+            </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
-                <Button variant='outline' type='button'>ยกเลิก</Button>
-                <Button variant='default' type='button' disabled={isSubmitting} onClick={handleSubmit}>
+                <Button variant="outline">ยกเลิก</Button>
+                <Button
+                    variant="default"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                >
                     {isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
                 </Button>
             </div>
-        </Block>
+        </>
     )
 }

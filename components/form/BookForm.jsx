@@ -195,11 +195,18 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 					<FundPicker label="ทุนที่เกี่ยวข้อง" selectedFund={formData.__fundingObj} onSelect={(fund) => handleInputChange('__fundingObj', fund)} />
 					<FileUploadField label="เอกสารแนบ" value={Array.isArray(formData.attachments) ? formData.attachments : []} onFilesChange={(files) => handleInputChange('attachments', files)} />
 					<WritersEditor writers={formData.writers} onChange={(writers) => handleInputChange('writers', writers)} />
-					<Partners data={formData.partners} onChange={(p) => handleInputChange('partners', p)} />
 				</div>
 			</Block>
-			<div className='p-6'>
-				<Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+			<Block className="mt-4">
+				<Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+			</Block>
+			<div className='flex justify-end items-center gap-3 mt-4'>
+				<Button variant="outline">ยกเลิก</Button>
+				<Button
+					variant="default"
+					onClick={handleSubmit}
+					disabled={isSubmitting}
+				>
 					{isSubmitting ? 'กำลังบันทึก...' : 'บันทึก'}
 				</Button>
 			</div>
