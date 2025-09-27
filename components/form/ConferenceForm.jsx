@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Country, State, City } from 'country-state-city';
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useSession } from "next-auth/react";
 import { useMutation } from "@apollo/client/react";
 import Block from '../layout/Block';
@@ -28,41 +28,53 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     // เก็บค่า attachments เดิมตอน hydrate เพื่อเช็คการเปลี่ยนแปลงเวลา update
     const originalAttachmentIdsRef = useRef([]);
 
-    const extractAttachmentIds = (arr) => {
+    // Safe extraction with null checks - optimized with useCallback
+    const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return [];
         return arr
             .filter(a => a && (a.documentId || a.id))
             .map(a => Number(a.documentId ?? a.id))
             .filter(n => Number.isFinite(n) && n > 0);
-    };
+    }, []);
 
-    // Hydrate form data when editing
+    // Hydrate form data when editing with proper error handling
     useEffect(() => {
         if (initialData) {
-            // Map the conference data to form structure
-            const hydrated = {
-                ...CONFERENCE_FORM_INITIAL,
-                ...initialData,
-                // Map project relation if exists
-                __projectObj: initialData.projects?.[0] ? {
-                    ...initialData.projects[0],
-                    partners: initialData.projects[0].partners || []
-                } : null,
-                // Ensure partners come from the linked project if available
-                partners: initialData.projects?.[0]?.partners || [],
-            };
-            setFormData(hydrated);
-            // บันทึกรายการ attachments เดิม (ใช้ภายหลังเพื่อตรวจว่ามีการแก้ไขไหม)
-            originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
+            try {
+                // Map the conference data to form structure with safe access
+                const hydrated = {
+                    ...CONFERENCE_FORM_INITIAL,
+                    ...initialData,
+                    // Map project relation if exists with null safety
+                    __projectObj: initialData.projects?.[0] ? {
+                        ...initialData.projects[0],
+                        partners: Array.isArray(initialData.projects[0].partners) ? initialData.projects[0].partners : []
+                    } : null,
+                    // Ensure partners come from the linked project if available
+                    partners: Array.isArray(initialData.projects?.[0]?.partners) ? initialData.projects[0].partners : [],
+                };
+                setFormData(hydrated);
+                // บันทึกรายการ attachments เดิม (ใช้ภายหลังเพื่อตรวจว่ามีการแก้ไขไหม)
+                originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
+            } catch (error) {
+                console.error('Error hydrating form data:', error);
+                // Fallback to initial data to prevent crashes
+                setFormData(CONFERENCE_FORM_INITIAL);
+            }
         }
-    }, [initialData]);
+    }, [initialData, extractAttachmentIds]);
 
-    const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
+    // Memoize mutation options to prevent re-creation
+    const mutationOptions = useMemo(() => ({
         context: {
             headers: {
                 Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
             }
-        },
+        }
+    }), [session?.jwt]);
+
+    const [updateProjectPartners] = useMutation(UPDATE_PROJECT_PARTNERS, {
+        ...mutationOptions,
         onCompleted: (data) => {
             console.log('Project partners updated successfully:', data);
         },
@@ -72,11 +84,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     });
 
     const [createConference] = useMutation(CREATE_CONFERENCE, {
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        },
+        ...mutationOptions,
         onCompleted: (data) => {
             console.log('Conference created successfully:', data);
         },
@@ -85,21 +93,26 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         }
     });
 
-    const handleInputChange = (field, value) => {
+    // Memoized input change handler to prevent child re-renders
+    const handleInputChange = useCallback((field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
         if (field === 'partners') {
             console.log('Partners updated in ConferenceForm:', value);
         }
-    };
+    }, []);
 
-    const handleSubmit = async () => {
+    // Memoized submit handler with proper error handling
+    const handleSubmit = useCallback(async () => {
         if (!session?.jwt) {
             toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
 
-        // Basic validation
-        if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
+        // Basic validation with null checks
+        const titleTH = formData.titleTH?.trim?.() || '';
+        const titleEN = formData.titleEN?.trim?.() || '';
+        
+        if (!titleTH && !titleEN) {
             toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;
         }
@@ -107,7 +120,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         setIsSubmitting(true);
         
         try {
-            // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว
+            // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว with null safety
             const attachmentIds = Array.isArray(formData.attachments)
                 ? formData.attachments
                     .filter(att => att && (att.id || att.documentId))
@@ -116,18 +129,18 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
 
             // ตรวจสอบรายการปัจจุบัน
             const currentIds = attachmentIds;
-            const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
+            const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort();
             const currentIdsSorted = [...currentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             // สร้างข้อมูล conference (อาจลบ field attachments ภายหลังหากไม่เปลี่ยนและเป็นการแก้ไข)
             const conferenceData = {
-                titleTH: formData.titleTH.trim() || null,
-                titleEN: formData.titleEN.trim() || null,
+                titleTH: titleTH || null,
+                titleEN: titleEN || null,
                 isEnvironmentallySustainable: formData.isEnvironmentallySustainable || null,
-                journalName: formData.journalName || null,
-                doi: formData.doi || null,
-                isbn: formData.isbn || null,
+                journalName: formData.journalName?.trim?.() || null,
+                doi: formData.doi?.trim?.() || null,
+                isbn: formData.isbn?.trim?.() || null,
                 durationStart: formData.durationStart || null,
                 durationEnd: formData.durationEnd || null,
                 cost: formData.cost || null,
@@ -135,15 +148,15 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 presentationWork: formData.presentationWork || null,
                 presentType: formData.presentType || null,
                 articleType: formData.articleType || null,
-                abstractTH: formData.abstractTH || null,
-                abstractEN: formData.abstractEN || null,
-                summary: formData.summary || null,
+                abstractTH: formData.abstractTH?.trim?.() || null,
+                abstractEN: formData.abstractEN?.trim?.() || null,
+                summary: formData.summary?.trim?.() || null,
                 level: formData.level || null,
                 country: formData.country || null,
                 state: formData.state || null,
                 city: formData.city || null,
-                fundName: formData.fundName || null,
-                keywords: formData.keywords || null,
+                fundName: formData.fundName?.trim?.() || null,
+                keywords: formData.keywords?.trim?.() || null,
                 // เก็บข้อมูล attachments ของ conference
                 attachments: attachmentIds.length ? attachmentIds : [],
                 // เชื่อมโยงกับ project ที่เลือก
@@ -181,7 +194,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             }
 
             // อัปเดต partners ใน project ถ้ามีและถ้า partners มีการเปลี่ยนแปลง
-            if (formData.__projectObj?.documentId && formData.partners && Array.isArray(formData.partners)) {
+            if (formData.__projectObj?.documentId && Array.isArray(formData.partners)) {
                 await updateProjectPartners({
                     variables: {
                         documentId: formData.__projectObj.documentId,
@@ -195,56 +208,119 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             
         } catch (error) {
             console.error('Submission error:', error);
-            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + (error.message || 'ไม่ทราบสาเหตุ'));
+            const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'ไม่ทราบสาเหตุ';
+            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [
+        session?.jwt,
+        formData,
+        isEdit,
+        onSubmit,
+        createConference,
+        updateProjectPartners
+    ]);
+    // Memoized country options with error handling
     const countryOptions = useMemo(() => {
         try {
-            const all = Country.getAllCountries() || [];
-            return [
-                ...all.map((c) => ({ value: c.isoCode, label: c.name })),
-            ];
-        } catch (e) {
+            const all = Country.getAllCountries();
+            if (!Array.isArray(all)) return [];
+            return all.map((c) => ({ 
+                value: c?.isoCode || '', 
+                label: c?.name || 'Unknown Country' 
+            }));
+        } catch (error) {
+            console.error('Error fetching countries:', error);
             return [];
         }
     }, []);
 
+    // Memoized state options with error handling
     const stateOptions = useMemo(() => {
         if (!formData.country) return [];
         try {
-            const states = State.getStatesOfCountry(String(formData.country)) || [];
-            return [
-                ...states.map((s) => ({ value: s.isoCode, label: s.name })),
-            ];
-        } catch (e) {
+            const states = State.getStatesOfCountry(String(formData.country));
+            if (!Array.isArray(states)) return [];
+            return states.map((s) => ({ 
+                value: s?.isoCode || '', 
+                label: s?.name || 'Unknown State' 
+            }));
+        } catch (error) {
+            console.error('Error fetching states for country:', formData.country, error);
             return [];
         }
     }, [formData.country]);
 
+    // Memoized city options with error handling
     const cityOptions = useMemo(() => {
         if (!formData.country || !formData.state) return [];
         try {
             const cities = City.getCitiesOfState(
                 String(formData.country),
                 String(formData.state),
-            ) || [];
-            return [
-                ...cities.map((c) => ({ value: c.name, label: c.name })),
-            ];
-        } catch (e) {
+            );
+            if (!Array.isArray(cities)) return [];
+            return cities.map((c) => ({ 
+                value: c?.name || '', 
+                label: c?.name || 'Unknown City' 
+            }));
+        } catch (error) {
+            console.error('Error fetching cities for country/state:', formData.country, formData.state, error);
             return [];
         }
     }, [formData.country, formData.state]);
 
+    // Memoized project object to prevent unnecessary updates
+    const projectObj = useMemo(() => formData.__projectObj, [formData.__projectObj]);
+
+    // Safe useEffect with proper dependency and null checks
     useEffect(() => {
-        if (!formData.__projectObj) return;
-        // setFormData((prev) => ({ ...prev, fundName: formData.__projectObj.fundName || "" }));
-        // setFormData((prev) => ({ ...prev, keywords: formData.__projectObj.keywords || "" }));
-        // setFormData((prev) => ({ ...prev, isEnvironmentallySustainable: formData.__projectObj.isEnvironmentallySustainable || "" }));
-        setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
-    }, [formData.__projectObj]);
+        if (!projectObj) return;
+        
+        try {
+            // Only update if partners array exists and is different
+            const newPartners = Array.isArray(projectObj.partners) ? projectObj.partners : [];
+            const currentPartners = Array.isArray(formData.partners) ? formData.partners : [];
+            
+            // Compare arrays to prevent unnecessary updates
+            if (JSON.stringify(newPartners) !== JSON.stringify(currentPartners)) {
+                setFormData((prev) => ({ 
+                    ...prev, 
+                    partners: newPartners 
+                }));
+            }
+        } catch (error) {
+            console.error('Error updating partners from project:', error);
+        }
+    }, [projectObj]);
+
+    // Memoized safe value getters with null coalescing
+    const safeFormValues = useMemo(() => ({
+        titleTH: formData.titleTH ?? "",
+        titleEN: formData.titleEN ?? "",
+        isEnvironmentallySustainable: formData.isEnvironmentallySustainable ?? "",
+        journalName: formData.journalName ?? "",
+        doi: formData.doi ?? "",
+        isbn: formData.isbn ?? "",
+        durationStart: formData.durationStart ?? "",
+        durationEnd: formData.durationEnd ?? "",
+        cost: formData.cost ?? "",
+        costType: formData.costType ?? "",
+        presentationWork: formData.presentationWork ?? "",
+        presentType: formData.presentType ?? "",
+        articleType: formData.articleType ?? "",
+        abstractTH: formData.abstractTH ?? "",
+        abstractEN: formData.abstractEN ?? "",
+        summary: formData.summary ?? "",
+        level: formData.level ?? "",
+        country: formData.country ?? "",
+        state: formData.state ?? "",
+        city: formData.city ?? "",
+        fundName: formData.fundName ?? "",
+        keywords: formData.keywords ?? "",
+        attachments: Array.isArray(formData.attachments) ? formData.attachments : []
+    }), [formData]);
     console.log('formData', formData);
     return (
         <>
