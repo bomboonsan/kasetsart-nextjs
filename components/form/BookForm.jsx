@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Block from '../layout/Block';
@@ -15,19 +15,41 @@ import { BOOK_FORM_INITIAL } from '@/data/book';
 import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK } from '@/graphql/formQueries';
 import toast from 'react-hot-toast';
 
-// Writers simple inputs
-function WritersEditor({ writers, onChange }) {
-	const addWriter = () => {
+// Helper functions moved outside component to prevent recreation
+const hydrateBook = (b) => ({
+	...BOOK_FORM_INITIAL,
+	...b,
+	publicationDate: b.publicationDate ? String(b.publicationDate).slice(0, 10) : '',
+	__fundingObj: b.funds?.[0] ? b.funds[0] : null,
+	attachments: b.attachments || [],
+	partners: b.partners || [],
+	writers: Array.isArray(b.writers) ? b.writers : [],
+});
+
+const extractAttachmentIds = (arr) => {
+	if (!Array.isArray(arr)) return [];
+	return arr
+		.filter(a => a && (a.documentId || a.id))
+		.map(a => Number(a.documentId ?? a.id))
+		.filter(n => Number.isFinite(n) && n > 0);
+};
+
+// Writers editor component moved outside and memoized
+const WritersEditor = React.memo(function WritersEditor({ writers, onChange }) {
+	const addWriter = useCallback(() => {
 		onChange([...(writers || []), { name: '', email: '', affiliation: '' }]);
-	};
-	const updateWriter = (idx, field, value) => {
+	}, [writers, onChange]);
+
+	const updateWriter = useCallback((idx, field, value) => {
 		const next = [...writers];
 		next[idx] = { ...next[idx], [field]: value };
 		onChange(next);
-	};
-	const removeWriter = (idx) => {
+	}, [writers, onChange]);
+
+	const removeWriter = useCallback((idx) => {
 		onChange((writers || []).filter((_, i) => i !== idx));
-	};
+	}, [writers, onChange]);
+
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
@@ -54,7 +76,7 @@ function WritersEditor({ writers, onChange }) {
 			</div>
 		</div>
 	);
-}
+});
 
 export default function BookForm({ documentId, isEdit = false, onSubmit, initialData = null }) {
 	const { data: session } = useSession();
@@ -62,19 +84,24 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const originalAttachmentIdsRef = useRef([]);
 
+	// Memoize authorization header
+	const authHeaders = useMemo(() => ({
+		headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' }
+	}), [session?.jwt]);
+
 	// If editing and initialData not provided, fetch existing book
 	const shouldFetch = isEdit && !initialData && documentId;
 	const { data: existingBookData } = useQuery(GET_BOOK, {
 		variables: { documentId },
 		skip: !shouldFetch,
-		context: { headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' } },
-		onCompleted: (data) => {
+		context: authHeaders,
+		onCompleted: useCallback((data) => {
 			const b = data?.book;
 			if (!b) return;
 			const hydrated = hydrateBook(b);
 			setFormData(hydrated);
 			originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
-		}
+		}, [])
 	});
 
 	// If initialData provided, use it to hydrate form once
@@ -85,37 +112,18 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
 	}, [initialData]);
 
-	// helper to hydrate a book object into form data shape
-	const hydrateBook = (b) => ({
-		...BOOK_FORM_INITIAL,
-		...b,
-		publicationDate: b.publicationDate ? String(b.publicationDate).slice(0, 10) : '',
-		__fundingObj: b.funds?.[0] ? b.funds[0] : null,
-		attachments: b.attachments || [],
-		partners: b.partners || [],
-		writers: Array.isArray(b.writers) ? b.writers : [],
-	});
-
 	const [createBook] = useMutation(CREATE_BOOK, {
-		context: { headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' } }
+		context: authHeaders
 	});
 	const [updateBook] = useMutation(UPDATE_BOOK, {
-		context: { headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : '' } }
+		context: authHeaders
 	});
 
-	const extractAttachmentIds = (arr) => {
-		if (!Array.isArray(arr)) return [];
-		return arr
-			.filter(a => a && (a.documentId || a.id))
-			.map(a => Number(a.documentId ?? a.id))
-			.filter(n => Number.isFinite(n) && n > 0);
-	};
-
-	const handleInputChange = (field, value) => {
+	const handleInputChange = useCallback((field, value) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
-	};
+	}, []);
 
-	const handleSubmit = async () => {
+	const handleSubmit = useCallback(async () => {
 		if (!session?.jwt) {
 			toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
 			return;
@@ -167,12 +175,40 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		} finally {
 			setIsSubmitting(false);
 		}
-	};
+	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, documentId]);
 
-	useEffect(() => {
+	// Memoize partners update to prevent infinite loop
+	const updatePartnersFromFunding = useCallback(() => {
 		if (!formData.__fundingObj) return;
 		setFormData((prev) => ({ ...prev, partners: formData.__fundingObj.partners || [] }));
 	}, [formData.__fundingObj]);
+
+	useEffect(() => {
+		updatePartnersFromFunding();
+	}, [updatePartnersFromFunding]);
+
+	// Memoize form options
+	const bookTypeOptions = useMemo(() => [
+		{ value: '0', label: 'หนังสือ' },
+		{ value: '1', label: 'ตำรา' },
+	], []);
+
+	const levelOptions = useMemo(() => [
+		{ value: '0', label: 'ระดับชาติ' },
+		{ value: '1', label: 'ระดับนานาชาติ' },
+	], []);
+
+	// Memoize handlers for specific fields
+	const handleBookTypeChange = useCallback((e) => handleInputChange('bookType', e.target.value), [handleInputChange]);
+	const handleTitleTHChange = useCallback((e) => handleInputChange('titleTH', e.target.value), [handleInputChange]);
+	const handleTitleENChange = useCallback((e) => handleInputChange('titleEN', e.target.value), [handleInputChange]);
+	const handleDetailChange = useCallback((e) => handleInputChange('detail', e.target.value), [handleInputChange]);
+	const handleLevelChange = useCallback((e) => handleInputChange('level', e.target.value), [handleInputChange]);
+	const handlePublicationDateChange = useCallback((e) => handleInputChange('publicationDate', e.target.value), [handleInputChange]);
+	const handleFundChange = useCallback((fund) => handleInputChange('__fundingObj', fund), [handleInputChange]);
+	const handleAttachmentsChange = useCallback((files) => handleInputChange('attachments', files), [handleInputChange]);
+	const handleWritersChange = useCallback((writers) => handleInputChange('writers', writers), [handleInputChange]);
+	const handlePartnersChange = useCallback((partners) => handleInputChange('partners', partners), [handleInputChange]);
 
 	console.log('BookForm render', { formData });
 
@@ -180,25 +216,69 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		<>
 			<Block>
 				<div className="inputGroup">
-					<FormRadio id="bookType" label="ประเภทผลงาน" value={String(formData.bookType)} onChange={(e) => handleInputChange('bookType', e.target.value)} options={[
-						{ value: '0', label: 'หนังสือ' },
-						{ value: '1', label: 'ตำรา' },
-					]} />
-					<FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH} onChange={(e) => handleInputChange('titleTH', e.target.value)} rows={4} />
-					<FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN} onChange={(e) => handleInputChange('titleEN', e.target.value)} rows={4} />
-					<FormTextarea id="detail" label="รายละเอียดเบื้องต้น" value={formData.detail} onChange={(e) => handleInputChange('detail', e.target.value)} rows={6} />
-					<FormRadio id="level" label="ระดับผลงาน" value={formData.level} onChange={(e) => handleInputChange('level', e.target.value)} options={[
-						{ value: '0', label: 'ระดับชาติ' },
-						{ value: '1', label: 'ระดับนานาชาติ' },
-					]} />
-					<FormInput id="publicationDate" label="วันที่เกิดผลงาน" type="date" value={formData.publicationDate} onChange={(e) => handleInputChange('publicationDate', e.target.value)} />
-					<FundPicker label="ทุนที่เกี่ยวข้อง" selectedFund={formData.__fundingObj} onSelect={(fund) => handleInputChange('__fundingObj', fund)} />
-					<FileUploadField label="เอกสารแนบ" value={Array.isArray(formData.attachments) ? formData.attachments : []} onFilesChange={(files) => handleInputChange('attachments', files)} />
-					<WritersEditor writers={formData.writers} onChange={(writers) => handleInputChange('writers', writers)} />
+					<FormRadio 
+						id="bookType" 
+						label="ประเภทผลงาน" 
+						value={String(formData.bookType)} 
+						onChange={handleBookTypeChange} 
+						options={bookTypeOptions} 
+					/>
+					<FormTextarea 
+						id="titleTH" 
+						label="ชื่อผลงาน (ไทย)" 
+						value={formData.titleTH} 
+						onChange={handleTitleTHChange} 
+						rows={4} 
+					/>
+					<FormTextarea 
+						id="titleEN" 
+						label="ชื่อผลงาน (อังกฤษ)" 
+						value={formData.titleEN} 
+						onChange={handleTitleENChange} 
+						rows={4} 
+					/>
+					<FormTextarea 
+						id="detail" 
+						label="รายละเอียดเบื้องต้น" 
+						value={formData.detail} 
+						onChange={handleDetailChange} 
+						rows={6} 
+					/>
+					<FormRadio 
+						id="level" 
+						label="ระดับผลงาน" 
+						value={formData.level} 
+						onChange={handleLevelChange} 
+						options={levelOptions} 
+					/>
+					<FormInput 
+						id="publicationDate" 
+						label="วันที่เกิดผลงาน" 
+						type="date" 
+						value={formData.publicationDate} 
+						onChange={handlePublicationDateChange} 
+					/>
+					<FundPicker 
+						label="ทุนที่เกี่ยวข้อง" 
+						selectedFund={formData.__fundingObj} 
+						onSelect={handleFundChange} 
+					/>
+					<FileUploadField 
+						label="เอกสารแนบ" 
+						value={Array.isArray(formData.attachments) ? formData.attachments : []} 
+						onFilesChange={handleAttachmentsChange} 
+					/>
+					<WritersEditor 
+						writers={formData.writers} 
+						onChange={handleWritersChange} 
+					/>
 				</div>
 			</Block>
 			<Block className="mt-4">
-				<Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+				<Partners 
+					data={formData.partners} 
+					onChange={handlePartnersChange} 
+				/>
 			</Block>
 			<div className='flex justify-end items-center gap-3 mt-4'>
 				<Button variant="outline">ยกเลิก</Button>
