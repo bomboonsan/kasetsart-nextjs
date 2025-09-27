@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Block from '../layout/Block';
@@ -18,19 +18,34 @@ import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubse
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
 import toast from 'react-hot-toast';
 
-export default function PublicationForm({ initialData, onSubmit, isEdit = false }) {
+const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession();
     const [formData, setFormData] = useState(PUBLICATION_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const originalAttachmentIdsRef = useRef([]);
 
-    const extractAttachmentIds = (arr) => {
+    // Memoize helper functions
+    const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return [];
         return arr
             .filter(a => a && (a.documentId || a.id))
             .map(a => Number(a.documentId ?? a.id))
             .filter(n => Number.isFinite(n) && n > 0);
-    };
+    }, []);
+
+    const booleanToString = useCallback((v) => {
+        if (v === true || v === 'true' || v === 1 || v === '1') return "1";
+        if (v === false || v === 'false' || v === 0 || v === '0') return "0";
+        return null;
+    }, []);
+
+    const coerceBoolean = useCallback((v) => {
+        if (v === true || v === 'true' || v === 1 || v === '1') return true;
+        if (v === false || v === 'false' || v === 0 || v === '0') return false;
+        return null;
+    }, []);
+
+    const toSelectOptions = useCallback((arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label })), []);
 
     useEffect(() => {
         if (initialData) {
@@ -46,7 +61,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             setFormData(hydrated);
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
         }
-    }, [initialData]);
+    }, [initialData, extractAttachmentIds]);
 
     const [createPublication] = useMutation(CREATE_PUBLICATION, {
         context: { headers: { Authorization: session?.jwt ? `Bearer ${session?.jwt}` : '' } },
@@ -66,11 +81,11 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
         }
     });
 
-    const handleInputChange = (field, value) => {
+    const handleInputChange = useCallback((field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-    };
+    }, []);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (!session?.jwt) {
             toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
@@ -85,19 +100,6 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
             const currentIdsSorted = [...attachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
-
-            const booleanToString = (v) => {
-                if (v === true || v === 'true' || v === 1 || v === '1') return "1";
-                if (v === false || v === 'false' || v === 0 || v === '0') return "0";
-                return null;
-            }
-
-            // normalize boolean-like fields (accepts 0/1/'0'/'1'/true/false)
-            const coerceBoolean = (v) => {
-                if (v === true || v === 'true' || v === 1 || v === '1') return true;
-                if (v === false || v === 'false' || v === 0 || v === '0') return false;
-                return null;
-            };
 
             const data = {
                 titleTH: formData.titleTH?.trim() || null,
@@ -171,18 +173,32 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [session?.jwt, formData, isEdit, onSubmit, initialData?.documentId, extractAttachmentIds, booleanToString, coerceBoolean, updatePublication, createPublication, updateProjectPartners]);
 
-    // Helpers
-    const toSelectOptions = (arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label }));
+    // Helpers - Memoized select options
+    const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), [toSelectOptions]);
+    const scopusSubjectOptions = useMemo(() => toSelectOptions(listsStandardScopusSubset), [toSelectOptions]);
+    const abdcOptions = useMemo(() => toSelectOptions(listsStandardABDC), [toSelectOptions]);
+    const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), [toSelectOptions]);
+    const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), [toSelectOptions]);
 
-    const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), []);
-    const scopusSubjectOptions = useMemo(() => toSelectOptions(listsStandardScopusSubset), []);
-    const abdcOptions = useMemo(() => toSelectOptions(listsStandardABDC), []);
-    const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), []);
-    const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), []);
+    // Memoized radio button options
+    const environmentalSustainabilityOptions = useMemo(() => [
+        { value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' },
+        { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' }
+    ], []);
 
-    const handleStandardToggle = (field, checked) => {
+    const levelOptions = useMemo(() => [
+        { value: '0', label: 'ระดับชาติ' },
+        { value: '1', label: 'ระดับนานาชาติ' }
+    ], []);
+
+    const journalDatabaseOptions = useMemo(() => [
+        { value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' },
+        { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }
+    ], []);
+
+    const handleStandardToggle = useCallback((field, checked) => {
         handleInputChange(field, checked ? 1 : 0);
         // reset dependent selects when toggled off
         if (!checked) {
@@ -194,11 +210,50 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             if (field === 'isAJG') handleInputChange('ajgType', '');
             if (field === 'isWOS') handleInputChange('wosType', '');
         }
-    };
+    }, [handleInputChange]);
+
+    // Memoized callback functions for commonly used form field changes
+    const handleProjectSelect = useCallback((project) => {
+        handleInputChange('__projectObj', project);
+    }, [handleInputChange]);
+
+    const handlePartnersChange = useCallback((partners) => {
+        handleInputChange('partners', partners);
+    }, [handleInputChange]);
+
+    const handleFilesChange = useCallback((files) => {
+        handleInputChange('attachments', files);
+    }, [handleInputChange]);
+
+    // Memoized select field onChange handlers
+    const handleScopusValueChange = useCallback((val) => {
+        handleInputChange('scopusValue', val);
+    }, [handleInputChange]);
+
+    const handleScopusTypeChange = useCallback((val) => {
+        handleInputChange('scopusType', val);
+    }, [handleInputChange]);
+
+    const handleAbdcTypeChange = useCallback((val) => {
+        handleInputChange('abdcType', val);
+    }, [handleInputChange]);
+
+    const handleAjgTypeChange = useCallback((val) => {
+        handleInputChange('ajgType', val);
+    }, [handleInputChange]);
+
+    const handleWosTypeChange = useCallback((val) => {
+        handleInputChange('wosType', val);
+    }, [handleInputChange]);
+
+    // Memoized computed values
+    const attachmentsArray = useMemo(() => {
+        return Array.isArray(formData.attachments) ? formData.attachments : [];
+    }, [formData.attachments]);
     useEffect(() => {
-            if (!formData.__projectObj) return;
-            setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
-        }, [formData.__projectObj]);
+        if (!formData.__projectObj) return;
+        setFormData((prev) => ({ ...prev, partners: formData.__projectObj.partners || [] }));
+    }, [formData.__projectObj?.documentId, formData.__projectObj?.partners]);
 
     if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
     console.log('Render PublicationForm', { formData });
@@ -209,9 +264,9 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                 <div className="inputGroup">
                     <FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH} onChange={e => handleInputChange('titleTH', e.target.value)} rows={5} />
                     <FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN} onChange={e => handleInputChange('titleEN', e.target.value)} rows={5} />
-                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={e => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={[{ value: '0', label: 'เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' }, { value: '1', label: 'ไม่เกี่ยวข้อง กับสิ่งแวดล้อมและความยั่งยืน' }]} />
+                    <FormRadio id="isEnvironmentallySustainable" label="" value={formData.isEnvironmentallySustainable} onChange={e => handleInputChange('isEnvironmentallySustainable', e.target.value)} options={environmentalSustainabilityOptions} />
                     <FormTextarea id="journalName" label="ชื่อวารสาร/แหล่งตีพิมพ์" value={formData.journalName} onChange={e => handleInputChange('journalName', e.target.value)} rows={3} />
-                    <ProjectPicker label="โครงการวิจัยที่เกี่ยวข้อง" required={false} selectedProject={formData.__projectObj} onSelect={(project) => handleInputChange('__projectObj', project)} />
+                    <ProjectPicker label="โครงการวิจัยที่เกี่ยวข้อง" required={false} selectedProject={formData.__projectObj} onSelect={handleProjectSelect} />
                     <FormInput id="doi" label="DOI (ถ้าไม่มีให้ใส่ “-”)" value={formData.doi} onChange={e => handleInputChange('doi', e.target.value)} />
                     <FormInput id="isbn" label="ISSN (ถ้ามี)" value={formData.isbn} onChange={e => handleInputChange('isbn', e.target.value)} />
                     <FormDoubleInput id="pages" label="" before="ปีที่ (Volume)" after="ฉบับที่ (Issue)" value1={formData.volume} onChange1={e => handleInputChange('volume', e.target.value)} value2={formData.issue} onChange2={e => handleInputChange('issue', e.target.value)} />
@@ -219,8 +274,8 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                         วัน/เดือน/ปี ที่ตีพิมพ์
                     </FormDateSelect>
                     <FormDoubleInput id="pages" label="จากหน้า" before="" after="ถึง" value1={formData.pageStart} onChange1={e => handleInputChange('pageStart', e.target.value)} value2={formData.pageEnd} onChange2={e => handleInputChange('pageEnd', e.target.value)} />
-                    <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={[{ value: '0', label: 'ระดับชาติ' }, { value: '1', label: 'ระดับนานาชาติ' }]} />
-                    <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={[{ value: '0', label: 'วารสารที่อยู่ในฐานข้อมูล' }, { value: '1', label: 'วารสารที่ไม่อยู่ในฐานข้อมูล' }]} />
+                    <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={levelOptions} />
+                    <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={journalDatabaseOptions} />
                     {/* Standards Section */}
                     <div className="space-y-1 flex flex-wrap items-center forminput">
                         <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
@@ -231,8 +286,8 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                                 <div className='w-full'>
                                     {formData.isScopus ? (
                                         <div className="grid md:grid-cols-2 gap-4">
-                                            <FormSelect id="scopusValue" label="" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={val => handleInputChange('scopusValue', val)} options={scopusQuartileOptions} />
-                                            <FormSelect id="scopusType" label="" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={val => handleInputChange('scopusType', val)} options={scopusSubjectOptions} />
+                                            <FormSelect id="scopusValue" label="" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={handleScopusValueChange} options={scopusQuartileOptions} />
+                                            <FormSelect id="scopusType" label="" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={handleScopusTypeChange} options={scopusSubjectOptions} />
                                         </div>
                                     ) : null}
                                 </div>
@@ -250,7 +305,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                                 <span>ABDC</span>
                                 <div className='w-full'>
                                     {formData.isABDC ? (
-                                        <FormSelect id="abdcType" label="" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('abdcType', val)} options={abdcOptions} />
+                                        <FormSelect id="abdcType" label="" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={handleAbdcTypeChange} options={abdcOptions} />
                                     ) : null}
                                 </div>
                             </label>
@@ -263,7 +318,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                                 <span>AJG</span>
                                 <div className='w-full'>
                                     {formData.isAJG ? (
-                                        <FormSelect id="ajgType" label="" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={val => handleInputChange('ajgType', val)} options={ajgOptions} />
+                                        <FormSelect id="ajgType" label="" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={handleAjgTypeChange} options={ajgOptions} />
                                     ) : null}
                                 </div>
                             </label>
@@ -276,7 +331,7 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                                 <span>Web of Science</span>
                                 <div className='w-full'>
                                 {formData.isWOS ? (
-                                    <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={val => handleInputChange('wosType', val)} options={wosOptions} />
+                                    <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={handleWosTypeChange} options={wosOptions} />
                                 ) : null}
                                 </div>
                             </label>
@@ -288,12 +343,12 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={e => handleInputChange('keywords', e.target.value)} rows={3} />
                     <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={e => handleInputChange('abstractTH', e.target.value)} rows={4} />
                     <FormTextarea id="abstractEN" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractEN} onChange={e => handleInputChange('abstractEN', e.target.value)} rows={4} />
-                    <FileUploadField label="ส่งไฟล์บทความทางวิชาการ (ขอให้ Scan หน้าปกวารสาร สารบัญ พร้อมบทความ เพื่อการตรวจสอบหลักฐาน)" value={Array.isArray(formData.attachments) ? formData.attachments : []} onFilesChange={files => handleInputChange('attachments', files)} />
+                    <FileUploadField label="ส่งไฟล์บทความทางวิชาการ (ขอให้ Scan หน้าปกวารสาร สารบัญ พร้อมบทความ เพื่อการตรวจสอบหลักฐาน)" value={attachmentsArray} onFilesChange={handleFilesChange} />
                     {/* Partners (reuse component) */}
                 </div>
             </Block>
             <Block className="mt-4">
-                <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+                <Partners data={formData.partners} onChange={handlePartnersChange} />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
                 <Button variant="outline">ยกเลิก</Button>
@@ -307,4 +362,6 @@ export default function PublicationForm({ initialData, onSubmit, isEdit = false 
             </div>
         </>
     );
-}
+});
+
+export default PublicationForm;
