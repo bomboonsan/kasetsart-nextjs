@@ -27,7 +27,6 @@ export default function AdminUsersPage() {
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
-    // console.log('session', session);
 
     // สถานะบนหน้าจอ
     const [search, setSearch] = useState("");
@@ -58,7 +57,6 @@ export default function AdminUsersPage() {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
-    console.log('meData', meData?.usersPermissionsUser?.departments[0]?.title);
 
 
     // จัดการข้อมูลผู้ใช้
@@ -84,7 +82,6 @@ export default function AdminUsersPage() {
                 roleFilter === "all" || (u.role && u.role.documentId === roleFilter);
             let matchesDepartment;
                 
-            console.log('u.departments', session?.user?.role?.name);
                 if (session?.user?.role?.name === "Admin") {
                     
                     // Admin เห็นเฉพาะแผนกตัวเอง

@@ -33,7 +33,6 @@ export default function BookEdit() {
         }
     })
 
-    console.log('Book data:', data);
     const book = data?.book
 
     const handleUpdate = async (bookData) => {

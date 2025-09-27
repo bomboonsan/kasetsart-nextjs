@@ -52,7 +52,6 @@ export default function ProjectTable() {
     });
 
     const projects = data?.projects || [];
-    console.log({ data });
 
     return (
         <div>

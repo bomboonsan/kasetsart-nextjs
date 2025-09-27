@@ -32,7 +32,6 @@ export default function ProjectEdit() {
 
 
     const project = data?.project
-    console.log('project', project)
 
     return (
         <div>

@@ -31,7 +31,6 @@ export default function PartnersDemo() {
     const [partnersData, setPartnersData] = useState(initialData);
 
     const handlePartnersChange = (newData) => {
-        console.log('Partners data changed:', newData);
         setPartnersData(newData);
     };
 

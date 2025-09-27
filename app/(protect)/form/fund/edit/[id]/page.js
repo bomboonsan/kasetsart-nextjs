@@ -35,7 +35,6 @@ export default function FundEditPage() {
       try {
         await updateFundPartners({ variables: { documentId, data: { partners } } })
       } catch (pe) {
-        console.error('Update partners failed:', pe)
         toast.error('บันทึกหลักสำเร็จ แต่ partners ผิดพลาด')
         return
       }

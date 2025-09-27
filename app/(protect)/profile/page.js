@@ -28,7 +28,6 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (profileData && profileData.usersPermissionsUser) {
-            console.log("Fetched Profile Data:", profileData.usersPermissionsUser);
             setUserData(profileData.usersPermissionsUser);
         }
     }, [profileData]);
@@ -37,7 +36,6 @@ export default function ProfilePage() {
     // if (error) return <p>Error: {error.message}</p>;
     // if (!profileData || !profileData.usersPermissionsUser) return <p>No user data found.</p>;
     if (!userData) return <p>Loading user data...</p>;
-    console.log("User Data:", userData);
 
 
     return (

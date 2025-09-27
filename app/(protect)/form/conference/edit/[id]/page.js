@@ -35,7 +35,6 @@ export default function ConferenceEdit() {
 
     const conference = data?.conference
 
-    console.log('Fetched conference data:', conference); // --- IGNORE ---
 
     const handleUpdate = async (conferenceData) => {
         try {
@@ -46,7 +45,6 @@ export default function ConferenceEdit() {
             toast.error('เกิดข้อผิดพลาดในการบันทึก');
         }
     }
-    console.log('Rendering ConferenceEdit with conference:', conference); // --- IGNORE ---
 
     return (
         <div>

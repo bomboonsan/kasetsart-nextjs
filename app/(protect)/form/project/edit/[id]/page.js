@@ -36,7 +36,6 @@ export default function ProjectEdit() {
 
     const project = data?.project
 
-    console.log('Fetched project data:', project); // --- IGNORE ---
 
     const handleUpdate = async (projectData) => {
         await updateProject({ variables: { documentId, data: projectData } })

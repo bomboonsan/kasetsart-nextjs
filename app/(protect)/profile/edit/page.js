@@ -53,6 +53,7 @@ export default function ProfileEditPage() {
     const [previewUrl, setPreviewUrl] = useState(null);
     const fileInputRef = useRef(null);
     const isFormInitialized = useRef(false);
+    const [password, setPassword] = useState('');
 
     const { data: meData, loading: meLoading } = useQuery(GET_ME, {
         skip: status !== 'authenticated',
@@ -86,7 +87,6 @@ export default function ProfileEditPage() {
             return;
         }
         const profile = profileData.usersPermissionsUser;
-        console.log("profileData:", profileData);
         let initialData = {};
 
         for (const key in profile) {
@@ -118,11 +118,9 @@ export default function ProfileEditPage() {
                     setEducation(educationData);
                 }
             } catch (error) {
-                console.log("Error parsing education data:", error);
             }
         }
 
-        console.log("Initial form data set:", initialData);
 
 
         if (profile.avatar && profile.avatar.url) {
@@ -254,10 +252,12 @@ export default function ProfileEditPage() {
                 edu.level || edu.institution || edu.field || edu.year
             ))
         };
-        console.log("Payload to submit:", payload);
 
         if (uploadedAvatarId) {
             payload.avatar = uploadedAvatarId;
+        }
+        if (password && password.length > 0) {
+            payload.password = password;
         }
 
         try {
@@ -277,14 +277,11 @@ export default function ProfileEditPage() {
     if (meLoading || (loading && !profileData) || optionsLoading || optionsXLoading) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
 
-    if (optionsError) return <p>Error: {optionsError}</p>;
 
-    console.log("Form data:", formData);
-    if (!formData) {
-        return <p>No profile data found.</p>;
-    }
+    // if (!formData) {
+    //     return <p>No profile data found.</p>;
+    // }
 
-    console.log("Form selectData:", selectData);
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
@@ -415,6 +412,15 @@ export default function ProfileEditPage() {
                         <Button type="button" variant="secondary" onClick={addEducation}>
                             เพิ่มวุฒิการศึกษา
                         </Button>
+                    </div>
+                </div>
+            </Block>
+            <Block>
+                <div className="p-6">
+                    <h2 className='text-lg text-gray-900'>เปลี่ยนรหัสผ่าน</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <FieldInput label="รหัสผ่านใหม่" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="เว้นว่างถ้าไม่ต้องการเปลี่ยน" />
+                        <div />
                     </div>
                 </div>
             </Block>

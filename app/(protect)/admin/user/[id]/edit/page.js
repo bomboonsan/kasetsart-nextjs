@@ -86,7 +86,6 @@ export default function AdminUserEditPage({ params }) {
             return;
         }
         const profile = profileData.usersPermissionsUser;
-        console.log("Admin Edit - profileData:", profileData);
         let initialData = {};
 
         for (const key in profile) {
@@ -116,11 +115,10 @@ export default function AdminUserEditPage({ params }) {
                     setEducation(educationData);
                 }
             } catch (error) {
-                console.log("Error parsing education data:", error);
+                console.error("Error parsing education data:", error);
             }
         }
 
-        console.log("Admin Edit - Initial form data set:", initialData);
 
         if (profile.avatar && profile.avatar.url) {
             const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
@@ -227,7 +225,6 @@ export default function AdminUserEditPage({ params }) {
             organizations: organizationId ? [organizationId] : null,
             education: JSON.stringify(education.filter(edu => edu.level || edu.institution || edu.field || edu.year))
         };
-        console.log("Admin Edit - Payload to submit:", payload);
 
         if (uploadedAvatarId) payload.avatar = uploadedAvatarId;
         if (password && password.length > 0) payload.password = password;
@@ -272,7 +269,6 @@ export default function AdminUserEditPage({ params }) {
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
 
-    console.log("Admin Edit - Form selectData:", selectData);
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <Block>
