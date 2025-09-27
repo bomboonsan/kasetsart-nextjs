@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import Block from '@/components/layout/Block'
 import FormInput from '@/components/myui/FormInput'
@@ -11,6 +11,56 @@ import { Button } from '@/components/ui/button'
 import { FUND_FORM_INITIAL } from '@/data/fund'
 import toast from 'react-hot-toast'
 
+// Memoized Writer Form Component to prevent unnecessary re-renders
+const WriterForm = React.memo(({ index, writer, handlers }) => {
+    const { updateWriterField, removeWriter } = handlers
+    
+    const handleFieldChange = useCallback((field, value) => {
+        updateWriterField(index, field, value)
+    }, [index, updateWriterField])
+
+    const handleRemove = useCallback(() => {
+        removeWriter(index)
+    }, [index, removeWriter])
+
+    return (
+        <div className=''>
+            <div className='space-y-2'>
+                <FormInput 
+                    label='ชื่อ-นามสกุล' 
+                    value={writer?.fullName || ''} 
+                    onChange={(e) => handleFieldChange('fullName', e.target.value)} 
+                />
+                <FormInput 
+                    label='ภาควิชา' 
+                    value={writer?.department || ''} 
+                    onChange={(e) => handleFieldChange('department', e.target.value)} 
+                />
+                <FormInput 
+                    label='คณะ' 
+                    value={writer?.faculty || ''} 
+                    onChange={(e) => handleFieldChange('faculty', e.target.value)} 
+                />
+                <FormInput 
+                    label='โทรศัพท์' 
+                    value={writer?.phone || ''} 
+                    onChange={(e) => handleFieldChange('phone', e.target.value)} 
+                />
+                <FormInput 
+                    label='อีเมล' 
+                    value={writer?.email || ''} 
+                    onChange={(e) => handleFieldChange('email', e.target.value)} 
+                />
+            </div>
+            <div className='flex justify-end my-3'>
+                <Button className="text-xs" type='button' variant='destructive' onClick={handleRemove}>
+                    ลบ
+                </Button>
+            </div>
+        </div>
+    )
+})
+
 // The form supports create and edit. If initialData provided => edit mode.
 export default function FundForm({ initialData, onSubmit, isEdit = false }) {
     const { data: session } = useSession()
@@ -18,40 +68,16 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const originalAttachmentIdsRef = useRef([])
 
-    const extractAttachmentIds = (arr) => {
+    // Memoize expensive operations
+    const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return []
         return arr
             .filter(a => a && (a.documentId || a.id))
             .map(a => Number(a.documentId ?? a.id))
             .filter(n => Number.isFinite(n) && n > 0)
-    }
+    }, [])
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }))
-    }
-
-    const addWriter = () => {
-        setFormData(prev => ({
-            ...prev,
-            writers: [...prev.writers, { fullName: '', department: '', faculty: '', phone: '', email: '' }]
-        }))
-    }
-
-    const removeWriter = (index) => {
-        setFormData(prev => ({
-            ...prev,
-            writers: prev.writers.filter((_, i) => i !== index)
-        }))
-    }
-
-    const updateWriterField = (index, field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            writers: prev.writers.map((w, i) => i === index ? { ...w, [field]: value } : w)
-        }))
-    }
-
-    const sanitize = (value) => {
+    const sanitize = useCallback((value) => {
         if (typeof value === 'bigint') return value.toString()
         if (Array.isArray(value)) return value.map(sanitize)
         if (value && typeof value === 'object') {
@@ -60,9 +86,35 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             return out
         }
         return value
-    }
+    }, [])
 
-    const handleSubmit = async () => {
+    // Memoize form handlers to prevent unnecessary re-renders
+    const handleInputChange = useCallback((field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }))
+    }, [])
+
+    const addWriter = useCallback(() => {
+        setFormData(prev => ({
+            ...prev,
+            writers: [...(prev.writers || []), { fullName: '', department: '', faculty: '', phone: '', email: '' }]
+        }))
+    }, [])
+
+    const removeWriter = useCallback((index) => {
+        setFormData(prev => ({
+            ...prev,
+            writers: (prev.writers || []).filter((_, i) => i !== index)
+        }))
+    }, [])
+
+    const updateWriterField = useCallback((index, field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            writers: (prev.writers || []).map((w, i) => i === index ? { ...w, [field]: value } : w)
+        }))
+    }, [])
+
+    const handleSubmit = useCallback(async () => {
         if (!session?.jwt) {
             toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล')
             return
@@ -79,7 +131,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             // derive users_permissions_users from partners internal
             const users_permissions_users = Array.isArray(formData.partners)
                 ? formData.partners
-                    .filter(p => p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
+                    .filter(p => p && p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
                     .map(p => p.userID || p.User?.documentId || p.User?.id)
                     .filter(Boolean)
                 : []
@@ -119,11 +171,11 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             if (onSubmit) await onSubmit(safe)
         } catch (err) {
             console.error('Fund submit error:', err)
-            toast.error('เกิดข้อผิดพลาด: ' + err.message)
+            toast.error('เกิดข้อผิดพลาด: ' + (err?.message || 'Unknown error'))
         } finally {
             setIsSubmitting(false)
         }
-    }
+    }, [session?.jwt, formData, extractAttachmentIds, sanitize, initialData, onSubmit])
 
     // hydrate edit data
     useEffect(() => {
@@ -132,7 +184,24 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             setFormData(hydrated)
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments)
         }
-    }, [initialData])
+    }, [initialData, extractAttachmentIds])
+
+    // Memoize static options to prevent re-renders
+    const fundTypeOptions = useMemo(() => [
+        { value: '0', label: 'ตำรา ใช้สอนในรายวิชา' },
+        { value: '1', label: 'หนังสือ (ชื่อไทย และชื่อภาษาอังกฤษ)' }
+    ], [])
+
+    // Memoize safe writers array
+    const safeWriters = useMemo(() => {
+        return Array.isArray(formData.writers) ? formData.writers : []
+    }, [formData.writers])
+
+    // Memoized writers handlers
+    const writerHandlers = useMemo(() => ({
+        updateWriterField,
+        removeWriter
+    }), [updateWriterField, removeWriter])
 
     return (        
         <>
@@ -144,34 +213,25 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                             <h3 className='font-semibold'>ผู้เขียน</h3>
                             <Button type='button' variant='outline' onClick={addWriter}>เพิ่มผู้เขียน</Button>
                         </div>
-                        {formData.writers.map((w, idx) => (
-                            <div key={idx} className=''>
-                                <div className='space-y-2'>
-                                    <FormInput label='ชื่อ-นามสกุล' value={w.fullName} onChange={(e) => updateWriterField(idx, 'fullName', e.target.value)} />
-                                    <FormInput label='ภาควิชา' value={w.department} onChange={(e) => updateWriterField(idx, 'department', e.target.value)} />
-                                    <FormInput label='คณะ' value={w.faculty} onChange={(e) => updateWriterField(idx, 'faculty', e.target.value)} />
-                                    <FormInput label='โทรศัพท์' value={w.phone} onChange={(e) => updateWriterField(idx, 'phone', e.target.value)} />
-                                    <FormInput label='อีเมล' value={w.email} onChange={(e) => updateWriterField(idx, 'email', e.target.value)} />
-                                </div>
-                                <div className='flex justify-end my-3'>
-                                    <Button className="text-xs" type='button' variant='destructive' onClick={() => removeWriter(idx)}>ลบ</Button>
-                                </div>
-                            </div>
+                        {safeWriters.map((w, idx) => (
+                            <WriterForm
+                                key={idx}
+                                index={idx}
+                                writer={w}
+                                handlers={writerHandlers}
+                            />
                         ))}
                     </div>
-                    <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={[
-                        { value: '0', label: 'ตำรา ใช้สอนในรายวิชา' },
-                        { value: '1', label: 'หนังสือ (ชื่อไทย และชื่อภาษาอังกฤษ)' }
-                    ]} />
-                    <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} />
-                    <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
-                    <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
-                    <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
-                    <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
-                    <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
-                    <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages} onChange={(e) => handleInputChange('pages', e.target.value)} />
-                    <FormInput id='duration' type='date' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.duration} onChange={(e) => handleInputChange('duration', e.target.value)} />
-                    <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
+                    <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={fundTypeOptions} />
+                    <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText || ''} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} />
+                    <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc || ''} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
+                    <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications || ''} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
+                    <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose || ''} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
+                    <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup || ''} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
+                    <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails || ''} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
+                    <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages || ''} onChange={(e) => handleInputChange('pages', e.target.value)} />
+                    <FormInput id='duration' type='date' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.duration || ''} onChange={(e) => handleInputChange('duration', e.target.value)} />
+                    <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
 
 
 
@@ -183,7 +243,10 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 </div>
             </Block>
             <Block className="mt-4">
-                <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
+                <Partners 
+                    data={formData.partners || []} 
+                    onChange={(partners) => handleInputChange('partners', partners)} 
+                />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
                 <Button variant="outline">ยกเลิก</Button>
