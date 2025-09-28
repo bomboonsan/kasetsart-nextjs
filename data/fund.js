@@ -9,6 +9,7 @@ export const FUND_FORM_INITIAL = {
     chapterDetails: "", // การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ
     pages: "", // ตำรา หรือ หนังสือ มีจำนวนประมาณ (Int)
     duration: "", // ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ (Date)
+    period: "", // ปีงบประมาณที่ขอรับทุน (str)
     references: "", // รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม)
     partners: [], // json array
     attachments: [],

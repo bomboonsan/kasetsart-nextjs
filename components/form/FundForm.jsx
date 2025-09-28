@@ -228,7 +228,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                     <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup || ''} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
                     <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails || ''} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
                     <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages || ''} onChange={(e) => handleInputChange('pages', e.target.value)} />
-                    <FormInput id='duration' type='date' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.duration || ''} onChange={(e) => handleInputChange('duration', e.target.value)} />
+                    <FormInput id='period' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.period || ''} onChange={(e) => handleInputChange('period', e.target.value)} />
                     <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
 
 

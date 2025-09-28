@@ -347,6 +347,7 @@ export const GET_FUNDS = gql`
       fundType
       fundTypeText
       duration
+      period
       pages
       updatedAt
       partners
@@ -367,6 +368,7 @@ export const GET_MY_FUNDS = gql`
       fundType
       fundTypeText
       duration
+      period
       pages
       updatedAt
       partners
@@ -388,6 +390,7 @@ export const GET_FUND = gql`
       chapterDetails
       pages
       duration
+      period
       references
       partners
       attachments { documentId name url size mime }
