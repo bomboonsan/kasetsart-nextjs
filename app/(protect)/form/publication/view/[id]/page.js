@@ -65,7 +65,7 @@ export default function PublicationView() {
               <FieldView label="ระดับ" value={publication.level === '0' ? 'ระดับชาติ' : publication.level === '1' ? 'ระดับนานาชาติ' : '-'} />
               <FieldView label="ฐานข้อมูลวารสาร" value={publication.isJournalDatabase ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'} />
               {publication.isScopus && (
-                <FieldView label="Scopus" value={`${scopusQuartileOptions.find(option => option.value === publication.scopusValue)?.label || '-'} ${scopusSubjectOptions.find(option => option.value === publication.scopusType)?.label || '-'}`} />
+                <FieldView label="Scopus" value={`${scopusQuartileOptions.find(option => option.value === publication.scopusValue)?.label || '-'} , ${scopusSubjectOptions.find(option => option.value === publication.scopusType)?.label || '-'}`} />
               )}
               {publication.isACI && (
                 <FieldView label="ACI" value="ใช่" />
