@@ -11,6 +11,7 @@ import FormRadio from '@/components/myui/FormRadio';
 import FormTextarea from '@/components/myui/FormTextarea';
 import FormDateSelect from '../myui/FormDateSelect';
 import FormSelect from '../myui/FormSelect';
+import FormMultiSelect from '../myui/FormMultiSelect';
 import Partners from "../form/Partners"
 import FileUploadField from './FileUploadField';
 import { Button } from '../ui/button';
@@ -65,6 +66,19 @@ const extractAttachmentIds = (arr) => {
         .filter(a => a && (a.documentId || a.id))
         .map(a => normalizeId(a.documentId ?? a.id))
         .filter(Boolean);
+};
+
+const extractSdgIds = (sdgData) => {
+    if (!sdgData) return [];
+    if (Array.isArray(sdgData)) {
+        return sdgData
+            .filter(s => s && (s.documentId || s.id))
+            .map(s => normalizeId(s.documentId ?? s.id))
+            .filter(Boolean);
+    }
+    // Handle single value case
+    const singleId = normalizeId(sdgData.documentId ?? sdgData.id ?? sdgData);
+    return singleId ? [singleId] : [];
 };
 
 export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
@@ -162,6 +176,15 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 return normalized ? [normalized] : [];
             };
 
+            const toSdgIdArray = (value) => {
+                if (!value) return [];
+                if (Array.isArray(value)) {
+                    return value.map(v => normalizeId(v)).filter(Boolean);
+                }
+                const normalized = normalizeId(value);
+                return normalized ? [normalized] : [];
+            };
+
             const projectData = {
                 fiscalYear: parseIntegerOrNull(formData.fiscalYear),
                 projectType: formData.projectType || null,
@@ -181,7 +204,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 departments: toIdArray(formData.departments),
                 ic_types: toIdArray(formData.icTypes),
                 impacts: toIdArray(formData.impact),
-                sdgs: toIdArray(formData.sdg),
+                sdgs: toSdgIdArray(formData.sdg),
                 partners: Array.isArray(formData.partners) ? stripTypenameDeep(formData.partners) : [],
                 attachments: attachmentIds.length ? attachmentIds : [],
                 users_permissions_users: usersPermissionsUsers
@@ -239,15 +262,16 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         if (initialData) {
             const normalizedIcType = normalizeId(initialData.ic_types?.[0]?.documentId ?? initialData.icTypes);
             const normalizedImpact = normalizeId(initialData.impacts?.[0]?.documentId ?? initialData.impact);
-            const normalizedSdg = normalizeId(initialData.sdgs?.[0]?.documentId ?? initialData.sdg);
+            // Handle SDG as array - extract all SDG IDs
+            const normalizedSdgArray = extractSdgIds(initialData.sdgs ?? initialData.sdg);
             const normalizedDepartment = normalizeId(initialData.departments?.[0]?.documentId ?? initialData.departments);
             const hydrated = {
                 ...PROJECT_FORM_INITIAL,
                 ...initialData,
-                // map relations to expected single select values
+                // map relations to expected values
                 icTypes: normalizedIcType ?? "",
                 impact: normalizedImpact ?? "",
-                sdg: normalizedSdg ?? "",
+                sdg: normalizedSdgArray, // Now an array
                 departments: normalizedDepartment ?? "",
             };
             setFormData(hydrated);
@@ -365,7 +389,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />
                     <FormSelect id="impact" label="Impact" value={formData.impact ?? ""} placeholder="เลือก Impact" onChange={(val) => handleInputChange('impact', val)} options={impactsOptions} />
-                    <FormSelect id="sdgs" label="SDG" value={formData.sdg ?? ""} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
+                    <FormMultiSelect id="sdgs" label="SDG" value={formData.sdg ?? []} placeholder="เลือก SDG" onChange={(val) => handleInputChange('sdg', val)} options={sdgsOptions} />
                     <FileUploadField
                         label="เอกสารแนบ"
                         value={formData.attachments || []}

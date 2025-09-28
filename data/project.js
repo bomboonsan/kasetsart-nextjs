@@ -17,7 +17,7 @@ export const PROJECT_FORM_INITIAL = {
     keywords: "",
     icTypes: "",
     impact: "",
-    sdg: "",
+    sdg: [], // Changed from string to array for multi-select
     departments: "",
     partners: [],
     users: [],
