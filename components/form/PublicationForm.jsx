@@ -275,8 +275,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         return <div className="p-6">Loading...</div>;
     }
 
-    console.log('Rendering PublicationForm with formData:', formData);
-
     return (
         <>
             <Block>

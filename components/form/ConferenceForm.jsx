@@ -99,6 +99,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         setFormData((prev) => ({ ...prev, [field]: value }));
         if (field === 'partners') {
         }
+        if (field === 'level' && value === '0') {
+            setFormData((prev) => ({ ...prev, country: 'TH' }));
+        }
     }, []);
 
     // Memoized submit handler with proper error handling
@@ -312,6 +315,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             if (JSON.stringify(newPartners) !== JSON.stringify(currentPartners)) {
                 setFormData((prev) => ({ 
                     ...prev, 
+                    fundName: projectObj?.fundName || '',
                     partners: newPartners 
                 }));
             }
@@ -390,7 +394,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                         { value: '0', label: 'ระดับชาติ' },
                         { value: '1', label: 'ระดับนานาชาติ' },
                     ]} />
-                    <FormSelect id="country" label="ประเทศ" value={formData.country ?? ""} placeholder="เลือกประเทศ" onChange={(val) => handleInputChange('country', val)} options={countryOptions} />
+                    <FormSelect id="country" label="ประเทศ" disabled={formData.level == '0'} value={formData.country ?? ""} placeholder="เลือกประเทศ" onChange={(val) => handleInputChange('country', val)} options={countryOptions} />
                     <FormSelect id="state" label="มลรัฐ/จังหวัด" value={formData.state ?? ""} placeholder="เลือกมลรัฐ/จังหวัด" onChange={(val) => handleInputChange('state', val)} options={stateOptions} />
                     <FormSelect id="city" label="เมือง" value={formData.city ?? ""} placeholder="เลือกเมือง" onChange={(val) => handleInputChange('city', val)} options={cityOptions} />
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={(e) => handleInputChange('fundName', e.target.value)} placeholder="" rows={5} />
