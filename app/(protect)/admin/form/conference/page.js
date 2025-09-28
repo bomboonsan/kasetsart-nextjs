@@ -15,6 +15,7 @@ import {
     TableHead,
     TableCell,
 } from '@/components/ui/table'
+import { formatDateToDDMMYYYY } from '@/utils/formatters';
 
 export default function ConferenceTable() {
     const { data: session, status } = useSession();
@@ -54,8 +55,8 @@ export default function ConferenceTable() {
     const conferences = data?.conferences || [];
 
     const getLevelText = (level) => {
-        if (level === 0) return 'ระดับชาติ';
-        if (level === 1) return 'ระดับนานาชาติ';
+        if (level == '0') return 'ระดับชาติ';
+        if (level == '1') return 'ระดับนานาชาติ';
         return '-';
     };
 
@@ -126,7 +127,7 @@ export default function ConferenceTable() {
                                 <TableCell className={'px-5'}>{getLocationText(c)}</TableCell>
                                 <TableCell className={'px-5'}>
                                     {c.durationStart && c.durationEnd 
-                                        ? `${c.durationStart} - ${c.durationEnd}`
+                                        ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`
                                         : c.durationStart || c.durationEnd || '-'
                                     }
                                 </TableCell>

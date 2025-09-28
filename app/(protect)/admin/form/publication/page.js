@@ -54,8 +54,8 @@ export default function PublicationTable() {
     const publications = data?.publications || [];
 
     const getLevelText = (level) => {
-        if (level === 0) return 'ระดับชาติ';
-        if (level === 1) return 'ระดับนานาชาติ';
+        if (level == '0') return 'ระดับชาติ';
+        if (level == '1') return 'ระดับนานาชาติ';
         return '-';
     };
 
