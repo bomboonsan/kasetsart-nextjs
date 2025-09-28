@@ -275,6 +275,8 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         return <div className="p-6">Loading...</div>;
     }
 
+    console.log('Rendering PublicationForm with formData:', formData);
+
     return (
         <>
             <Block>
@@ -291,17 +293,17 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                         วัน/เดือน/ปี ที่ตีพิมพ์
                     </FormDateSelect>
                     <FormDoubleInput id="pages" label="จากหน้า" before="" after="ถึง" value1={formData.pageStart} onChange1={e => handleInputChange('pageStart', e.target.value)} value2={formData.pageEnd} onChange2={e => handleInputChange('pageEnd', e.target.value)} />
-                    <FormRadio id="level" label="ระดับ" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={levelOptions} />
-                    <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" value={formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={journalDatabaseOptions} />
+                    <FormRadio id="level" label="ระดับตีพิมพ์" value={formData.level} onChange={e => handleInputChange('level', e.target.value)} options={levelOptions} />
+                    <FormRadio id="isJournalDatabase" label="ฐานข้อมูล" disabled={formData.level == ''} value={formData.level == '' ? '' : formData.isJournalDatabase} onChange={e => handleInputChange('isJournalDatabase', e.target.value)} options={journalDatabaseOptions} />
                     {/* Standards Section */}
                     <div className="space-y-1 flex flex-wrap items-center forminput">
                         <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
                         <div className="grid grid-cols-2 gap-3 text-sm w-2/3">
-                            <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isScopus} onChange={e => handleStandardToggle('isScopus', e.target.checked)} />
+                            <label className={formData.level == "0" ? "hidden" :  "flex flex-wrap items-center gap-2"}>
+                                <input disabled={formData.isJournalDatabase == '1'} type="checkbox" checked={!!formData.isScopus && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isScopus', e.target.checked)} />
                                 <span>Scopus</span>
                                 <div className='w-full'>
-                                    {formData.isScopus ? (
+                                    {formData.isScopus && formData.isJournalDatabase == '0' ? (
                                         <div className="grid md:grid-cols-2 gap-4">
                                             <FormSelect id="scopusValue" label="" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={handleScopusValueChange} options={scopusQuartileOptions} />
                                             <FormSelect id="scopusType" label="" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={handleScopusTypeChange} options={scopusSubjectOptions} />
@@ -310,44 +312,44 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                                 </div>
                             </label>
                             <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isACI} onChange={e => handleStandardToggle('isACI', e.target.checked)} />
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isACI && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isACI', e.target.checked)} />
                                 <span>ACI</span>
                             </label>
                             <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isTCI1} onChange={e => handleStandardToggle('isTCI1', e.target.checked)} />
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isTCI1 && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isTCI1', e.target.checked)} />
                                 <span>TCI1</span>
                             </label>
-                            <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isABDC} onChange={e => handleStandardToggle('isABDC', e.target.checked)} />
+                            <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isABDC && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isABDC', e.target.checked)} />
                                 <span>ABDC</span>
                                 <div className='w-full'>
-                                    {formData.isABDC ? (
+                                    {formData.isABDC && formData.isJournalDatabase == '0' ? (
                                         <FormSelect id="abdcType" label="" value={formData.abdcType || ''} placeholder="เลือกระดับ" onChange={handleAbdcTypeChange} options={abdcOptions} />
                                     ) : null}
                                 </div>
                             </label>
                             <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isTCI2} onChange={e => handleStandardToggle('isTCI2', e.target.checked)} />
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isTCI2 && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isTCI2', e.target.checked)} />
                                 <span>TCI2</span>
                             </label>
-                            <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isAJG} onChange={e => handleStandardToggle('isAJG', e.target.checked)} />
+                            <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isAJG && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isAJG', e.target.checked)} />
                                 <span>AJG</span>
                                 <div className='w-full'>
-                                    {formData.isAJG ? (
+                                    {formData.isAJG && formData.isJournalDatabase == '0' ? (
                                         <FormSelect id="ajgType" label="" value={formData.ajgType || ''} placeholder="เลือกระดับ" onChange={handleAjgTypeChange} options={ajgOptions} />
                                     ) : null}
                                 </div>
                             </label>
-                            <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isSSRN} onChange={e => handleStandardToggle('isSSRN', e.target.checked)} />
+                            <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isSSRN && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isSSRN', e.target.checked)} />
                                 <span>SSRN</span>
                             </label>
-                            <label className="flex flex-wrap items-center gap-2">
-                                <input type="checkbox" checked={!!formData.isWOS} onChange={e => handleStandardToggle('isWOS', e.target.checked)} />
+                            <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
+                                <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isWOS && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isWOS', e.target.checked)} />
                                 <span>Web of Science</span>
                                 <div className='w-full'>
-                                {formData.isWOS ? (
+                                    {formData.isWOS && formData.isJournalDatabase == '0' ? (
                                     <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={handleWosTypeChange} options={wosOptions} />
                                 ) : null}
                                 </div>

@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function FormRadio({ id , onChange, options, label, ...props }) {
+export default function FormRadio({ id, onChange, options, label, disabled = false, ...props }) {
     return (
         <div className="space-y-1 flex items-center forminput">
             {label && <div className="w-1/3">
@@ -17,6 +17,7 @@ export default function FormRadio({ id , onChange, options, label, ...props }) {
                             value={option.value}
                             checked={option.value === props.value}
                             onChange={onChange}
+                            disabled={disabled}
                         />
                         <Label htmlFor={`${id}-${option.value}`} className="ml-2 font-normal">
                             {option.label}
