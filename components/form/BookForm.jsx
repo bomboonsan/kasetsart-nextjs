@@ -12,7 +12,8 @@ import Partners from './Partners';
 import FundPicker from './FundPicker';
 import { Button } from '@/components/ui/button';
 import { BOOK_FORM_INITIAL } from '@/data/book';
-import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK } from '@/graphql/formQueries';
+import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK, UPDATE_FUND_PARTNERS } from '@/graphql/formQueries';
+import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 // Helper functions moved outside component to prevent recreation
@@ -118,6 +119,9 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const [updateBook] = useMutation(UPDATE_BOOK, {
 		context: authHeaders
 	});
+	const [updateFundPartners] = useMutation(UPDATE_FUND_PARTNERS, {
+		context: authHeaders
+	});
 
 	const handleInputChange = useCallback((field, value) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
@@ -139,6 +143,8 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 			const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
 			const attachmentsChanged = JSON.stringify(currentIdsSorted) !== JSON.stringify(originalIdsSorted);
 
+			const fundDocumentId = normalizeDocumentId(formData.__fundingObj?.documentId ?? formData.__fundingObj?.id);
+
 			const bookData = {
 				bookType: formData.bookType ?? "0",
 				titleTH: formData.titleTH?.trim() || null,
@@ -148,7 +154,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				publicationDate: formData.publicationDate || null,
 				attachments: attachmentIds,
 				writers: formData.writers || [],
-				funds: formData.__fundingObj?.documentId ? [formData.__fundingObj.documentId] : [],
+				funds: fundDocumentId ? [fundDocumentId] : [],
 			};
 			Object.keys(bookData).forEach(k => {
 				if (bookData[k] === null || bookData[k] === '') delete bookData[k];
@@ -157,15 +163,34 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				delete bookData.attachments;
 			}
 
+			const partnersForRelation = Array.isArray(formData.partners) ? formData.partners : [];
+			const usersPermissionsUsers = fundDocumentId ? Array.from(new Set(extractInternalUserIds(partnersForRelation))) : [];
+
 			if (isEdit) {
 				if (onSubmit) {
 					await onSubmit(bookData);
 				} else {
 					await updateBook({ variables: { documentId, data: bookData } });
 				}
-				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
 			} else {
 				await createBook({ variables: { data: bookData } });
+			}
+
+			if (fundDocumentId) {
+				await updateFundPartners({
+					variables: {
+						documentId: fundDocumentId,
+						data: {
+							partners: partnersForRelation,
+							users_permissions_users: usersPermissionsUsers
+						}
+					}
+				});
+			}
+
+			if (isEdit) {
+				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
+			} else {
 				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
 				setFormData(BOOK_FORM_INITIAL);
 			}
@@ -175,7 +200,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, documentId]);
+	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId]);
 
 	// Memoize partners update to prevent infinite loop
 	const updatePartnersFromFunding = useCallback(() => {

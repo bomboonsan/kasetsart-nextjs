@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button'
 import { FUND_FORM_INITIAL } from '@/data/fund'
 import toast from 'react-hot-toast'
 
+import { extractInternalUserIds } from '@/utils/partners'
+
 // Memoized Writer Form Component to prevent unnecessary re-renders
 const WriterForm = React.memo(({ index, writer, handlers }) => {
     const { updateWriterField, removeWriter } = handlers
@@ -128,13 +130,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
 
         setIsSubmitting(true)
         try {
-            // derive users_permissions_users from partners internal
-            const users_permissions_users = Array.isArray(formData.partners)
-                ? formData.partners
-                    .filter(p => p && p.isInternal && (p.userID || p.User?.documentId || p.User?.id))
-                    .map(p => p.userID || p.User?.documentId || p.User?.id)
-                    .filter(Boolean)
-                : []
+            const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners)))
 
             const attachmentIds = extractAttachmentIds(formData.attachments)
             const currentIdsSorted = [...attachmentIds].sort()
@@ -155,7 +151,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 references: formData.references || null,
                 partners: formData.partners || [],
                 attachments: attachmentIds,
-                users_permissions_users: users_permissions_users.length ? users_permissions_users : undefined
+                users_permissions_users: usersPermissionsUsers
             }
 
             // Remove null/empty string to reduce noise

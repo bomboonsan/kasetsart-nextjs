@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
+import { extractInternalUserIds } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 export default function ConferenceForm({ initialData, onSubmit, isEdit = false }) {
@@ -190,11 +191,14 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
 
             // อัปเดต partners ใน project ถ้ามีและถ้า partners มีการเปลี่ยนแปลง
             if (formData.__projectObj?.documentId && Array.isArray(formData.partners)) {
+                const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners)));
+
                 await updateProjectPartners({
                     variables: {
                         documentId: formData.__projectObj.documentId,
                         data: {
-                            partners: formData.partners
+                            partners: formData.partners,
+                            users_permissions_users: usersPermissionsUsers
                         }
                     }
                 });

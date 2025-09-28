@@ -16,6 +16,7 @@ import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
+import { extractInternalUserIds } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
@@ -159,11 +160,16 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
 
             // Update project partners if project is selected and partners provided
             try {
-                if (formData.__projectObj?.documentId && formData.partners && Array.isArray(formData.partners)) {
+                if (formData.__projectObj?.documentId && Array.isArray(formData.partners)) {
+                    const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners)));
+
                     await updateProjectPartners({
                         variables: {
                             documentId: formData.__projectObj.documentId,
-                            data: { partners: formData.partners }
+                            data: {
+                                partners: formData.partners,
+                                users_permissions_users: usersPermissionsUsers
+                            }
                         }
                     });
                 }

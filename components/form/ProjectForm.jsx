@@ -17,6 +17,8 @@ import { PROJECT_FORM_INITIAL, researchKindOptions, fundTypeOptions, subFundType
 import { GET_PROJECT_OPTIONS } from '@/graphql/optionForm';
 import { CREATE_PROJECT, UPDATE_PROJECT } from '@/graphql/formQueries';
 
+import { extractInternalUserIds } from '@/utils/partners';
+
 // Move utility functions outside component to prevent re-creation
 const normalizeId = (value) => {
     if (value === undefined || value === null || value === '') return null;
@@ -145,12 +147,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         setIsSubmitting(true);
         
         try {
-            const usersPermissionsUsers = Array.isArray(formData.partners)
-                ? formData.partners
-                    .filter(p => p?.isInternal && (p?.userID || p?.User?.documentId || p?.User?.id))
-                    .map(p => normalizeId(p.userID ?? p.User?.documentId ?? p.User?.id))
-                    .filter(Boolean)
-                : [];
+            const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners).map(normalizeId).filter(Boolean)));
 
             const attachmentIds = Array.from(new Set(extractAttachmentIds(formData.attachments)));
 
@@ -185,7 +182,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 sdgs: toIdArray(formData.sdg),
                 partners: Array.isArray(formData.partners) ? stripTypenameDeep(formData.partners) : [],
                 attachments: attachmentIds.length ? attachmentIds : [],
-                users_permissions_users: usersPermissionsUsers.length ? Array.from(new Set(usersPermissionsUsers)) : undefined
+                users_permissions_users: usersPermissionsUsers
             };
 
             // Remove null/undefined values to avoid issues
