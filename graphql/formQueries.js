@@ -354,6 +354,26 @@ export const GET_FUNDS = gql`
   }
 `;
 
+export const GET_MY_FUNDS = gql`
+  query GetMyFunds($pagination: PaginationArg, $sort: [String], $userId: ID!, $filters: FundFiltersInput) {
+    funds(pagination: $pagination, sort: $sort, filters: { 
+      and: [
+        { users_permissions_users: { documentId: { eq: $userId } } },
+        $filters
+      ]
+    }) {
+      documentId
+      contentDesc
+      fundType
+      fundTypeText
+      duration
+      pages
+      updatedAt
+      partners
+    }
+  }
+`;
+
 export const GET_FUND = gql`
   query GetFund($documentId: ID!) {
     fund(documentId: $documentId) {

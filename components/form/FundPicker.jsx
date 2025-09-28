@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useSession } from 'next-auth/react';
-import { GET_FUNDS } from '@/graphql/formQueries';
+import { GET_FUNDS, GET_MY_FUNDS } from '@/graphql/formQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,20 +16,29 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 	const [searchTerm, setSearchTerm] = useState('');
 	const [funds, setFunds] = useState([]);
 
-	const { data: fundsData, loading, error } = useQuery(GET_FUNDS, {
-		variables: {
-			pagination: { pageSize: 100 },
-			filters: searchTerm ? {
-				or: [
-					{ fundTypeText: { containsi: searchTerm } },
-					{ fundType: { containsi: searchTerm } },
-					{ duration: { containsi: searchTerm } },
-					{ pages: { containsi: searchTerm } },
-					{ partners: { containsi: searchTerm } },
-					{ contentDesc: { containsi: searchTerm } },
-				]
-			} : {}
-		},
+	// ตรวจสอบ role ของ user
+	const isUserRole = session?.user?.role?.name?.toLowerCase() === 'user';
+	const userId = session?.user?.documentId || session?.user?.id;
+
+	// เลือก query ตาม role
+	const queryToUse = isUserRole ? GET_MY_FUNDS : GET_FUNDS;
+	const queryVariables = {
+		pagination: { pageSize: 100 },
+		filters: searchTerm ? {
+			or: [
+				{ fundTypeText: { containsi: searchTerm } },
+				{ fundType: { containsi: searchTerm } },
+				{ duration: { containsi: searchTerm } },
+				{ pages: { containsi: searchTerm } },
+				{ partners: { containsi: searchTerm } },
+				{ contentDesc: { containsi: searchTerm } },
+			]
+		} : {},
+		...(isUserRole && userId ? { userId } : {})
+	};
+
+	const { data: fundsData, loading, error } = useQuery(queryToUse, {
+		variables: queryVariables,
 		skip: !searchOpen,
 		context: {
 			headers: {
