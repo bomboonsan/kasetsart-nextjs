@@ -228,6 +228,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         setFormData(prev => ({
             ...prev,
             __projectObj: project ?? null,
+            fundName: project?.fundName || '',
             partners: Array.isArray(project?.partners) ? project.partners : [],
         }));
     }, [setFormData]);
