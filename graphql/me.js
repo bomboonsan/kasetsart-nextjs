@@ -19,6 +19,31 @@ export const MY_PROJECTS = gql`
         }
     }
 `;
+
+export const MY_PROJECTS_EXTENDED = gql`
+    query GetMyProjectsExtended($pagination: PaginationArg, $sort: [String], $filters: ProjectFiltersInput, $userId: ID!) {
+        projects(pagination: $pagination, sort: $sort, filters: { 
+            and: [
+                { users_permissions_users: { documentId: { eq: $userId } } },
+                $filters
+            ]
+        }) {
+            documentId
+            nameTH
+            nameEN
+            fiscalYear
+            isEnvironmentallySustainable
+            keywords
+            fundName
+            budget
+            publishedAt
+            updatedAt
+            departments { documentId title }
+            projectType
+            partners
+        }
+    }
+`;
 export const MY_CONFERENCES = gql`
   query GetConferences($pagination: PaginationArg, $sort: [String], $userId: ID!) {
     conferences(

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from "@apollo/client/react";
 import { useSession } from "next-auth/react";
 import { GET_PROJECTS } from '../../graphql/projectQueries';
+import { MY_PROJECTS_EXTENDED } from '../../graphql/me';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,28 +18,44 @@ export default function ProjectPicker({ label = 'โครงการวิจ�
     const [searchTerm, setSearchTerm] = useState('')
     const [filteredProjects, setFilteredProjects] = useState([])
 
-    const { data: projectsData, loading, error } = useQuery(GET_PROJECTS, {
-        variables: {
-            pagination: { pageSize: 100 },
-            filters: searchTerm ? {
-                or: [
-                    { fundName: { containsi: searchTerm } },
-                    { isEnvironmentallySustainable: { containsi: isEnvironmentallySustainable } },
-                    { nameTH: { containsi: searchTerm } },
-                    { nameEN: { containsi: searchTerm } },
-                    { keywords: { containsi: searchTerm } },
-                    { fiscalYear: { eq: parseInt(searchTerm) || undefined } }
-                ]
-            } : {}
-        },
-        skip: !searchOpen,
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        },
-        ssr: false
-    });
+    // ตรวจสอบ role ของผู้ใช้
+    const isUserRole = session?.user?.role?.name?.toLowerCase() === 'user';
+    const userId = session?.user?.documentId || session?.user?.id;
+
+    // สร้าง filters สำหรับการค้นหา
+    const searchFilters = searchTerm ? {
+        or: [
+            { fundName: { containsi: searchTerm } },
+            { nameTH: { containsi: searchTerm } },
+            { nameEN: { containsi: searchTerm } },
+            { keywords: { containsi: searchTerm } },
+            { fiscalYear: { eq: parseInt(searchTerm) || undefined } }
+        ]
+    } : {};
+
+    // ใช้ query ที่เหมาะสมตาม role
+    const { data: projectsData, loading, error } = useQuery(
+        isUserRole ? MY_PROJECTS_EXTENDED : GET_PROJECTS,
+        {
+            variables: isUserRole ? {
+                pagination: { pageSize: 100 },
+                filters: searchFilters,
+                userId: userId,
+                sort: ['updatedAt:desc']
+            } : {
+                pagination: { pageSize: 100 },
+                filters: searchFilters,
+                sort: ['updatedAt:desc']
+            },
+            skip: !searchOpen || (isUserRole && !userId),
+            context: {
+                headers: {
+                    Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+                }
+            },
+            ssr: false
+        }
+    );
 
     useEffect(() => {
         const returned = projectsData?.projects;
