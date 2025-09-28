@@ -1,6 +1,6 @@
 'use client'
 import { useQuery, useMutation } from "@apollo/client/react";
-import { useRouter } from 'next/compat/router'
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import React from 'react';
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
@@ -355,11 +355,11 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     {/* <FormTextarea id="responsibleOrganization" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.responsibleOrganization} onChange={(e) => handleInputChange('responsibleOrganization', e.target.value)} placeholder="" rows={5} /> */}
                     <FormSelect id="departments" label="หน่วยงานหลักที่รับผิดชอบโครงการวิจัย (หน่วยงานที่ขอทุน)" value={formData.departments ?? ""} placeholder="เลือกหน่วยงาน" onChange={(val) => handleInputChange('departments', val)} options={departmentsOptions} />
                     <FormSelect id="researchKind" label="ประเภทงานวิจัย" value={formData.researchKind ?? ""} placeholder="เลือกประเภทงานวิจัย" onChange={(val) => handleInputChange('researchKind', val)} options={researchKindOptions} />
-                    <FormSelect id="fundType" label="ประเภทแหล่งทุน" value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
+                    <FormSelect id="fundType" label="ประเภทแหล่งทุน" disabled={formData.researchKind == ""} value={formData.fundType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundType', val)} options={fundTypeOptions} />
                     {fundSubTypeOptions.length > 0 && (
                         <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
                     )}
-                    <FormSelect id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
+                    <FormSelect id="fundName" label="ชื่อแหล่งทุน" disabled={formData.fundSubType == ""} value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
                     <FormTextarea label=" " value={formData.fundName} readOnly disabled />
                     <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="0" onChange={(e) => handleInputChange('budget', e.target.value)} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />

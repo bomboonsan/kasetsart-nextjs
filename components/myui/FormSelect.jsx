@@ -20,6 +20,7 @@ export default function FormSelect({
     onChange,
     options = [],
     placeholder = "Select an option",
+    disabled = false,
     ...props
 }) {
     const autoId = useId()
@@ -55,6 +56,7 @@ export default function FormSelect({
                 <Select
                     value={selectValue || ''}
                     onValueChange={handleValueChange}
+                    disabled={disabled}
                     {...props}
                 >
                     <SelectTrigger id={fieldId} className="w-full">
