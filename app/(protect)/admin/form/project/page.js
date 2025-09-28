@@ -96,8 +96,8 @@ export default function ProjectTable() {
                                 <TableCell className={'px-5'}>{p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/admin/form/project/view/${p.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/project/edit/${p.documentId}`}>แก้ไข</a>
+                                    <a className="text-blue-600 mr-3" href={`/form/project/view/${p.documentId}`}>ดู</a>
+                                    <a className="text-green-600" href={`/form/project/edit/${p.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}

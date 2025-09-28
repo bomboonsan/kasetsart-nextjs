@@ -124,8 +124,8 @@ export default function BookTable() {
                                 <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/admin/form/book/view/${b.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/book/edit/${b.documentId}`}>แก้ไข</a>
+                                    <a className="text-blue-600 mr-3" href={`/form/book/view/${b.documentId}`}>ดู</a>
+                                    <a className="text-green-600" href={`/form/book/edit/${b.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}
