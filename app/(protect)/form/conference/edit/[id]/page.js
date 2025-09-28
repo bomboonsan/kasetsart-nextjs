@@ -42,7 +42,15 @@ export default function ConferenceEdit() {
             toast.success('บันทึกข้อมูลสำเร็จ!');
         } catch (error) {
             console.error('Update error:', error);
-            toast.error('เกิดข้อผิดพลาดในการบันทึก');
+            
+            // ตรวจสอบว่าเป็น error เกี่ยวกับ attachments หรือไม่
+            const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'ไม่ทราบสาเหตุ';
+            
+            if (errorMessage.includes('plugin::upload.file') && errorMessage.includes('do not exist')) {
+                toast.error('เกิดข้อผิดพลาดเกี่ยวกับไฟล์แนบ: บางไฟล์อาจถูกลบไปแล้ว กรุณาลองใหม่อีกครั้ง');
+            } else {
+                toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
+            }
         }
     }
 

@@ -122,13 +122,14 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             const attachmentIds = Array.isArray(formData.attachments)
                 ? formData.attachments
                     .filter(att => att && (att.id || att.documentId))
-                    .map(att => String(att.documentId || att.id))
+                    .map(att => Number(att.documentId || att.id))
+                    .filter(id => Number.isFinite(id) && id > 0)
                 : [];
 
             // ตรวจสอบรายการปัจจุบัน
             const currentIds = attachmentIds;
-            const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort();
-            const currentIdsSorted = [...currentIds].sort();
+            const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort((a, b) => a - b);
+            const currentIdsSorted = [...currentIds].sort((a, b) => a - b);
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             // สร้างข้อมูล conference (อาจลบ field attachments ภายหลังหากไม่เปลี่ยนและเป็นการแก้ไข)
@@ -171,6 +172,16 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             // ถ้าเป็นการแก้ไข และ attachments ไม่ได้เปลี่ยน -> ลบ field ทิ้งเพื่อหลีกเลี่ยง error ของ Strapi
             if (isEdit && !attachmentsChanged) {
                 delete conferenceData.attachments;
+            } else if (isEdit && attachmentsChanged) {
+                // เมื่อมีการเปลี่ยนแปลง attachments ในการแก้ไข ให้ส่งเฉพาะ ID ที่ valid
+                // และตรวจสอบว่า attachments exist ใน Strapi หรือไม่
+                console.log('Attachments changed. Sending IDs:', attachmentIds);
+                
+                // กรอง attachments ที่อาจมีปัญหา
+                if (attachmentIds.length === 0) {
+                    // ถ้าไม่มี attachments ใหม่ ให้ลบ field นี้ออก
+                    delete conferenceData.attachments;
+                }
             }
 
 
@@ -206,8 +217,22 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             
         } catch (error) {
             console.error('Submission error:', error);
+            
+            // ตรวจสอบว่าเป็น error เกี่ยวกับ attachments หรือไม่
             const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'ไม่ทราบสาเหตุ';
-            toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
+            
+            if (errorMessage.includes('plugin::upload.file') && errorMessage.includes('do not exist')) {
+                // ถ้าเป็น error เกี่ยวกับ attachment files ที่หายไป
+                toast.error('เกิดข้อผิดพลาดเกี่ยวกับไฟล์แนบ: บางไฟล์อาจถูกลบไปแล้ว กรุณาอัปโหลดไฟล์ใหม่');
+                
+                // ลบ attachments ที่มีปัญหาออกจาก form data
+                setFormData(prev => ({
+                    ...prev,
+                    attachments: []
+                }));
+            } else {
+                toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
+            }
         } finally {
             setIsSubmitting(false);
         }
