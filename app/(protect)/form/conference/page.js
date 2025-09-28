@@ -135,8 +135,8 @@ export default function ConferenceTable() {
                                 <TableCell className={'px-5'}>{c.publishedAt ? new Date(c.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{c.updatedAt ? new Date(c.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/admin/form/conference/view/${c.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/conference/edit/${c.documentId}`}>แก้ไข</a>
+                                    <a className="text-blue-600 mr-3" href={`/form/conference/view/${c.documentId}`}>ดู</a>
+                                    <a className="text-green-600" href={`/form/conference/edit/${c.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}

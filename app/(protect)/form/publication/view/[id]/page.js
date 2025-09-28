@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useQuery } from '@apollo/client/react'
@@ -11,6 +11,7 @@ import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
 import { formatDateToMMYYYY } from '@/utils/formatters'
+import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 
 export default function PublicationView() {
   const params = useParams()
@@ -29,6 +30,13 @@ export default function PublicationView() {
   })
 
   const publication = data?.publication
+    
+  const toSelectOptions = useCallback((arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label })), []);
+  const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), []);
+  const scopusSubjectOptions = useMemo(() => toSelectOptions(listsStandardScopusSubset), []);
+  const abdcOptions = useMemo(() => toSelectOptions(listsStandardABDC), []);
+  const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), []);
+  const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), []);
 
   return (
     <div>
@@ -49,12 +57,35 @@ export default function PublicationView() {
               <FieldView label="โครงการวิจัยที่เกี่ยวข้อง" value={publication.projects?.[0]?.nameTH || '-'} />
               <FieldView label="DOI" value={publication.doi || '-'} />
               <FieldView label="ISSN" value={publication.isbn || '-'} /> {/* ใช้ isbn เก็บ ISSN ผิด */}
-              <FieldView label="ปีที่ตีพิมพ์" value={formatDateToMMYYYY(publication.durationStart) || '-'} />
+              <FieldView label="ปีที่ตีพิมพ์" value={formatDateToMMYYYY(publication.durationStart) + ' - ' + formatDateToMMYYYY(publication.durationEnd)} />
               <FieldView label="Volume" value={publication.volume || '-'} />
               <FieldView label="Issue" value={publication.issue || '-'} />
               <FieldView label="หน้าเริ่มต้น" value={publication.pageStart || '-'} />
               <FieldView label="หน้าสิ้นสุด" value={publication.pageEnd || '-'} />
               <FieldView label="ระดับ" value={publication.level === '0' ? 'ระดับชาติ' : publication.level === '1' ? 'ระดับนานาชาติ' : '-'} />
+              <FieldView label="ฐานข้อมูลวารสาร" value={publication.isJournalDatabase === '0' ? 'ไม่อยู่ในฐานข้อมูล' : publication.isJournalDatabase === '1' ? 'อยู่ในฐานข้อมูล' : '-'} />
+              {publication.isScopus && (
+                <FieldView label="Scopus" value={`${scopusQuartileOptions.find(option => option.value === publication.scopusValue)?.label || '-'} ${scopusSubjectOptions.find(option => option.value === publication.scopusSubject)?.label || '-'}`} />
+              )}
+              {publication.isACI && (
+                <FieldView label="ACI" value="ใช่" />
+              )}
+              {publication.isTCI1 && (
+                <FieldView label="TCI1" value="ใช่" />
+              )}
+              {publication.isTCI2 && (
+                <FieldView label="TCI2" value="ใช่" />
+              )}
+              {publication.isABDC && (
+                <FieldView label="ABDC" value={`${abdcOptions.find(option => option.value === publication.abdcType)?.label || '-'}`} />
+              )}
+              {publication.isAJG && (
+                <FieldView label="AJG" value={`${ajgOptions.find(option => option.value === publication.ajgType)?.label || '-'}`} />
+              )}
+              {publication.isWOS && (
+                <FieldView label="WOS" value={`${wosOptions.find(option => option.value === publication.wosType)?.label || '-'}`} />
+              )}
+
               <FieldView label="ชื่อแหล่งทุน" value={publication.fundName || '-'} />
               <FieldView label="คำสำคัญ" value={publication.keywords || '-'} />
               <FieldView label="บทคัดย่อ (ไทย)" value={publication.abstractTH || '-'} />
