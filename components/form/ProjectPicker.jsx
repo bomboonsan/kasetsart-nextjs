@@ -179,9 +179,6 @@ export default function ProjectPicker({ label = 'โครงการวิจ�
                                                     {formatProjectDetails(project) && (
                                                         <div className="text-xs text-gray-600">{formatProjectDetails(project)}</div>
                                                     )}
-                                                    {project.keywords && (
-                                                        <div className="text-xs text-gray-500">คำสำคัญ: {project.keywords}</div>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>
