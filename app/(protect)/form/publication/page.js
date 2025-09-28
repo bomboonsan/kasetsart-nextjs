@@ -15,6 +15,7 @@ import {
     TableHead,
     TableCell,
 } from '@/components/ui/table'
+import { formatDateToMMYYYY } from '@/utils/formatters';
 
 export default function PublicationTable() {
     const { data: session, status } = useSession();
@@ -55,10 +56,12 @@ export default function PublicationTable() {
     const publications = data?.publications || [];
 
     const getLevelText = (level) => {
-        if (level === 0) return 'ระดับชาติ';
-        if (level === 1) return 'ระดับนานาชาติ';
+        if (level == '0') return 'ระดับชาติ';
+        if (level == '1') return 'ระดับนานาชาติ';
         return '-';
     };
+
+    console.log('Publications data:', publications);
 
     return (
         <div>
@@ -84,7 +87,6 @@ export default function PublicationTable() {
                         <TableRow>
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
                             <TableHead className={'px-5'}>วารสาร / แหล่งตีพิมพ์</TableHead>
-                            <TableHead className={'px-5'}>ฉบับ / เล่ม</TableHead>
                             <TableHead className={'px-5'}>หน้า</TableHead>
                             <TableHead className={'px-5'}>ระดับ</TableHead>
                             <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
@@ -115,10 +117,7 @@ export default function PublicationTable() {
                                     <div className="text-sm">{p.journalName || '-'}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>
-                                    {p.volume || '-'} {p.issue ? `/ ${p.issue}` : ''}
-                                </TableCell>
-                                <TableCell className={'px-5'}>
-                                    {p.pageStart && p.pageEnd ? `${p.pageStart} - ${p.pageEnd}` : p.pageStart || p.pageEnd || '-'}
+                                    {formatDateToMMYYYY(p.durationStart) || '-'}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(p.level)}</TableCell>
                                 <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>

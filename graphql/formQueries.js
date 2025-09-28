@@ -37,6 +37,7 @@ export const GET_PUBLICATIONS = gql`
       pageEnd
       level
       updatedAt
+      durationStart
       projects {
         documentId
         nameTH
