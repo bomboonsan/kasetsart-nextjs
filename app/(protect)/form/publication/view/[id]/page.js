@@ -28,6 +28,7 @@ export default function PublicationView() {
   })
 
   const publication = data?.publication
+  console.log('publication', publication)
 
   return (
     <div>
@@ -65,7 +66,7 @@ export default function PublicationView() {
             <div className="space-y-2">
               {publication.attachments && publication.attachments.length > 0 ? (
                 publication.attachments.map((file) => (
-                  <div key={file.documentId}>
+                  <div key={file.documentId || file.id}>
                     <a href={`${process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338'}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                       {file.name} ({(file.size / 1024).toFixed(2)} KB)
                     </a>
@@ -76,10 +77,12 @@ export default function PublicationView() {
               )}
             </div>  
           </Block>
-          <Block>
-            <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
-            <PartnersView data={publication.partners || []} />
-          </Block>
+          {publication.projects && (
+            <Block>
+              <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
+              <PartnersView data={publication.projects[0].partners} />
+            </Block>
+          )}
         </div>
       )}
     </div>
