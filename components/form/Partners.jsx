@@ -190,6 +190,16 @@ export default function Partners({ data, onChange }) {
         { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
         { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
         { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
+        { value: 'ผู้แต่งร่วมภายใน', label: 'ผู้แต่งร่วมภายใน' },
+        { value: 'อื่นๆ', label: 'อื่นๆ' },
+    ], []);
+
+    const partnerTypeOptionsExternal = useMemo(() => [
+        { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
+        { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
+        { value: 'ผู้ประสานงาน', label: 'ผู้ประสานงาน' },
+        { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
+        { value: 'ผู้แต่งร่วมภายนอก', label: 'ผู้แต่งร่วมภายนอก' },
         { value: 'อื่นๆ', label: 'อื่นๆ' },
     ], []);
 
@@ -319,7 +329,7 @@ export default function Partners({ data, onChange }) {
                                     onChange={(value) => setModalPartnerType(value)}
                                     className="max-w-lg"
                                     placeholder="เลือกประเภท"
-                                    options={partnerTypeOptions}
+                                    options={modalIsInternal ? partnerTypeOptions : partnerTypeOptionsExternal}
                                 />
                             </div>
 
