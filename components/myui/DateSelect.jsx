@@ -202,20 +202,18 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
             <div className="flex items-center gap-x-4">
                 <p className="text-zinc-700 font-medium">{title}</p>
 
-                {!noDay && (
-                    <div className="space-x-2">
-                        <label className="text-zinc-700">วันที่</label>
-                        <select
-                            className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
-                            value={day}
-                            onChange={handleDayChange}
-                        >
-                            {dayOptions.map((d) => (
-                                <option key={d} value={d}>{d}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
+                <div className={noDay ? "hidden" : "space-x-2"}>
+                    <label className="text-zinc-700">วันที่</label>
+                    <select
+                        className="text-zinc-800 border border-gray-300 rounded-md px-3 py-2"
+                        value={day}
+                        onChange={handleDayChange}
+                    >
+                        {dayOptions.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
+                    </select>
+                </div>
 
                 <div className="space-x-2">
                     <label className="text-zinc-700">เดือน</label>

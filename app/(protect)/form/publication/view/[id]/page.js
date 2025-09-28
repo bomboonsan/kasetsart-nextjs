@@ -44,11 +44,11 @@ export default function PublicationView() {
               <FieldView label="ชื่อผลงาน (ไทย)" value={publication.titleTH || '-'} />
               <FieldView label="ชื่อผลงาน (อังกฤษ)" value={publication.titleEN || '-'} />
               <FieldView label="เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืนหรือไม่" value={publication.isEnvironmentallySustainable === '0' ? 'เกี่ยวข้อง' : publication.isEnvironmentallySustainable === '1' ? 'ไม่เกี่ยวข้อง' : '-'} />
-              <FieldView label="ชื่อวารสาร" value={publication.journalName || '-'} />
+              <FieldView label="ชื่อวารสาร / แหล่งตีพิมพ์" value={publication.journalName || '-'} />
               <FieldView label="โครงการวิจัยที่เกี่ยวข้อง" value={publication.projects?.[0]?.nameTH || '-'} />
               <FieldView label="DOI" value={publication.doi || '-'} />
-              <FieldView label="ISBN" value={publication.isbn || '-'} />
-              <FieldView label="ปีที่ตีพิมพ์" value={publication.publicationYear || '-'} />
+              <FieldView label="ISSN" value={publication.isbn || '-'} /> {/* ใช้ isbn เก็บ ISSN ผิด */}
+              <FieldView label="ปีที่ตีพิมพ์" value={publication.durationStart || '-'} />
               <FieldView label="Volume" value={publication.volume || '-'} />
               <FieldView label="Issue" value={publication.issue || '-'} />
               <FieldView label="หน้าเริ่มต้น" value={publication.pageStart || '-'} />

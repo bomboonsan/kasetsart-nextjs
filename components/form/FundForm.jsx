@@ -222,28 +222,36 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                             />
                         ))}
                     </div>
-                    <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={fundTypeOptions} />
-                    <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText || ''} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} />
-                    {/* <div className="space-y-1 flex items-center forminput">
+                    {/* <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={fundTypeOptions} />
+                    <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText || ''} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} /> */}
+                    <div className="space-y-1 flex items-center forminput">
                         <div className="w-1/3">
                             <Label htmlFor="fundType">ลักษณะของผลงานวิชาการที่จะขอรับทุน</Label>
                         </div>
-                        <div className="flex-1 space-x-3 flex gap-4 items-center">
-                            <div key={option.value} className="flex items-center">
-                                <Input
-                                    id={`${id}-${option.value}`}
-                                    type="radio"
-                                    className={"w-4 h-4"}
-                                    value={option.value}
-                                    checked={option.value === props.value}
-                                    onChange={onChange}
-                                />
-                                <Label htmlFor={`${id}-${option.value}`} className="ml-2 font-normal">
-                                    {option.label}
-                                </Label>
+                        <div className="flex-1 space-x-3 flex flex-col gap-4">
+                            <div className="flex flex-col gap-2 w-full">
+                                {fundTypeOptions.map((option) => (
+                                    <div key={option.value} className="flex items-center">
+                                        <Input
+                                            id={`${option.value}`}
+                                            type="radio"
+                                            className={"w-4 h-4"}
+                                            value={option.value}
+                                            checked={option.value === formData.fundType}
+                                            onChange={(e) => handleInputChange('fundType', e.target.value)}
+                                        />
+                                        <Label htmlFor={`${option.value}`} className="ml-2 font-normal">
+                                            {option.label}
+                                        </Label>
+
+                                        <div className='ml-4 flex-1'>
+                                            <Input type="text" onChange={(e) => handleInputChange('fundTypeText', e.target.value)}  />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    </div> */}
+                    </div>
                     <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc || ''} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
                     <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications || ''} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
                     <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose || ''} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
