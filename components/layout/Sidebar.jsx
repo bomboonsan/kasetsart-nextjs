@@ -31,7 +31,7 @@ const MAIN_ITEMS = [
 			{ id: "project", url: "/form/create/project", icon: File, label: "ทุนโครงการวิจัย" },
 			{ id: "conference", url: "/form/create/conference", icon: File, label: "ประชุมวิชาการ" },
 			{ id: "publication", url: "/form/create/publication", icon: File, label: "ตีพิมพ์ทางวิชาการ" },
-			{ id: "funding", url: "/form/create/fund", icon: File, label: "ทุนตำรวจหรือหนังสือ" },
+			{ id: "funding", url: "/form/create/fund", icon: File, label: "ทุนตำราหรือหนังสือ" },
 			{ id: "book", url: "/form/create/book", icon: File, label: "หนังสือและตำรา" },
 		],
 	},
