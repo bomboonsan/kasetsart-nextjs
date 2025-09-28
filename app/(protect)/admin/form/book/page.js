@@ -53,6 +53,7 @@ export default function BookTable() {
 
 
     const books = data?.books || [];
+    // console.log("Books data:", books);
 
     return (
         <div>
@@ -107,7 +108,7 @@ export default function BookTable() {
                                 <TableCell className={'px-5'}>
                                     <div className="text-sm">{(b.writers || []).join(', ') || '-'}</div>
                                 </TableCell>
-                                <TableCell className={'px-5'}>{b.bookType ?? '-'}</TableCell>
+                                <TableCell className={'px-5'}>{b.bookType == '0' ? 'หนังสือ' : "ตำรา"}</TableCell>
                                 <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
