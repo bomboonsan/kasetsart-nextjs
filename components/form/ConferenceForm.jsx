@@ -380,7 +380,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     ]} />
                     <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={(e) => handleInputChange('abstractTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="abstractEN" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractEN} onChange={(e) => handleInputChange('abstractEN', e.target.value)} placeholder="" rows={5} />
-                    <FormTextarea id="summary" label="บทคัดย่อ (อังกฤษ) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
+                    <FormTextarea id="summary" label="* กรณีเข้าร่วมประชุมวิชาการ สรุปเนื้อหาการประชุมแบบย่อ (ถ้าไม่มีข้อมูลให้ใส่ -)" value={formData.summary} onChange={(e) => handleInputChange('summary', e.target.value)} placeholder="" rows={5} />
                     <FileUploadField
                         label="เอกสารแนบ"
                         value={Array.isArray(formData.attachments) ? formData.attachments : []}
