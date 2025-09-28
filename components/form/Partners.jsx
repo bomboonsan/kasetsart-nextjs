@@ -77,7 +77,7 @@ export default function Partners({ data, onChange }) {
     const handleAddPartner = useCallback(() => {
         const newPartner = {
             id: editingIndex !== null ? displayRows[editingIndex].id : Date.now(), // Generate ID if creating new
-            userID: modalUserObj ? modalUserObj.id : undefined,
+            userID: modalUserObj ? modalUserObj.documentId : undefined,
             User: modalUserObj,
             fullname: modalPartnerFullName,
             orgName: modalOrgName,
