@@ -1,5 +1,6 @@
 'use client'
 import { useQuery, useMutation } from "@apollo/client/react";
+import { useRouter } from 'next/compat/router'
 import toast from 'react-hot-toast';
 import React from 'react';
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
@@ -67,6 +68,7 @@ const extractAttachmentIds = (arr) => {
 };
 
 export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
+    const router = useRouter();
     const { data: session, status } = useSession();
     const [formData, setFormData] = useState(PROJECT_FORM_INITIAL);
     const [icTypesOptions, setIcTypesOptions] = useState([]);
@@ -375,7 +377,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 <Partners data={formData.partners} onChange={(partners) => handleInputChange('partners', partners)} />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
-                <Button variant="outline">ยกเลิก</Button>
+                <Button onClick={() => router.back()} variant="outline">ยกเลิก</Button>
                 <Button
                     variant="default"
                     onClick={handleSubmit}

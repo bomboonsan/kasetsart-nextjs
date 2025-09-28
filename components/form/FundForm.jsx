@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react'
 import Block from '@/components/layout/Block'
 import FormInput from '@/components/myui/FormInput'
@@ -65,6 +66,7 @@ const WriterForm = React.memo(({ index, writer, handlers }) => {
 
 // The form supports create and edit. If initialData provided => edit mode.
 export default function FundForm({ initialData, onSubmit, isEdit = false }) {
+    const router = useRouter()
     const { data: session } = useSession()
     const [formData, setFormData] = useState(FUND_FORM_INITIAL)
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -245,7 +247,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
-                <Button variant="outline">ยกเลิก</Button>
+                <Button onClick={() => router.back()} variant="outline">ยกเลิก</Button>
                 <Button
                     variant="default"
                     onClick={handleSubmit}

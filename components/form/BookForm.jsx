@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Block from '../layout/Block';
@@ -80,6 +81,7 @@ const WritersEditor = React.memo(function WritersEditor({ writers, onChange }) {
 });
 
 export default function BookForm({ documentId, isEdit = false, onSubmit, initialData = null }) {
+	const router = useRouter();
 	const { data: session } = useSession();
 	const [formData, setFormData] = useState(BOOK_FORM_INITIAL);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -305,7 +307,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				/>
 			</Block>
 			<div className='flex justify-end items-center gap-3 mt-4'>
-				<Button variant="outline">ยกเลิก</Button>
+				<Button onClick={() => router.back()} variant="outline">ยกเลิก</Button>
 				<Button
 					variant="default"
 					onClick={handleSubmit}

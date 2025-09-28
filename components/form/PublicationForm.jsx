@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useMutation, useQuery } from '@apollo/client/react';
 import Block from '../layout/Block';
@@ -20,7 +21,7 @@ import { extractInternalUserIds } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
-    const { data: session } = useSession();
+    const router = useRouter();const { data: session } = useSession();
     const [isHydrated, setIsHydrated] = useState(false);
     const [formData, setFormData] = useState(PUBLICATION_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -366,7 +367,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                 <Partners data={formData.partners} onChange={handlePartnersChange} />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
-                <Button variant="outline">ยกเลิก</Button>
+                <Button onClick={() => router.back()} variant="outline">ยกเลิก</Button>
                 <Button
                     variant="default"
                     onClick={handleSubmit}
