@@ -10,7 +10,9 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, Dialo
 import { Button } from '@/components/ui/button'
 
 export default function Partners({ data, onChange }) {
+    // state หลักของตาราง
     const [displayRows, setDisplayRows] = useState([]);
+    // state ของ dialog + ฟอร์ม
     const [dialogOpen, setDialogOpen] = useState(false);
     const [modalIsInternal, setModalIsInternal] = useState(true);
     const [modalUserObj, setModalUserObj] = useState(null);
@@ -20,31 +22,32 @@ export default function Partners({ data, onChange }) {
     const [modalPartnerProportionCustom, setModalPartnerProportionCustom] = useState('');
     const [modalPartnerCommentArr, setModalPartnerCommentArr] = useState([]);
     const [editingIndex, setEditingIndex] = useState(null);
-    // Use useMemo to prevent recalculation on every render
+
+    // ตรวจว่ามี First/Corresponding Author แล้วหรือยัง เพื่อบังคับไม่ให้เลือกซ้ำ
     const hasFirstAuthor = useMemo(() => {
         return displayRows.some(p => p.partnerComment?.includes('First Author'));
     }, [displayRows]);
-    
+
     const hasCorresponding = useMemo(() => {
         return displayRows.some(p => p.partnerComment?.includes('Corresponding Author'));
     }, [displayRows]);
 
+    // ดึงข้อมูลเริ่มต้น + sort ตาม order
     useEffect(() => {
-        // Initialize with sorted data from props with null safety
         if (!data) {
             setDisplayRows([]);
             return;
         }
-        
-        const sortedData = Array.isArray(data) ? [...data].sort((a, b) => (a?.order || 0) - (b?.order || 0)) : [];
+        const sortedData = Array.isArray(data)
+            ? [...data].sort((a, b) => (a?.order || 0) - (b?.order || 0))
+            : [];
         setDisplayRows(sortedData);
     }, [data]);
 
+    // อัปเดต rows แล้วคำนวณสัดส่วน partnerProportion ของ internal ให้รวมกันเป็น 1
     const handleDataChange = useCallback((newRows) => {
-        // assign order
         let sortedRows = newRows.map((row, index) => ({ ...row, order: index + 1 }));
 
-        // Calculate partnerProportion: equal split among internal partners (sum to 1)
         const internalCount = sortedRows.filter(r => r.isInternal).length;
         if (internalCount > 0) {
             const share = 1 / internalCount;
@@ -57,11 +60,10 @@ export default function Partners({ data, onChange }) {
         }
 
         setDisplayRows(sortedRows);
-        if (onChange) {
-            onChange(sortedRows);
-        }
+        if (onChange) onChange(sortedRows);
     }, [onChange]);
 
+    // รีเซ็ตฟอร์มใน dialog
     const resetForm = useCallback(() => {
         setModalIsInternal(true);
         setModalUserObj(null);
@@ -74,16 +76,50 @@ export default function Partners({ data, onChange }) {
         setDialogOpen(false);
     }, []);
 
+    // เลือกผู้ใช้ภายใน: สร้างชื่อและหน่วยงานจาก object อย่างปลอดภัย
+    const handleInternalUserSelect = useCallback((u) => {
+        // ฟังก์ชันนี้ถูกย้ายมาไว้ top-level เพื่อไม่ให้เกิดการเรียก hook ในเงื่อนไข
+        if (!u) {
+            setModalUserObj(null);
+            setModalPartnerFullName('');
+            setModalOrgName('');
+            return;
+        }
+        setModalUserObj(u);
+
+        const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile;
+        const display = prof
+            ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim()
+            : (u.firstNameTH && u.lastNameTH
+                ? `${u.firstNameTH} ${u.lastNameTH}`.trim()
+                : u.email || '');
+
+        const orgParts = [];
+        if (u.departments && u.departments[0]?.name) orgParts.push(u.departments[0].name);
+        if (u.faculties && u.faculties[0]?.name) orgParts.push(u.faculties[0].name);
+        if (u.organizations && u.organizations[0]?.name) orgParts.push(u.organizations[0].name);
+        if (orgParts.length === 0) {
+            if (u.department?.name) orgParts.push(u.department.name);
+            if (u.faculty?.name) orgParts.push(u.faculty.name);
+            if (u.organization?.name) orgParts.push(u.organization.name);
+        }
+        const org = orgParts.join(' ');
+
+        setModalPartnerFullName(display);
+        setModalOrgName(org);
+    }, []);
+
+    // เพิ่มหรือบันทึก partner
     const handleAddPartner = useCallback(() => {
         const newPartner = {
-            id: editingIndex !== null ? displayRows[editingIndex].id : Date.now(), // Generate ID if creating new
+            id: editingIndex !== null ? displayRows[editingIndex].id : Date.now(),
             userID: modalUserObj ? modalUserObj.documentId : undefined,
             User: modalUserObj,
             fullname: modalPartnerFullName,
             orgName: modalOrgName,
             partnerType: modalPartnerType,
             partnerProportion_percentage_custom: modalPartnerProportionCustom,
-            partnerProportion: "", // <<- มาจากเอาจำนวน partner ที่งหมดที่มี isInternal = true มาแบ่งกันเป็นหน่วยสัดส่วน เต็ม 1 
+            partnerProportion: "", // คำนวณอัตโนมัติใน handleDataChange
             partnerComment: modalPartnerCommentArr.join(', '),
             isInternal: modalIsInternal,
         };
@@ -98,13 +134,25 @@ export default function Partners({ data, onChange }) {
 
         handleDataChange(newRows);
         resetForm();
-        // dialog controlled by React state; resetForm will close it
-    }, [displayRows, editingIndex, modalUserObj, modalPartnerFullName, modalOrgName, modalPartnerType, modalPartnerProportionCustom, modalPartnerCommentArr, modalIsInternal, handleDataChange, resetForm]);
+    }, [
+        displayRows,
+        editingIndex,
+        modalUserObj,
+        modalPartnerFullName,
+        modalOrgName,
+        modalPartnerType,
+        modalPartnerProportionCustom,
+        modalPartnerCommentArr,
+        modalIsInternal,
+        handleDataChange,
+        resetForm
+    ]);
 
+    // แก้ไข partner ตาม index
     const handleEditPartner = useCallback((index) => {
         const partner = displayRows[index];
         setEditingIndex(index);
-        setModalIsInternal(partner.isInternal);
+        setModalIsInternal(!!partner.isInternal);
         setModalUserObj(partner.User || null);
         setModalPartnerFullName(partner.fullname || '');
         setModalOrgName(partner.orgName || '');
@@ -114,11 +162,13 @@ export default function Partners({ data, onChange }) {
         setDialogOpen(true);
     }, [displayRows]);
 
+    // ลบ partner
     const handleRemovePartner = useCallback((index) => {
         const newRows = displayRows.filter((_, i) => i !== index);
         handleDataChange(newRows);
     }, [displayRows, handleDataChange]);
 
+    // ย้ายลำดับขึ้น
     const moveUp = useCallback((index) => {
         if (index === 0) return;
         const newRows = [...displayRows];
@@ -126,6 +176,7 @@ export default function Partners({ data, onChange }) {
         handleDataChange(newRows);
     }, [displayRows, handleDataChange]);
 
+    // ย้ายลำดับลง
     const moveDown = useCallback((index) => {
         if (index === displayRows.length - 1) return;
         const newRows = [...displayRows];
@@ -133,7 +184,7 @@ export default function Partners({ data, onChange }) {
         handleDataChange(newRows);
     }, [displayRows, handleDataChange]);
 
-    // Memoized options to prevent recreation on every render
+    // ตัวเลือกประเภทผู้ร่วมโครงการ
     const partnerTypeOptions = useMemo(() => [
         { value: 'หัวหน้าโครงการ', label: 'หัวหน้าโครงการ' },
         { value: 'ที่ปรึกษาโครงการ', label: 'ที่ปรึกษาโครงการ' },
@@ -141,6 +192,8 @@ export default function Partners({ data, onChange }) {
         { value: 'นักวิจัยร่วม', label: 'นักวิจัยร่วม' },
         { value: 'อื่นๆ', label: 'อื่นๆ' },
     ], []);
+
+    // แสดงชื่อจาก userObj ถ้ามี
     const partnerDisplayName = useMemo(() => {
         if (modalUserObj) {
             return modalUserObj.firstNameTH && modalUserObj.lastNameTH
@@ -150,13 +203,13 @@ export default function Partners({ data, onChange }) {
         return modalPartnerFullName || '';
     }, [modalUserObj, modalPartnerFullName]);
 
+    // แสดงหน่วยงานจาก userObj ถ้ามี
     const organizationDisplayName = useMemo(() => {
         if (modalUserObj) {
             const orgParts = [];
             if (modalUserObj.departments && modalUserObj.departments[0]?.name) orgParts.push(modalUserObj.departments[0].name);
             if (modalUserObj.faculties && modalUserObj.faculties[0]?.name) orgParts.push(modalUserObj.faculties[0].name);
             if (modalUserObj.organizations && modalUserObj.organizations[0]?.name) orgParts.push(modalUserObj.organizations[0].name);
-            // Fallback to old structure
             if (orgParts.length === 0) {
                 if (modalUserObj.department?.name) orgParts.push(modalUserObj.department.name);
                 if (modalUserObj.faculty?.name) orgParts.push(modalUserObj.faculty.name);
@@ -166,7 +219,6 @@ export default function Partners({ data, onChange }) {
         }
         return modalOrgName || '';
     }, [modalUserObj, modalOrgName]);
-
 
     return (
         <>
@@ -203,93 +255,63 @@ export default function Partners({ data, onChange }) {
                                     ภายนอก มก. (หัวหน้าโครงการวิจัยภายนอก มก. นิสิต และลูกจ้าง)
                                 </label>
                             </div>
-                            {
-                                modalIsInternal === true ? (
-                                    <>
-                                        <div>
-                                            <UserPicker
-                                                label="ผู้ร่วมโครงการวิจัย"
-                                                selectedUser={modalUserObj}
-                                                onSelect={useCallback((u) => {
-                                                    if (!u) {
-                                                        setModalUserObj(null);
-                                                        return;
-                                                    }
-                                                    setModalUserObj(u);
-                                                    
-                                                    // Safe access to profile
-                                                    const prof = Array.isArray(u.profile) ? u.profile[0] : u.profile;
-                                                    const display = prof 
-                                                        ? `${prof.firstName || ''} ${prof.lastName || ''}`.trim() 
-                                                        : (u.firstNameTH && u.lastNameTH 
-                                                            ? `${u.firstNameTH} ${u.lastNameTH}`.trim()
-                                                            : u.email || '');
-                                                    
-                                                    // Safe access to organization data
-                                                    const orgParts = [];
-                                                    if (u.departments && u.departments[0]?.name) orgParts.push(u.departments[0].name);
-                                                    if (u.faculties && u.faculties[0]?.name) orgParts.push(u.faculties[0].name);
-                                                    if (u.organizations && u.organizations[0]?.name) orgParts.push(u.organizations[0].name);
-                                                    // Fallback to old structure if new doesn't exist
-                                                    if (orgParts.length === 0) {
-                                                        if (u.department?.name) orgParts.push(u.department.name);
-                                                        if (u.faculty?.name) orgParts.push(u.faculty.name);
-                                                        if (u.organization?.name) orgParts.push(u.organization.name);
-                                                    }
-                                                    const org = orgParts.join(' ');
-                                                    
-                                                    setModalPartnerFullName(display);
-                                                    setModalOrgName(org);
-                                                }, [])}
-                                            />
-                                        </div>
-                                        <div>
-                                            <FormInput
-                                                label="ชื่อผู้ร่วมโครงการวิจัย"
-                                                type="text"
-                                                value={partnerDisplayName}
-                                                readOnly={!!modalUserObj}
-                                                onChange={(value) => {
-                                                    // allow manual name editing when internal but not linked to a user
-                                                    if (!modalUserObj) setModalPartnerFullName(value)
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            <FormInput
-                                                label="ชื่อหน่วยงาน"
-                                                type="text"
-                                                value={organizationDisplayName}
-                                                readOnly={!!modalUserObj}
-                                                onChange={(value) => {
-                                                    if (!modalUserObj) setModalOrgName(value)
-                                                }}
-                                            />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div>
-                                            <FormInput
-                                                label="ชื่อผู้ร่วมโครงการวิจัย"
-                                                type="text"
-                                                value={modalPartnerFullName}
-                                                onChange={(e) => setModalPartnerFullName(e.target.value)}
-                                                placeholder="กรอกชื่อ-นามสกุล"
-                                            />
-                                        </div>
-                                        <div>
-                                            <FormInput
-                                                label="ชื่อหน่วยงาน"
-                                                type="text"
-                                                value={modalOrgName}
-                                                onChange={(e) => setModalOrgName(e.target.value)}
-                                                placeholder="กรอกชื่อหน่วยงาน"
-                                            />
-                                        </div>
-                                    </>
-                                )
-                            }
+
+                            {modalIsInternal === true ? (
+                                <>
+                                    <div>
+                                        <UserPicker
+                                            label="ผู้ร่วมโครงการวิจัย"
+                                            selectedUser={modalUserObj}
+                                            // เดิมคุณเรียก useCallback(...) ใน JSX ทำให้ผิดกฎ Hook เมื่อสลับ radio
+                                            onSelect={handleInternalUserSelect}
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormInput
+                                            label="ชื่อผู้ร่วมโครงการวิจัย"
+                                            type="text"
+                                            value={partnerDisplayName}
+                                            readOnly={!!modalUserObj}
+                                            onChange={(value) => {
+                                                if (!modalUserObj) setModalPartnerFullName(value)
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormInput
+                                            label="ชื่อหน่วยงาน"
+                                            type="text"
+                                            value={organizationDisplayName}
+                                            readOnly={!!modalUserObj}
+                                            onChange={(value) => {
+                                                if (!modalUserObj) setModalOrgName(value)
+                                            }}
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <FormInput
+                                            label="ชื่อผู้ร่วมโครงการวิจัย"
+                                            type="text"
+                                            value={modalPartnerFullName}
+                                            onChange={(e) => setModalPartnerFullName(e.target.value)}
+                                            placeholder="กรอกชื่อ-นามสกุล"
+                                        />
+                                    </div>
+                                    <div>
+                                        <FormInput
+                                            label="ชื่อหน่วยงาน"
+                                            type="text"
+                                            value={modalOrgName}
+                                            onChange={(e) => setModalOrgName(e.target.value)}
+                                            placeholder="กรอกชื่อหน่วยงาน"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
                             <div>
                                 <FormSelect
                                     label="ประเภทผู้ร่วมโครงการวิจัย"
@@ -300,6 +322,7 @@ export default function Partners({ data, onChange }) {
                                     options={partnerTypeOptions}
                                 />
                             </div>
+
                             <div>
                                 <FormInput
                                     label="สัดส่วนการมีส่วนร่วม (%)"
@@ -309,19 +332,19 @@ export default function Partners({ data, onChange }) {
                                     max="100"
                                     value={modalPartnerProportionCustom || ''}
                                     onChange={(e) => {
-                                        // allow empty or valid number between 0-100
                                         if (e.target.value === '' || e.target.value === null) {
-                                            setModalPartnerProportionCustom('')
-                                            return
+                                            setModalPartnerProportionCustom('');
+                                            return;
                                         }
-                                        const num = parseFloat(String(e.target.value))
-                                        if (Number.isNaN(num)) return
-                                        const clamped = Math.max(0, Math.min(100, num))
-                                        setModalPartnerProportionCustom(String(clamped))
+                                        const num = parseFloat(String(e.target.value));
+                                        if (Number.isNaN(num)) return;
+                                        const clamped = Math.max(0, Math.min(100, num));
+                                        setModalPartnerProportionCustom(String(clamped));
                                     }}
                                     placeholder="0%"
                                 />
                             </div>
+
                             <div>
                                 <FormCheckbox
                                     label="หมายเหตุ"
@@ -349,35 +372,20 @@ export default function Partners({ data, onChange }) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
             <div className="bg-white border border-gray-200 rounded-b-md overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ลำดับ
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ชื่อ-นามสกุล
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    หน่วยงาน
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    ประเภทผู้ร่วมโครงการวิจัย
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    หมายเหตุ
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    สัดส่วนการมีส่วนร่วม (%)
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    สัดส่วนการวิจัย (%)
-                                </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    การจัดการ
-                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ลำดับ</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อ-นามสกุล</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หน่วยงาน</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภทผู้ร่วมโครงการวิจัย</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หมายเหตุ</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สัดส่วนการมีส่วนร่วม (%)</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สัดส่วนการวิจัย (%)</th>
+                                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">การจัดการ</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -385,9 +393,7 @@ export default function Partners({ data, onChange }) {
                                 <tr key={p.id || p.userID || i} className="hover:bg-gray-50">
                                     <td className="px-4 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <div
-                                                className={`w-6 h-6 rounded-full flex items-center justify-center text-[#065F46] text-sm font-mediumbg-[#D1FAE5]`}
-                                            >
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[#065F46] text-sm font-mediumbg-[#D1FAE5]`}>
                                                 {i + 1}
                                             </div>
                                             {(displayRows.length >= 2) && (
@@ -454,5 +460,5 @@ export default function Partners({ data, onChange }) {
                 </div>
             </div>
         </>
-    )
+    );
 }
