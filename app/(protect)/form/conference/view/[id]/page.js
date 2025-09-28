@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
-import { formatDateToDDMMYYYY } from '@/lib/dateUtils'
+import { formatDateToDDMMYYYY } from '@/utils/formatters'
 
 export default function ConferenceView() {
     const params = useParams()
@@ -97,7 +97,7 @@ export default function ConferenceView() {
                             <FieldView label="โครงการวิจัยที่เกี่ยวข้อง" value={conference.projects?.[0]?.nameTH || conference.projects?.[0]?.nameEN || '-'} />
                             <FieldView label="DOI" value={conference.doi || '-'} />
                             <FieldView label="ISBN" value={conference.isbn || '-'} />
-                            <FieldView label="วัน/เดือน/ปี ที่นำเสนอ" value={conference.durationStart && conference.durationEnd ? `${conference.durationStart} - ${conference.durationEnd}` : conference.durationStart || conference.durationEnd || '-'} />
+                            <FieldView label="วัน/เดือน/ปี ที่นำเสนอ" value={conference.durationStart && conference.durationEnd ? `${formatDateToDDMMYYYY(conference.durationStart)} - ${formatDateToDDMMYYYY(conference.durationEnd)}` : formatDateToDDMMYYYY(conference.durationStart) || formatDateToDDMMYYYY(conference.durationEnd) || '-'} />
                             <FieldView label="ค่าใช้จ่าย" value={conference.cost ? `${conference.cost.toLocaleString()} บาท จาก${getCostTypeText(conference.costType)}` : '-'} />
                             <FieldView label="การนำเสนอผลงาน" value={getPresentationWorkText(conference.presentationWork)} />
                             <FieldView label="ประเภทการนำเสนอ" value={getPresentTypeText(conference.presentType)} />

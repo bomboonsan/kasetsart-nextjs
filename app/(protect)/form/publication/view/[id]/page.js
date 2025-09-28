@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
-import { formatDateToMMYYYY } from '@/lib/dateUtils'
+import { formatDateToMMYYYY } from '@/utils/formatters'
 
 export default function PublicationView() {
   const params = useParams()
