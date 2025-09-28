@@ -58,9 +58,9 @@ export default function ProjectEdit() {
                             <FieldView label="ชื่อแหล่งทุน" value={project.fundName} />
                             <FieldView label="งบวิจัย" value={`฿${project.budget.toLocaleString()}`} />
                             <FieldView label="คำสำคัญ" value={project.keywords} />
-                            <FieldView label="IC Types" value={project.ic_types?.map(ic => ic.name).join(', ')} />
-                            <FieldView label="Impact" value={project.impacts?.map(ic => ic.name).join(', ')} />
-                            <FieldView label="SDG" value={project.sdgs?.map(ic => ic.name).join(', ')} />
+                            <FieldView label="IC Types" value={project.ic_types?.map(ic => ic.name).join(', ') || '-'} />
+                            <FieldView label="Impact" value={project.impacts?.map(impact => impact.name).join(', ') || '-'} />
+                            <FieldView label="SDG" value={project.sdgs && project.sdgs.length > 0 ? project.sdgs.map(sdg => sdg.name).join(', ') : '-'} />
                             <FieldView label="ผู้ร่วมวิจัย" value={project.partners?.map(p => p.name).join(', ')} />
                         </div>
                     </Block>
