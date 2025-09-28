@@ -28,7 +28,6 @@ export default function PublicationView() {
   })
 
   const publication = data?.publication
-  console.log('publication', publication)
 
   return (
     <div>
