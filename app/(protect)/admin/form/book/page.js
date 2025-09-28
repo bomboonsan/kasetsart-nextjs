@@ -53,7 +53,19 @@ export default function BookTable() {
 
 
     const books = data?.books || [];
-    // console.log("Books data:", books);
+    const getWriters = (book) => {
+        let writersFullName = ''
+        if (book.funds && book.funds.length > 0) {
+            const writers = book.funds.map(fund => fund.writers).flat().filter(Boolean);
+            if (writers.length > 0) {
+                const fullNamesSet = writers.map(w => w.fullName).flat();
+                writersFullName = Array.from(new Set(fullNamesSet)).join(', ');
+                return writersFullName;
+            }
+        }
+        return [];
+    }
+    // getWriters(books[0] || {});
 
     return (
         <div>
@@ -106,7 +118,7 @@ export default function BookTable() {
                                     )}
                                 </TableCell>
                                 <TableCell className={'px-5'}>
-                                    <div className="text-sm">{(b.writers || []).join(', ') || '-'}</div>
+                                    <div className="text-sm">{b.funds.length > 0 ? getWriters(b) : "-" }</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>{b.bookType == '0' ? 'หนังสือ' : "ตำรา"}</TableCell>
                                 <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>

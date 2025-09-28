@@ -56,6 +56,9 @@ export const GET_BOOKS = gql`
       publicationDate
       updatedAt
       writers
+      funds {
+        writers
+      }
       attachments {
         documentId
         name
