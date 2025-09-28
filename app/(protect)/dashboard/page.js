@@ -87,11 +87,11 @@ export default function DashboardPage() {
   // Stats (apply toggles; you could extend to filter by dept if domain requires)
   const stats = useMemo(() => {
     const items = [];
-    if (useProjects) items.push({ key: 'projects', value: String(projects.length), label: 'ทุนโครงการวิจัย', href: '/dashboard/admin/form/projects', icon: HandCoins });
-    if (useFunds) items.push({ key: 'funds', value: String(funds.length), label: 'ทุนตำราหนังสือ', href: '/dashboard/admin/form/funds', icon: HandCoins });
-    if (usePublications) items.push({ key: 'publications', value: String(publications.length), label: 'การตีพิมพ์ทางวิชาการ', href: '/dashboard/admin/form/publications', icon: FileBadge });
-    if (useConferences) items.push({ key: 'conferences', value: String(conferences.length), label: 'การประชุมวิชาการ', href: '/dashboard/admin/form/conferents', icon: Presentation });
-    if (useBooks) items.push({ key: 'books', value: String(books.length), label: 'หนังสือและตำรา', href: '/dashboard/admin/form/books', icon: BookOpen });
+    if (useProjects) items.push({ key: 'projects', value: String(projects.length), label: 'ทุนโครงการวิจัย', href: '/admin/form/project', icon: HandCoins });
+    if (useFunds) items.push({ key: 'funds', value: String(funds.length), label: 'ทุนตำราหนังสือ', href: '/admin/form/fund', icon: HandCoins });
+    if (usePublications) items.push({ key: 'publications', value: String(publications.length), label: 'การตีพิมพ์ทางวิชาการ', href: '/admin/form/publication', icon: FileBadge });
+    if (useConferences) items.push({ key: 'conferences', value: String(conferences.length), label: 'การประชุมวิชาการ', href: '/admin/form/conference', icon: Presentation });
+    if (useBooks) items.push({ key: 'books', value: String(books.length), label: 'หนังสือและตำรา', href: '/admin/form/book', icon: BookOpen });
     return items;
   }, [useProjects, useFunds, usePublications, useConferences, useBooks, projects.length, funds.length, publications.length, conferences.length, books.length]);
 
