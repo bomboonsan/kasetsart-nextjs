@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
+import { formatDateToDDMMYYYY } from '@/lib/dateUtils'
 
 export default function ConferenceView() {
     const params = useParams()
@@ -36,27 +37,27 @@ export default function ConferenceView() {
     };
 
     const getPresentationWorkText = (value) => {
-        if (value === 0) return 'ได้รับเชิญ (Invited Paper.)';
-        if (value === 1) return 'เสนอเอง';
+        if (value == '0') return 'ได้รับเชิญ (Invited Paper.)';
+        if (value == '1') return 'เสนอเอง';
         return '-';
     };
 
     const getPresentTypeText = (value) => {
-        if (value === 0) return 'ภาคบรรยาย (Oral)';
-        if (value === 1) return 'ภาคโปสเตอร์ (Poster)';
-        if (value === 2) return 'เข้าร่วมประชุมวิชาการ';
+        if (value == '0') return 'ภาคบรรยาย (Oral)';
+        if (value == '1') return 'ภาคโปสเตอร์ (Poster)';
+        if (value == '2') return 'เข้าร่วมประชุมวิชาการ';
         return '-';
     };
 
     const getArticleTypeText = (value) => {
-        if (value === 0) return 'Abstract อย่างเดียว';
-        if (value === 1) return 'เรื่องเต็ม';
+        if (value == '0') return 'Abstract อย่างเดียว';
+        if (value == '1') return 'เรื่องเต็ม';
         return '-';
     };
 
     const getLevelText = (value) => {
-        if (value === 0) return 'ระดับชาติ';
-        if (value === 1) return 'ระดับนานาชาติ';
+        if (value == '0') return 'ระดับชาติ';
+        if (value == '1') return 'ระดับนานาชาติ';
         return '-';
     };
 

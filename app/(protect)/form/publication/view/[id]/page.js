@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
+import { formatDateToMMYYYY } from '@/lib/dateUtils'
 
 export default function PublicationView() {
   const params = useParams()
@@ -48,7 +49,7 @@ export default function PublicationView() {
               <FieldView label="โครงการวิจัยที่เกี่ยวข้อง" value={publication.projects?.[0]?.nameTH || '-'} />
               <FieldView label="DOI" value={publication.doi || '-'} />
               <FieldView label="ISSN" value={publication.isbn || '-'} /> {/* ใช้ isbn เก็บ ISSN ผิด */}
-              <FieldView label="ปีที่ตีพิมพ์" value={publication.durationStart || '-'} />
+              <FieldView label="ปีที่ตีพิมพ์" value={formatDateToMMYYYY(publication.durationStart) || '-'} />
               <FieldView label="Volume" value={publication.volume || '-'} />
               <FieldView label="Issue" value={publication.issue || '-'} />
               <FieldView label="หน้าเริ่มต้น" value={publication.pageStart || '-'} />
