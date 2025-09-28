@@ -30,19 +30,36 @@ export default function ProjectEdit() {
         }
     })
 
-
+        
     const project = data?.project
+    if (!project) { return <div className="p-6">{loading ? 'Loading...' : 'ไม่พบข้อมูลโครงการ'}</div> }
+    let subFundTypeLabel = ''
+    const sub1 = subFundType1.find(option => option.value === project.fundSubType)?.label + subFundType1.find(option => option.value === project.fundSubType)?.label
+    const sub2 = subFundType2.find(option => option.value === project.fundSubType)?.label + subFundType2.find(option => option.value === project.fundSubType)?.label
+    const sub3 = subFundType3.find(option => option.value === project.fundSubType)?.label + subFundType3.find(option => option.value === project.fundSubType)?.label
+    const sub4 = subFundType4.find(option => option.value === project.fundSubType)?.label + subFundType4.find(option => option.value === project.fundSubType)?.label
+    if (sub1 !== 'undefined') {
+        subFundTypeLabel = sub1
+    } else if (sub2 !== 'undefined') {
+        subFundTypeLabel = sub2
+    } else if (sub3 !== 'undefined') {
+        subFundTypeLabel = sub3
+    } else if (sub4 !== 'undefined') {
+        subFundTypeLabel = sub4
+    } else {
+        subFundTypeLabel = ''
+    }
 
     return (
         <div>
-            <Pageheader title="แก้ไขโครงการวิจัย" />
+            <Pageheader title="ทุนโครงการวิจัย" />
             {loading && <div className="p-6">Loading...</div>}
             {error && <div className="p-6 text-red-600">โหลดข้อมูลผิดพลาด</div>}
             {project && (
                 <div className='space-y-4'>
                     <Block>
                         <div className='mb-4 flex justify-end'>
-                            <Button variant="default" onClick={() => router.push(`/admin/form/project/edit/${project.documentId}`)}>แก้ไข</Button>
+                            <Button variant="default" onClick={() => router.push(`/form/project/edit/${project.documentId}`)}>แก้ไข</Button>
                         </div>
                         <div className="inputGroup">
                             <FieldView label="ปีงบประมาณ" value={project.fiscalYear} />
@@ -54,14 +71,13 @@ export default function ProjectEdit() {
                             <FieldView label="เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืนหรือไม่" value={project.isEnvironmentallySustainable === 0 ? 'ใช่' : 'ไม่ใช่'} />
                             <FieldView label="ระยะเวลาการทำวิจัย" value={`${project.durationStart} - ${project.durationEnd}`} />
                             <FieldView label="ประเภทงานวิจัย" value={researchKindOptions.find(option => option.value === project.researchKind)?.label} />
-                            <FieldView label="ประเภทแหล่งทุน" value={fundTypeOptions.find(option => option.value === project.fundType)?.label} />
+                            <FieldView label="ประเภทแหล่งทุน" value={fundTypeOptions.find(option => option.value === project.fundType)?.label + ' - ' + subFundTypeLabel} />
                             <FieldView label="ชื่อแหล่งทุน" value={project.fundName} />
                             <FieldView label="งบวิจัย" value={`฿${project.budget.toLocaleString()}`} />
                             <FieldView label="คำสำคัญ" value={project.keywords} />
                             <FieldView label="IC Types" value={project.ic_types?.map(ic => ic.name).join(', ') || '-'} />
                             <FieldView label="Impact" value={project.impacts?.map(impact => impact.name).join(', ') || '-'} />
                             <FieldView label="SDG" value={project.sdgs && project.sdgs.length > 0 ? project.sdgs.map(sdg => sdg.name).join(', ') : '-'} />
-                            <FieldView label="ผู้ร่วมวิจัย" value={project.partners?.map(p => p.name).join(', ')} />
                         </div>
                     </Block>
                     <Block>

@@ -363,7 +363,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                         { value: '0', label: 'โครงการวิจัยเดี่ยว' },
                         { value: '1', label: 'แผนงานวิจัย หรือชุดโครงการวิจัย' },
                     ]} />
-                    <FormInput id="subProjectCount" type="number" label="จำนวนโครงการย่อย" value={formData.subProjectCount} placeholder="กรอกจำนวนโครงการย่อย" onChange={(e) => handleInputChange('subProjectCount', e.target.value)} />
+                    <FormInput id="subProjectCount" disabled={formData.projectMode == '0' || formData.projectMode == ''} type="number" label="จำนวนโครงการย่อย" value={formData.subProjectCount} placeholder="กรอกจำนวนโครงการย่อย" onChange={(e) => handleInputChange('subProjectCount', e.target.value)} />
                     {/* <FormInput id="project-name" label="ชื่อโครงการ" value="" placeholder="กรอกชื่อโครงการ" /> */}
                     <FormTextarea id="nameTH" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" value={formData.nameTH} onChange={(e) => handleInputChange('nameTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="nameEN" label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" value={formData.nameEN} onChange={(e) => handleInputChange('nameEN', e.target.value)} placeholder="" rows={5} />
