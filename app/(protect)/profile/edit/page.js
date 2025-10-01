@@ -47,6 +47,8 @@ export default function ProfileEditPage() {
     const [selectData, setSelectData] = useState({});
     const [education, setEducation] = useState([{ ...initialEducationItem }]);
 
+    const [isAdminSuperAdmin, setIsAdminSuperAdmin] = useState(false);
+
     const { options, loading: optionsLoading, error: optionsError } = useFormOptions(session);
 
     const [avatarFile, setAvatarFile] = useState(null);
@@ -96,6 +98,10 @@ export default function ProfileEditPage() {
             }
         }
         initialData.academic_types = profile.academic_types[0]?.documentId || '';
+
+        if ((initialData.academic_types.length == 0 && initialData.role.name == "Admin") || (initialData.academic_types.length == 0 && initialData.role.name == "Super Admin")) {
+            setIsAdminSuperAdmin(true);
+        }
 
         setFormData(prev => ({ ...prev, ...initialData }));
 
@@ -318,24 +324,28 @@ export default function ProfileEditPage() {
                         <FieldInput label="เบอร์ติดต่อ" value={formData.telephoneNo || ''} onChange={(e) => handleInputChange('telephoneNo', e.target.value)} placeholder="" />
                         <FieldInput label="อีเมล" type="email" value={formData.email || ''} onChange={(e) => handleInputChange('email', e.target.value)} placeholder="กรุณาระบุอีเมล" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldInput label="ตำแหน่งทางวิชาการ" value={formData.academicPosition || ''} onChange={(e) => handleInputChange('academicPosition', e.target.value)} placeholder="" />
-                        <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={options.academicTypes} />
+                    {!isAdminSuperAdmin && (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FieldInput label="ตำแหน่งทางวิชาการ" value={formData.academicPosition || ''} onChange={(e) => handleInputChange('academicPosition', e.target.value)} placeholder="" />
+                                <FieldInput label="วุฒิการศึกษาสูงสุด" value={formData.highDegree || ''} onChange={(e) => handleInputChange('highDegree', e.target.value)} placeholder="เช่น Ph.D., M.Sc., B.Eng." />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={options.academicTypes} />
 
-                        <FieldSelect
-                            label="ประเภทการเข้าร่วม"
-                            value={formData.participation || ''}
-                            onChange={(value) => handleInputChange('participation', value)}
-                            placeholder="เลือกประเภทการเข้าร่วม"
-                            options={[
-                                { value: "0", label: 'participating' },
-                                { value: "1", label: 'supporting' }
-                            ]}
-                        />
-                    </div>
+                                <FieldSelect
+                                    label="ประเภทการเข้าร่วม"
+                                    value={formData.participation || ''}
+                                    onChange={(value) => handleInputChange('participation', value)}
+                                    placeholder="เลือกประเภทการเข้าร่วม"
+                                    options={[
+                                        { value: "0", label: 'participating' },
+                                        { value: "1", label: 'supporting' }
+                                    ]}
+                                />
+                            </div>
+                        </>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={selectData.departments.map(d => ({ value: d.documentId, label: d.title }))} />
                         <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties.map(f => ({ value: f.documentId, label: f.title }))} />
@@ -343,70 +353,72 @@ export default function ProfileEditPage() {
                     </div>
                 </div>
             </Block>
-            <Block>
-                <div className="space-y-6 p-6">
-                    <h2 className='text-lg text-gray-900'>วุฒิการศึกษา</h2>
-                    <div className="space-y-4">
-                        {education.map((edu, index) => (
-                            <div key={index} className="grid grid-cols-12 gap-4 items-end pb-4 border-b last:border-b-0">
-                                <div className="col-span-12 md:col-span-3">
-                                    <FieldSelect
-                                        label="ระดับวุฒิการศึกษา"
-                                        value={edu.level}
-                                        onChange={(value) => updateEducation(index, 'level', value)}
-                                        placeholder="เลือกระดับการศึกษา"
-                                        options={[
-                                            { value: "ปริญญาตรี", label: 'ปริญญาตรี' },
-                                            { value: "ปริญญาโท", label: 'ปริญญาโท' },
-                                            { value: "ปริญญาเอก", label: 'ปริญญาเอก' }
-                                        ]}
-                                    />
+            {!isAdminSuperAdmin && (
+                <Block>
+                    <div className="space-y-6 p-6">
+                        <h2 className='text-lg text-gray-900'>วุฒิการศึกษา</h2>
+                        <div className="space-y-4">
+                            {education.map((edu, index) => (
+                                <div key={index} className="grid grid-cols-12 gap-4 items-end pb-4 border-b last:border-b-0">
+                                    <div className="col-span-12 md:col-span-3">
+                                        <FieldSelect
+                                            label="ระดับวุฒิการศึกษา"
+                                            value={edu.level}
+                                            onChange={(value) => updateEducation(index, 'level', value)}
+                                            placeholder="เลือกระดับการศึกษา"
+                                            options={[
+                                                { value: "ปริญญาตรี", label: 'ปริญญาตรี' },
+                                                { value: "ปริญญาโท", label: 'ปริญญาโท' },
+                                                { value: "ปริญญาเอก", label: 'ปริญญาเอก' }
+                                            ]}
+                                        />
+                                    </div>
+                                    <div className="col-span-12 md:col-span-4">
+                                        <FieldInput
+                                            label="ชื่อสถาบันการศึกษา"
+                                            value={edu.institution}
+                                            onChange={(e) => updateEducation(index, 'institution', e.target.value)}
+                                            placeholder="กรุณาระบุชื่อสถาบันการศึกษา"
+                                        />
+                                    </div>
+                                    <div className="col-span-12 md:col-span-3">
+                                        <FieldInput
+                                            label="คณะ/สาขา"
+                                            value={edu.field}
+                                            onChange={(e) => updateEducation(index, 'field', e.target.value)}
+                                            placeholder="กรุณาระบุสาขาวิชา"
+                                        />
+                                    </div>
+                                    <div className="col-span-9 md:col-span-1">
+                                        <FieldInput
+                                            label="ปีที่สำเร็จ"
+                                            value={edu.year}
+                                            onChange={(e) => updateEducation(index, 'year', e.target.value)}
+                                            placeholder="ปี"
+                                        />
+                                    </div>
+                                    <div className="col-span-3 md:col-span-1 flex justify-end">
+                                        <Button
+                                            variant="secondary"
+                                            type="button"
+                                            onClick={() => removeEducation(index)}
+                                            disabled={education.length === 1}
+                                            className="h-10"
+                                        >
+                                            -
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="col-span-12 md:col-span-4">
-                                    <FieldInput
-                                        label="ชื่อสถาบันการศึกษา"
-                                        value={edu.institution}
-                                        onChange={(e) => updateEducation(index, 'institution', e.target.value)}
-                                        placeholder="กรุณาระบุชื่อสถาบันการศึกษา"
-                                    />
-                                </div>
-                                <div className="col-span-12 md:col-span-3">
-                                    <FieldInput
-                                        label="คณะ/สาขา"
-                                        value={edu.field}
-                                        onChange={(e) => updateEducation(index, 'field', e.target.value)}
-                                        placeholder="กรุณาระบุสาขาวิชา"
-                                    />
-                                </div>
-                                <div className="col-span-9 md:col-span-1">
-                                    <FieldInput
-                                        label="ปีที่สำเร็จ"
-                                        value={edu.year}
-                                        onChange={(e) => updateEducation(index, 'year', e.target.value)}
-                                        placeholder="ปี"
-                                    />
-                                </div>
-                                <div className="col-span-3 md:col-span-1 flex justify-end">
-                                    <Button
-                                        variant="secondary"
-                                        type="button"
-                                        onClick={() => removeEducation(index)}
-                                        disabled={education.length === 1}
-                                        className="h-10"
-                                    >
-                                        -
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <div className="flex items-center space-x-4 pt-2">
+                            <Button type="button" variant="secondary" onClick={addEducation}>
+                                เพิ่มวุฒิการศึกษา
+                            </Button>
+                        </div>
                     </div>
-                    <div className="flex items-center space-x-4 pt-2">
-                        <Button type="button" variant="secondary" onClick={addEducation}>
-                            เพิ่มวุฒิการศึกษา
-                        </Button>
-                    </div>
-                </div>
-            </Block>
+                </Block>
+            )}
             <Block>
                 <div className="p-6">
                     <h2 className='text-lg text-gray-900'>เปลี่ยนรหัสผ่าน</h2>

@@ -41,9 +41,17 @@ export default function ProfilePage() {
     return (
         <div>
             <ProfileHeader data={userData} />
-            <ProfileStats userId={userData} />
-            <ProfileEducation data={userData.education} />
-            <ProfilePortfolio data={userData} />
+            {(userData.academic_types.length == 0 && userData.role.name == "Admin") || (userData.academic_types.length == 0 && userData.role.name == "Super Admin") ? (
+                <>
+                    {/* ADMIN */}
+                </>
+            ) : (
+                <>
+                    <ProfileStats userId={userData} />
+                    <ProfileEducation data={userData.education} />
+                    <ProfilePortfolio data={userData} />
+                </>
+            )}
         </div>
     );
 }
