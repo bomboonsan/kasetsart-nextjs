@@ -43,6 +43,7 @@ export const GET_USER_PROFILE = gql`
       academicPosition
       highDegree
       telephoneNo
+      role { name documentId }
       avatar {
         url
       }
