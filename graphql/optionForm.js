@@ -21,6 +21,7 @@ query ProjectOptions {
 }
 `;
 
+
 export const GET_USERS_FILTER_OPTIONS = gql`
 query UsersFilterOptions {
     departments {
