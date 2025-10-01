@@ -59,7 +59,6 @@ export default function ProjectTable() {
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
                 <Input value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white" placeholder="ค้นหาจากชื่อโครงการ..." />
-                <Button>ค้นหา</Button>
             </div>
             {/* /filter */}
 

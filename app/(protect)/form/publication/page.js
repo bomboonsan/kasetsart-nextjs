@@ -73,7 +73,6 @@ export default function PublicationTable() {
                     className="bg-white"
                     placeholder="ค้นหาจากชื่อผลงาน หรือชื่อวารสาร..."
                 />
-                <Button>ค้นหา</Button>
             </div>
             {/* /filter */}
 

@@ -79,7 +79,6 @@ export default function BookTable() {
                     className="bg-white"
                     placeholder="ค้นหาจากชื่อผลงาน หรือผู้แต่ง..."
                 />
-                <Button>ค้นหา</Button>
             </div>
             {/* /filter */}
 

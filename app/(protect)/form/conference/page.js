@@ -81,7 +81,6 @@ export default function ConferenceTable() {
                     className="bg-white"
                     placeholder="ค้นหาจากชื่อผลงาน หรือชื่อการประชุม..."
                 />
-                <Button>ค้นหา</Button>
             </div>
             {/* /filter */}
 
