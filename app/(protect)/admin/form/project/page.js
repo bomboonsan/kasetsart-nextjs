@@ -54,7 +54,7 @@ export default function ProjectTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการโครงการวิจัย" />
+            <Pageheader title="จัดการโครงการวิจัย" btnName="เพิ่มทุนโครงการวิจัย" btnLink="/form/create/project" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">

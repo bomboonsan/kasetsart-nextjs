@@ -70,15 +70,15 @@ export default function ConferenceTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการข้อมูลการประชุม" />
+            <Pageheader title="จัดการข้อมูลการประชุม" btnName="เพิ่มข้อมูลการประชุม" btnLink="/form/create/conference" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
-                <Input 
-                    value={search} 
-                    onChange={(e) => setSearch(e.target.value)} 
-                    className="bg-white" 
-                    placeholder="ค้นหาจากชื่อผลงาน หรือชื่อการประชุม..." 
+                <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-white"
+                    placeholder="ค้นหาจากชื่อผลงาน หรือชื่อการประชุม..."
                 />
                 <Button>ค้นหา</Button>
             </div>
@@ -126,7 +126,7 @@ export default function ConferenceTable() {
                                 <TableCell className={'px-5'}>{getLevelText(c.level)}</TableCell>
                                 <TableCell className={'px-5'}>{getLocationText(c)}</TableCell>
                                 <TableCell className={'px-5'}>
-                                    {c.durationStart && c.durationEnd 
+                                    {c.durationStart && c.durationEnd
                                         ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`
                                         : c.durationStart || c.durationEnd || '-'
                                     }

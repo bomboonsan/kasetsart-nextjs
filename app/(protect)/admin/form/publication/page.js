@@ -61,15 +61,15 @@ export default function PublicationTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการข้อมูลตีพิมพ์" />
+            <Pageheader title="จัดการข้อมูลตีพิมพ์" btnName="เพิ่มข้อมูลตีพิมพ์" btnLink="/form/create/publication" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
-                <Input 
-                    value={search} 
-                    onChange={(e) => setSearch(e.target.value)} 
-                    className="bg-white" 
-                    placeholder="ค้นหาจากชื่อผลงาน หรือชื่อวารสาร..." 
+                <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-white"
+                    placeholder="ค้นหาจากชื่อผลงาน หรือชื่อวารสาร..."
                 />
                 <Button>ค้นหา</Button>
             </div>

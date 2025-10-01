@@ -57,15 +57,15 @@ export default function BookTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการข้อมูลหนังสือ" />
+            <Pageheader title="จัดการข้อมูลหนังสือ" btnName="เพิ่มข้อมูลหนังสือ" btnLink="/form/create/book" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
-                <Input 
-                    value={search} 
-                    onChange={(e) => setSearch(e.target.value)} 
-                    className="bg-white" 
-                    placeholder="ค้นหาจากชื่อผลงาน หรือผู้แต่ง..." 
+                <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="bg-white"
+                    placeholder="ค้นหาจากชื่อผลงาน หรือผู้แต่ง..."
                 />
                 <Button>ค้นหา</Button>
             </div>
