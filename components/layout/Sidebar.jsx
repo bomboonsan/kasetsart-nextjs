@@ -49,6 +49,7 @@ const ADMIN_ITEMS = [
 		children: [
 			{ id: "admin/user", url: "/admin/user", icon: UsersRound, label: "รายชื่อผู้ใช้" },
 			{ id: "admin/user/add", url: "/admin/user/add", icon: UsersRound, label: "เพิ่มผู้ใช้" },
+			{ id: "admin/user/add-admin", url: "/admin/user/add-admin", icon: UsersRound, label: "เพิ่มผู้ดูแลระบบ" },
 		],
 	},
 ];
