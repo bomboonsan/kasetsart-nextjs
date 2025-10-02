@@ -368,10 +368,10 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						value={Array.isArray(formData.attachments) ? formData.attachments : []} 
 						onFilesChange={handleAttachmentsChange} 
 					/>
-					<WritersEditor 
+					{/* <WritersEditor 
 						writers={formData.writers} 
 						onChange={handleWritersChange} 
-					/>
+					/> */}
 				</div>
 			</Block>
 			<Block className="mt-4">
