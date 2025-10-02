@@ -1,4 +1,5 @@
 export const FUND_FORM_INITIAL = {
+    fundName: "", // ชื่อทุนที่ขอ (str)
     writers: [], // json array of { fullName, department, faculty , phone, email }
     fundType: "", // ลักษณะของผลงานวิชาการที่จะขอรับทุน (Int) 0=ตำรา ใช้สอนในรายวิชา, 1=หนังสือ(ชื่อไทย และชื่อภาษาอังกฤษ)
     fundTypeText: "", // ข้อความจาก radio button ลักษณะของผลงานวิชาการที่จะขอรับทุน

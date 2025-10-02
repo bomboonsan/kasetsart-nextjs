@@ -142,6 +142,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted)
 
             const payload = {
+                fundName: formData.fundName || null,
                 writers: formData.writers?.length ? formData.writers : [],
                 fundType: formData.fundType === '' ? null : parseInt(formData.fundType),
                 fundTypeText: formData.fundTypeText || null,
