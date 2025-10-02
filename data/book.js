@@ -17,4 +17,5 @@ export const BOOK_FORM_INITIAL = {
     yearContracted: "",
     refereed: "",
     numberPages: "",
+    researchType: "",
 }

@@ -165,6 +165,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				yearContracted: formData.yearContracted || null,
 				refereed: formData.refereed || null,
 				numberPages: formData.numberPages || null,
+				researchType: formData.researchType || null,
 			};
 			Object.keys(bookData).forEach(k => {
 				if (bookData[k] === null || bookData[k] === '') delete bookData[k];
@@ -234,6 +235,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	], []);
 
 	const yearOptions = useMemo(() => [
+		{ value: '2019', label: '2019' },
 		{ value: '2020', label: '2020' },
 		{ value: '2021', label: '2021' },
 		{ value: '2022', label: '2022' },
@@ -244,7 +246,23 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	], []);
 	const statusOptions = useMemo(() => [
 		{ value: 'draft', label: 'Draft' },
+		{ value: 'proposed', label: 'Proposed' },
+		{ value: 'under contract', label: 'Under Contract' },
+		{ value: 'under review', label: 'Under Review' },
+		{ value: 'accepted', label: 'Accepted' },
+		{ value: 'in press', label: 'In Press' },
 		{ value: 'published', label: 'Published' },
+		{ value: 'e-book', label: 'E-Book' },
+	], []);
+	const refereedOptions = useMemo(() => [
+		{ value: 'no', label: 'No' },
+		{ value: 'yes', label: 'Yes' },
+	], []);
+	const researchTypeOptions = useMemo(() => [
+		{ value: 'bds', label: 'BDS (Basic or Discovery Scholarship)' },
+		{ value: 'ais', label: 'AIS (Applied or Integrative / application Scholarship)' },
+		{ value: 'tls', label: 'TLS (Teaching and Learning Scholarship)' },
+		{ value: 'nic', label: 'NIC (Not counted as a separate Intellectual Contribution)' },
 	], []);
 
 	// Memoize handlers for specific fields
@@ -292,6 +310,11 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						onChange={handleDetailChange} 
 						rows={6} 
 					/>
+					<FundPicker
+						label="ทุนที่เกี่ยวข้อง"
+						selectedFund={formData.__fundingObj}
+						onSelect={handleFundChange}
+					/>
 					<FormRadio 
 						id="level" 
 						label="ระดับผลงาน" 
@@ -337,12 +360,21 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						onChange={(val) => handleInputChange('yearContracted', val)}
 						options={yearOptions}
 					/>
-					<FormInput
+					<FormSelect
 						id="refereed"
 						label="Refereed"
-						type="text"
-						value={formData.refereed}
-						onChange={(e) => handleInputChange('refereed', e.target.value)}
+						value={formData.refereed ?? ""}
+						placeholder="เลือก Refereed"
+						onChange={(val) => handleInputChange('refereed', val)}
+						options={refereedOptions}
+					/>
+					<FormSelect
+						id="researchType"
+						label="Research Type"
+						value={formData.researchType ?? ""}
+						placeholder="เลือก Research Type"
+						onChange={(val) => handleInputChange('researchType', val)}
+						options={researchTypeOptions}
 					/>
 					<FormInput
 						id="numberPages"
@@ -350,19 +382,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						type="number"
 						value={formData.numberPages || ''}
 						onChange={(e) => handleInputChange('numberPages', e.target.value)}
-					/>
-					<FormInput 
-						id="publicationDate" 
-						label="วันที่เกิดผลงาน" 
-						type="date" 
-						value={formData.publicationDate || ''} 
-						onChange={handlePublicationDateChange} 
-					/>
-					<FundPicker 
-						label="ทุนที่เกี่ยวข้อง" 
-						selectedFund={formData.__fundingObj} 
-						onSelect={handleFundChange} 
-					/>
+					/>					
 					<FileUploadField 
 						label="เอกสารแนบ" 
 						value={Array.isArray(formData.attachments) ? formData.attachments : []} 
