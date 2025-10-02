@@ -62,18 +62,18 @@ export default function FundTable() {
 
     let funds = data?.funds || [];
 
-    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
-    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    if (roleName === 'Admin' && myDeptId) {
-        funds = funds.filter(p =>
-            p.partners?.some(partner =>
-                partner?.User?.departments?.some(dep =>
-                    dep?.id === myDeptId || dep?.documentId === myDeptId
-                )
-            )
-        );
-    }
+    // // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    // const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    // const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    // if (roleName === 'Admin' && myDeptId) {
+    //     funds = funds.filter(p =>
+    //         p.partners?.some(partner =>
+    //             partner?.User?.departments?.some(dep =>
+    //                 dep?.id === myDeptId || dep?.documentId === myDeptId
+    //             )
+    //         )
+    //     );
+    // }
 
     return (
         <div>

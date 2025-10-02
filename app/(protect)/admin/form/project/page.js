@@ -68,15 +68,15 @@ export default function ProjectTable() {
     
     if (loading && meDataLoading) { return } 
     
-    if (roleName === 'Admin' && myDeptId) {
-        projects = projects.filter(p =>
-            p.partners?.some(partner =>
-                partner?.User?.departments?.some(dep =>
-                    dep?.id === myDeptId || dep?.documentId === myDeptId
-                )
-            )
-        );
-    }
+    // if (roleName === 'Admin' && myDeptId) {
+    //     projects = projects.filter(p =>
+    //         p.partners?.some(partner =>
+    //             partner?.User?.departments?.some(dep =>
+    //                 dep?.id === myDeptId || dep?.documentId === myDeptId
+    //             )
+    //         )
+    //     );
+    // }
 
 
     return (

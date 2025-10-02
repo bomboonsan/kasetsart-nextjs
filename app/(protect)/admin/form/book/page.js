@@ -63,20 +63,20 @@ export default function BookTable() {
 
 
     let books = data?.books || [];
-    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
-    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    if (roleName === 'Admin' && myDeptId) {
-        books = books.filter(book =>
-            book?.funds?.some(fund =>
-                fund?.partners?.some(partner =>
-                    partner?.User?.departments?.some(dep =>
-                        dep?.id === myDeptId || dep?.documentId === myDeptId
-                    )
-                )
-            )
-        );
-    }
+    // // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    // const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    // const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    // if (roleName === 'Admin' && myDeptId) {
+    //     books = books.filter(book =>
+    //         book?.funds?.some(fund =>
+    //             fund?.partners?.some(partner =>
+    //                 partner?.User?.departments?.some(dep =>
+    //                     dep?.id === myDeptId || dep?.documentId === myDeptId
+    //                 )
+    //             )
+    //         )
+    //     );
+    // }
 
 
 
