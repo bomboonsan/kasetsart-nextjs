@@ -58,7 +58,6 @@ export default function AdminUsersPage() {
         context: authContext,
     });
 
-
     // จัดการข้อมูลผู้ใช้
     const users = data?.usersPermissionsUsers ?? [];
 

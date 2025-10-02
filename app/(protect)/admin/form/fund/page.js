@@ -7,6 +7,7 @@ import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
 import { GET_FUNDS } from '@/graphql/formQueries'
+import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
     Table,
     TableHeader,
@@ -20,6 +21,15 @@ export default function FundTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+    const authContext = {
+        headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
+    };
+    // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
+    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+        variables: { documentId: session?.user?.documentId },
+        context: authContext,
+    });
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -50,7 +60,20 @@ export default function FundTable() {
         }
     });
 
-    const funds = data?.funds || [];
+    let funds = data?.funds || [];
+
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    if (roleName === 'Admin' && myDeptId) {
+        funds = funds.filter(p =>
+            p.partners?.some(partner =>
+                partner?.User?.departments?.some(dep =>
+                    dep?.id === myDeptId || dep?.documentId === myDeptId
+                )
+            )
+        );
+    }
 
     return (
         <div>

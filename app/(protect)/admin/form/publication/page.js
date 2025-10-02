@@ -7,6 +7,7 @@ import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
 import { GET_PUBLICATIONS } from '@/graphql/formQueries'
+import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
     Table,
     TableHeader,
@@ -20,6 +21,15 @@ export default function PublicationTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+    const authContext = {
+            headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
+    };
+    // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
+    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+        variables: { documentId: session?.user?.documentId },
+        context: authContext,
+    });
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -51,13 +61,30 @@ export default function PublicationTable() {
         }
     });
 
-    const publications = data?.publications || [];
+    let publications = data?.publications || [];
+
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    if (roleName === 'Admin' && myDeptId) {
+        publications = publications.filter(pub =>
+            pub?.projects?.some(proj =>
+                proj?.partners?.some(partner =>
+                    partner?.User?.departments?.some(dep =>
+                        dep?.id === myDeptId || dep?.documentId === myDeptId
+                    )
+                )
+            )
+        );
+    }
 
     const getLevelText = (level) => {
         if (level == '0') return 'ระดับชาติ';
         if (level == '1') return 'ระดับนานาชาติ';
         return '-';
     };
+
+    if (loading && meDataLoading) { return <div className="p-6">Loading...</div> }
 
     return (
         <div>

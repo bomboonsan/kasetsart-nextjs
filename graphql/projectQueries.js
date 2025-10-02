@@ -16,6 +16,10 @@ export const GET_PROJECTS = gql`
       departments { documentId title }
       projectType
       partners
+      users_permissions_users { 
+        documentId 
+        departments { documentId title } 
+      }
     }
   }
 `;

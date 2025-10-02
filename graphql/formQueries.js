@@ -19,6 +19,7 @@ export const GET_CONFERENCES = gql`
         documentId
         nameTH
         nameEN
+        partners
       }
     }
   }
@@ -42,6 +43,7 @@ export const GET_PUBLICATIONS = gql`
         documentId
         nameTH
         nameEN
+        partners
       }
     }
   }
@@ -59,6 +61,8 @@ export const GET_BOOKS = gql`
       writers
       funds {
         writers
+        documentId
+        partners
       }
       attachments {
         documentId

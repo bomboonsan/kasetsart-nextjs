@@ -7,6 +7,7 @@ import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
 import { GET_PROJECTS } from '@/graphql/projectQueries'
+import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
     Table,
     TableHeader,
@@ -20,6 +21,10 @@ export default function ProjectTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+    const authContext = {
+        headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
+    };
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -50,7 +55,29 @@ export default function ProjectTable() {
         }
     });
 
-    const projects = data?.projects || [];
+    // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
+    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+        variables: { documentId: session?.user?.documentId },
+        context: authContext,
+    });
+    let projects = data?.projects || [];
+    
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    
+    if (loading && meDataLoading) { return } 
+    
+    if (roleName === 'Admin' && myDeptId) {
+        projects = projects.filter(p =>
+            p.partners?.some(partner =>
+                partner?.User?.departments?.some(dep =>
+                    dep?.id === myDeptId || dep?.documentId === myDeptId
+                )
+            )
+        );
+    }
+
 
     return (
         <div>
