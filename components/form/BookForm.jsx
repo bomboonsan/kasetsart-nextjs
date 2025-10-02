@@ -8,6 +8,7 @@ import Block from '../layout/Block';
 import FormTextarea from '@/components/myui/FormTextarea';
 import FormRadio from '@/components/myui/FormRadio';
 import FormInput from '@/components/myui/FormInput';
+import FormSelect from '../myui/FormSelect';
 import FileUploadField from './FileUploadField';
 import Partners from './Partners';
 import FundPicker from './FundPicker';
@@ -157,6 +158,13 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				attachments: attachmentIds,
 				writers: formData.writers || [],
 				funds: fundDocumentId ? [fundDocumentId] : [],
+				revision: formData.revision || null,
+				bookStatus: formData.bookStatus || null,
+				isbn: formData.isbn?.trim() || null,
+				publisher: formData.publisher?.trim() || null,
+				yearContracted: formData.yearContracted || null,
+				refereed: formData.refereed || null,
+				numberPages: formData.numberPages || null,
 			};
 			Object.keys(bookData).forEach(k => {
 				if (bookData[k] === null || bookData[k] === '') delete bookData[k];
@@ -225,6 +233,20 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		{ value: '1', label: 'ระดับนานาชาติ' },
 	], []);
 
+	const yearOptions = useMemo(() => [
+		{ value: '2020', label: '2020' },
+		{ value: '2021', label: '2021' },
+		{ value: '2022', label: '2022' },
+		{ value: '2023', label: '2023' },
+		{ value: '2024', label: '2024' },
+		{ value: '2025', label: '2025' },
+		{ value: '2026', label: '2026' },
+	], []);
+	const statusOptions = useMemo(() => [
+		{ value: 'draft', label: 'Draft' },
+		{ value: 'published', label: 'Published' },
+	], []);
+
 	// Memoize handlers for specific fields
 	const handleBookTypeChange = useCallback((e) => handleInputChange('bookType', e.target.value), [handleInputChange]);
 	const handleTitleTHChange = useCallback((e) => handleInputChange('titleTH', e.target.value), [handleInputChange]);
@@ -277,11 +299,63 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						onChange={handleLevelChange} 
 						options={levelOptions} 
 					/>
+					<FormSelect
+						id="revision"
+						label="Revision (ถ้ามีโปรดระบุปี)"
+						value={formData.revision ?? ""}
+						placeholder="เลือก Revision"
+						onChange={(val) => handleInputChange('revision', val)}
+						options={yearOptions}
+					/>
+					<FormSelect
+						id="status"
+						label="Status"
+						value={formData.bookStatus ?? ""}
+						placeholder="Status"
+						onChange={(val) => handleInputChange('bookStatus', val)}
+						options={statusOptions}
+					/>
+					<FormInput
+						id="isbn"
+						label="ISBN"
+						type="text"
+						value={formData.isbn}
+						onChange={(e) => handleInputChange('isbn', e.target.value)}
+					/>
+					<FormInput
+						id="Publisher"
+						label="Publisher (จำเป็นต้องระบุ)"
+						type="text"
+						value={formData.publisher}
+						onChange={(e) => handleInputChange('publisher', e.target.value)}
+					/>
+					<FormSelect
+						id="yearContracted"
+						label="Year contracted (ถ้ามีโปรดระบุปี)"
+						value={formData.yearContracted ?? ""}
+						placeholder="เลือก Year contracted"
+						onChange={(val) => handleInputChange('yearContracted', val)}
+						options={yearOptions}
+					/>
+					<FormInput
+						id="refereed"
+						label="Refereed"
+						type="text"
+						value={formData.refereed}
+						onChange={(e) => handleInputChange('refereed', e.target.value)}
+					/>
+					<FormInput
+						id="numberPages"
+						label="Number of Pages"
+						type="number"
+						value={formData.numberPages || ''}
+						onChange={(e) => handleInputChange('numberPages', e.target.value)}
+					/>
 					<FormInput 
 						id="publicationDate" 
 						label="วันที่เกิดผลงาน" 
 						type="date" 
-						value={formData.publicationDate} 
+						value={formData.publicationDate || ''} 
 						onChange={handlePublicationDateChange} 
 					/>
 					<FundPicker 

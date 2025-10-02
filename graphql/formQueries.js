@@ -439,6 +439,14 @@ export const GET_BOOK = gql`
       publicationDate
       attachments { documentId name url size mime }
       writers
+      revision
+      bookStatus
+      isbn
+      publisher
+      yearContracted
+      refereed
+      numberPages
+
       funds { documentId contentDesc fundType fundTypeText partners }
     }
   }

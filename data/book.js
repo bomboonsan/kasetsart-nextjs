@@ -10,4 +10,11 @@ export const BOOK_FORM_INITIAL = {
     writers: [], // Writers array for dynamic management
     partners: [], // ผู้ร่วมงาน/ผู้ร่วมจัดทำ (Array similar to conference partners structure)
     __fundingObj: undefined, // สำหรับเก็บ object โครงการขอทุนที่เลือก
+    revision: "",
+    bookStatus: "",
+    isbn: "", // ISBN
+    publisher: "",
+    yearContracted: "",
+    refereed: "",
+    numberPages: "",
 }
