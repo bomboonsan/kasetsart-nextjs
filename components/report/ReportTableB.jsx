@@ -18,6 +18,21 @@ export default function ReportTableB() {
     societal: 'Societal Impact'
   }
 
+  // Mapping ของ impacts กับ documentId [key เป็น documentId ของ Strapi]
+  const IMPACT_MAP = [
+    { label: 'Teaching & Learning Impact', key: 'ccuvur1gtltvalcc9lvkc4q2' },
+    { label: 'Research & Scholarly Impact', key: 'd6ffaiiqsghhzb6cir9nm7um' },
+    { label: 'Practice & Community Impact', key: 'xeuhvpciv7stvysq70yl9k6z' },
+    { label: 'Societal Impact', key: 'kq6ol8bm18pucphvxfk0sxt7' },
+  ]
+
+  // ตัวอย่าง = มีการทำผลงาน publication ขึ้นมาโดยมี 3 คนทำ สมมติว่าเป็นคนในคณะบริหารทั้งหมด แต่คนละภาควิชา สัดส่วนการวิจัยจะอยู่ที่คนละ 0.3 
+  // ยกตัวอย่างว่า หากเป็นคอลัมน์ช่อง Teaching & Learning Impact จะดูว่าผลงาน publication นั้นมีค่า Impact ที่เลือกเป็น Teaching & Learning Impact หรือไม่ ถ้าใช่ 0.3 จะไปขึ้นที่ค่าของคอลัมน์ "Teaching & Learning Impact"
+  // ตัวอย่างเพิ่มเติม: อาจารย์ A อยู่ภาค Finance
+  // DISCIPLINE | Teaching & Learning Impact |
+  // FINANCE | 0.3 |
+  // ในขณะที่อาจารย์ อีก 2 คนที่มีรายชื่อทำผลงานด้วยกัน ก็จะไปขึ้นค่าแบบนี้ หลักการเดียวกัน แต่อยู่ใน row ของภาคตนเอง นั้นเอง
+
   useEffect(() => {
     let mounted = true
 
@@ -34,7 +49,7 @@ export default function ReportTableB() {
 
         for (const dept of reportData) {
           const discipline = dept.name || 'Unknown Department'
-          
+
           // จัดการข้อมูล impacts
           const impactMap = (dept.impacts || []).reduce((acc, impact) => {
             acc[impact.name] = Number(impact.value || 0)
@@ -56,11 +71,11 @@ export default function ReportTableB() {
         }
 
         const totalAll = totalsAcc.teaching + totalsAcc.research + totalsAcc.practice + totalsAcc.societal
-        
+
         if (!mounted) return
         setRows(resultRows)
         setTotals({ ...totalsAcc, total: totalAll })
-        
+
       } catch (e) {
         if (mounted) {
           setError(e?.message || String(e))
@@ -79,7 +94,7 @@ export default function ReportTableB() {
     [
       "Discipline",
       "Teaching & Learning Impact",
-      "Research & Scholarly Impact", 
+      "Research & Scholarly Impact",
       "Practice & Community Impact",
       "Societal Impact",
       "Total"
@@ -168,10 +183,10 @@ export default function ReportTableB() {
           </table>
         </div>
       </div>
-      
+
       {!loading && !error && rows.length > 0 && (
         <CSVLink filename={"ImpactsReport.csv"} data={csvData}>
-          <Button 
+          <Button
             variant="success"
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 mt-4"
           >
