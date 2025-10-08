@@ -234,8 +234,8 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                                 {fundTypeOptions.map((option) => {
                                     const selected = option.value === String(formData.fundType ?? '')
                                     return (
-                                        <div key={option.value} className="flex items-start gap-2">
-                                            <div className="flex items-center">
+                                        <div key={option.value} className="flex items-center gap-2">
+                                            <div className="flex items-center md:min-w-62">
                                                 <Input
                                                     id={`${option.value}`}
                                                     name="fundType"
@@ -254,7 +254,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                                                     type="text"
                                                     disabled={!selected}
                                                     value={selected ? (formData.fundTypeText || '') : ''}
-                                                    placeholder={selected ? 'ระบุข้อความเพิ่มเติม' : 'เลือกตัวเลือกนี้ก่อน'}
+                                                    placeholder={selected ? 'ระบุข้อความเพิ่มเติม' : ''}
                                                     onChange={(e) => {
                                                         if (selected) handleInputChange('fundTypeText', e.target.value)
                                                     }}
