@@ -19,7 +19,7 @@ function formatDate(d) {
 
 /** map level -> ป้ายไทย */
 function mapLevelToLabel(level) {
-    const v = typeof level === 'string' ? level.trim() : level
+    const v = typeof level == 'string' ? level.trim() : level
     const map = {
         '1': 'ระดับนานาชาติ',
         '2': 'ระดับชาติ',
@@ -91,11 +91,13 @@ export default function ReportTableE() {
                     title: c?.abstractTH || c?.abstractEN || '',
                     meeting: c?.journalName || '',
                     authors,
-                    level: mapLevelToLabel(c?.level),
+                    // level: mapLevelToLabel(c?.level),
+                    level: c?.level == 0 ? "ระดับชาติ" : "นานาชาติ",
                     rawDate: c?.durationStart || null,
                     date: formatDate(c?.durationStart),
                 })
             }
+            console.log('proj', proj)
         }
 
         // เรียงจากวันที่ใหม่ไปเก่า ถ้าไม่มีวันที่ให้ไปท้าย

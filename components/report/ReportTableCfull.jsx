@@ -91,37 +91,39 @@ export default function ReportTableCfull() {
         if (!row) return;
         const p = depProportion[depId] || 1;
 
-        if (level === 0) {
-          if (isJournalDb) {
-            if (toBool(pub.isTCI1)) row.tciTier1 += p;
-            else if (toBool(pub.isTCI2)) row.tciTier2 += p;
-            else if (toBool(pub.isACI)) row.aci += p;
-            else row.nonTci += p; // listed DB but none of the specific flags -> treat as non-listed TCI per requirement nuance
-          } else {
-            row.nonTci += p;
-          }
-        } else if (level === 1) {
-          if (isJournalDb) {
-            if (toBool(pub.isScopus)) {
-              const qKey = SCOPUS_QUARTER[Number(pub.scopusType)];
-              if (qKey && row[qKey] !== undefined) row[qKey] += p;
-            }
-            if (toBool(pub.isWOS)) {
-              const wKey = WOS_MAP[Number(pub.wosType)];
-              if (wKey && row[wKey] !== undefined) row[wKey] += p;
-            }
-            if (toBool(pub.isABDC)) {
-              const aKey = ABDC_MAP[Number(pub.abdcType)];
-              if (aKey && row[aKey] !== undefined) row[aKey] += p;
-            }
-            if (toBool(pub.isAJG)) {
-              const jKey = AJG_MAP[Number(pub.ajgType)];
-              if (jKey && row[jKey] !== undefined) row[jKey] += p;
-            }
-          } else {
-            row.otherPjr += p; // International non-database
-          }
-        }
+        if (toBool(pub.isTCI1)) row.tciTier1 += p;
+
+        // if (level == '0') {
+        //   if (isJournalDb) {
+        //     if (toBool(pub.isTCI1)) row.tciTier1 += p;
+        //     else if (toBool(pub.isTCI2)) row.tciTier2 += p;
+        //     else if (toBool(pub.isACI)) row.aci += p;
+        //     else row.nonTci += p; // listed DB but none of the specific flags -> treat as non-listed TCI per requirement nuance
+        //   } else {
+        //     row.nonTci += p;
+        //   }
+        // } else if (level == '1') {
+        //   if (isJournalDb) {
+        //     if (toBool(pub.isScopus)) {
+        //       const qKey = SCOPUS_QUARTER[Number(pub.scopusType)];
+        //       if (qKey && row[qKey] !== undefined) row[qKey] += p;
+        //     }
+        //     if (toBool(pub.isWOS)) {
+        //       const wKey = WOS_MAP[Number(pub.wosType)];
+        //       if (wKey && row[wKey] !== undefined) row[wKey] += p;
+        //     }
+        //     if (toBool(pub.isABDC)) {
+        //       const aKey = ABDC_MAP[Number(pub.abdcType)];
+        //       if (aKey && row[aKey] !== undefined) row[aKey] += p;
+        //     }
+        //     if (toBool(pub.isAJG)) {
+        //       const jKey = AJG_MAP[Number(pub.ajgType)];
+        //       if (jKey && row[jKey] !== undefined) row[jKey] += p;
+        //     }
+        //   } else {
+        //     row.otherPjr += p; // International non-database
+        //   }
+        // }
       });
     });
 

@@ -209,7 +209,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             <Block>
                 <div className='inputGroup'>
                     {/* Writers Section */}
-                    <div className='space-y-2'>
+                    <div className='space-y-2 hidden'>
                         <div className='flex justify-between items-center'>
                             <h3 className='font-semibold'>ผู้เขียน</h3>
                             <Button type='button' variant='outline' onClick={addWriter}>เพิ่มผู้เขียน</Button>
@@ -223,6 +223,9 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                             />
                         ))}
                     </div>
+                    {/* ยังไม่มีใน backend */}
+                    <FormTextarea id='mockup_fundName' label='ชื่อทุนตำราหรือหนังสือ' value={formData.mockup_fundName || ''} onChange={(e) => handleInputChange('mockup_fundName', e.target.value)} rows={5} />
+                    {/* ยังไม่มีใน backend */}
                     {/* <FormRadio id='fundType' label='ลักษณะของผลงานวิชาการที่จะขอรับทุน' value={String(formData.fundType ?? '')} onChange={(e) => handleInputChange('fundType', e.target.value)} options={fundTypeOptions} />
                     <FormInput id='fundTypeText' label='ข้อความประเภททุน (อัตโนมัติจาก radio หรือเพิ่มเอง)' value={formData.fundTypeText || ''} onChange={(e) => handleInputChange('fundTypeText', e.target.value)} /> */}
                     <div className="space-y-1 flex items-center forminput">
@@ -274,7 +277,12 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                     <FormInput id='pages' type='number' label='ตำรา หรือ หนังสือ มีจำนวนประมาณ' value={formData.pages || ''} onChange={(e) => handleInputChange('pages', e.target.value)} />
                     <FormInput id='period' label='ระยะเวลา (ปี หรือ เดือน) ที่จะใช้ในการเขียนประมาณ' value={formData.period || ''} onChange={(e) => handleInputChange('period', e.target.value)} />
                     <FormTextarea id='references' label='รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม) เพิ่มเติมความเหมาะสมได้' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
+                    {/* ยังไม่มีใน backend */}
+                    <FormTextarea id='' label=' ' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
+                    <FormTextarea id='' label=' ' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
+                    <FormTextarea id='' label=' ' value={formData.references || ''} onChange={(e) => handleInputChange('references', e.target.value)} rows={5} />
 
+                    {/* ยังไม่มีใน backend */}
 
 
                     <FileUploadField
