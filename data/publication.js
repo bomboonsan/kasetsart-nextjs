@@ -413,23 +413,23 @@ export const listsStandardABDC = [
 
 export const listsStandardAJG = [
     {
-        "label": "ระดับ 4*",
+        "label": "AJG4*",
         "value": 1
     },
     {
-        "label": "ระดับ 4",
+        "label": "AJG4",
         "value": 2
     },
     {
-        "label": "ระดับ 3",
+        "label": "AJG3",
         "value": 3
     },
     {
-        "label": "ระดับ 2",
+        "label": "AJG2",
         "value": 4
     },
     {
-        "label": "ระดับอื่น",
+        "label": "AJG1",
         "value": 5
     },
 ]
