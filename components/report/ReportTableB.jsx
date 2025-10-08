@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import { reportAPI } from '@/lib/api'
+import { useEffect, useState, useMemo } from 'react'
+// import { reportAPI } from '@/lib/api' // no longer needed; computing locally from graph
 import { CSVLink } from "react-csv";
 import { Button } from "@/components/ui/button";
 import ReportFilters from '@/components/report/ReportFilters'
+import { useQuery } from '@apollo/client'
+import { GET_REPORT_B } from '@/graphql/reportQueries'
 
 export default function ReportTableB() {
   const [rows, setRows] = useState([])
@@ -33,61 +35,104 @@ export default function ReportTableB() {
   // FINANCE | 0.3 |
   // ในขณะที่อาจารย์ อีก 2 คนที่มีรายชื่อทำผลงานด้วยกัน ก็จะไปขึ้นค่าแบบนี้ หลักการเดียวกัน แต่อยู่ใน row ของภาคตนเอง นั้นเอง
 
+  const { data, loading: gqlLoading, error: gqlError } = useQuery(GET_REPORT_B)
+
   useEffect(() => {
-    let mounted = true
+    setLoading(gqlLoading)
+    if (gqlError) setError(gqlError.message)
+  }, [gqlLoading, gqlError])
 
-    async function load() {
-      setLoading(true)
-      setError('')
-      try {
-        // ดึงข้อมูลจาก API ใหม่
-        const reportRes = await reportAPI.getImpactsByDepartment()
-        const reportData = reportRes?.data || []
+  // Compute rows based on publications -> projects -> impacts -> contributors (users_permissions_users)
+  const computed = useMemo(() => {
+    // Early states
+    if (!data || !data.publications) return { rows: [], totals: { teaching: 0, research: 0, practice: 0, societal: 0, total: 0 } }
 
-        const resultRows = []
-        const totalsAcc = { teaching: 0, research: 0, practice: 0, societal: 0 }
+    // Map impact documentId -> impact category key (teaching/research/practice/societal)
+    const impactIdToCategory = IMPACT_MAP.reduce((acc, i) => { acc[i.key] = i.label; return acc }, {})
 
-        for (const dept of reportData) {
-          const discipline = dept.name || 'Unknown Department'
+    // Accumulator per department
+    const deptAcc = new Map() // disciplineName -> { teaching, research, practice, societal }
 
-          // จัดการข้อมูล impacts
-          const impactMap = (dept.impacts || []).reduce((acc, impact) => {
-            acc[impact.name] = Number(impact.value || 0)
-            return acc
-          }, {})
+    for (const pub of data.publications || []) {
+      // For each publication, gather unique projects (already provided) and their contributors
+      const projects = pub.projects || []
+      for (const project of projects) {
+        const projectImpacts = project.impacts || []
+        if (projectImpacts.length === 0) continue // no impact classification -> skip
 
-          const teaching = Number(impactMap[IMPACT_NAMES.teaching] || 0)
-          const research = Number(impactMap[IMPACT_NAMES.research] || 0)
-          const practice = Number(impactMap[IMPACT_NAMES.practice] || 0)
-          const societal = Number(impactMap[IMPACT_NAMES.societal] || 0)
-
-          totalsAcc.teaching += teaching
-          totalsAcc.research += research
-          totalsAcc.practice += practice
-          totalsAcc.societal += societal
-
-          const total = teaching + research + practice + societal
-          resultRows.push({ discipline, teaching, research, practice, societal, total })
+        const contributors = project.users_permissions_users || []
+        // Build list of (userDepartments)
+        // If a user has multiple departments, we will attribute equally to each department (common approach). Adjust if needed.
+        const userDeptPairs = []
+        for (const user of contributors) {
+          const departments = user.departments || []
+          if (departments.length === 0) {
+            // Put into Unknown Department bucket
+            userDeptPairs.push('Unknown Department')
+          } else {
+            for (const d of departments) {
+              userDeptPairs.push(d.title || 'Unknown Department')
+            }
+          }
         }
 
-        const totalAll = totalsAcc.teaching + totalsAcc.research + totalsAcc.practice + totalsAcc.societal
+        if (userDeptPairs.length === 0) continue // avoid division by zero
 
-        if (!mounted) return
-        setRows(resultRows)
-        setTotals({ ...totalsAcc, total: totalAll })
+        // Weight per contributor-department association (proportional allocation)
+        const weight = 1 / userDeptPairs.length
 
-      } catch (e) {
-        if (mounted) {
-          setError(e?.message || String(e))
+        // For each impact of the project add weight to department accumulator in the correct category
+        for (const impact of projectImpacts) {
+          const impactLabel = impactIdToCategory[impact.documentId]
+          if (!impactLabel) continue // impact not one of the 4 tracked
+
+          // Translate full label back to category key used in table totals (teaching, research, etc.)
+          let categoryKey = null
+          if (impactLabel === IMPACT_NAMES.teaching) categoryKey = 'teaching'
+          else if (impactLabel === IMPACT_NAMES.research) categoryKey = 'research'
+          else if (impactLabel === IMPACT_NAMES.practice) categoryKey = 'practice'
+          else if (impactLabel === IMPACT_NAMES.societal) categoryKey = 'societal'
+          if (!categoryKey) continue
+
+          for (const deptTitle of userDeptPairs) {
+            if (!deptAcc.has(deptTitle)) {
+              deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
+            }
+            const bucket = deptAcc.get(deptTitle)
+            bucket[categoryKey] += weight
+          }
         }
-      } finally {
-        if (mounted) setLoading(false)
       }
     }
 
-    load()
-    return () => { mounted = false }
-  }, [])
+    // Build row list
+    const rowsList = Array.from(deptAcc.entries()).map(([discipline, vals]) => {
+      const total = vals.teaching + vals.research + vals.practice + vals.societal
+      return { discipline, teaching: vals.teaching, research: vals.research, practice: vals.practice, societal: vals.societal, total }
+    })
+
+    // Sort alphabetically for consistency
+    rowsList.sort((a, b) => a.discipline.localeCompare(b.discipline))
+
+    // Totals
+    const totalsAcc = rowsList.reduce((acc, r) => {
+      acc.teaching += r.teaching
+      acc.research += r.research
+      acc.practice += r.practice
+      acc.societal += r.societal
+      return acc
+    }, { teaching: 0, research: 0, practice: 0, societal: 0 })
+    const totalAll = totalsAcc.teaching + totalsAcc.research + totalsAcc.practice + totalsAcc.societal
+
+    return { rows: rowsList, totals: { ...totalsAcc, total: totalAll } }
+  }, [data])
+
+  useEffect(() => {
+    if (computed) {
+      setRows(computed.rows)
+      setTotals(computed.totals)
+    }
+  }, [computed])
 
   // จัดเตรียมข้อมูลสำหรับ CSV Export
   const csvData = [
