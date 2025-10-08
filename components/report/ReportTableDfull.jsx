@@ -257,7 +257,7 @@ export default function ReportTableDfull() {
                 <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">AJG4*</th>
                 <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">Total<br />AJG</th>
                 <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">Other PJR</th>
-                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">Total<br />International<br />Publications <br /> with single count</th>
+                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">Total<br />International<br />Publications<br />with single count</th>
               </tr>
             </thead>
             {/* Table Body */}
