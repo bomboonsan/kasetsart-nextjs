@@ -22,7 +22,7 @@ export default function ReportTableC() {
     let partnersAgg = []
     const allPartnersSources = []
     // publication.projects[].partners might carry authorship info.
-    (pub.projects || []).forEach(prj => {
+    ;(pub.projects || []).forEach(prj => {
       if (!prj.partners) return
       allPartnersSources.push(prj.partners)
     })
