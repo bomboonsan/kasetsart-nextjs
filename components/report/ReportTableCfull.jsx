@@ -193,7 +193,7 @@ export default function ReportTableCfull() {
                 <th className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r" rowSpan="2">Discipline</th>
                 <th className="bg-green-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-b" colSpan="4">National Publications</th>
                 <th className="bg-pink-200 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r border-b" colSpan="25">International Publications</th>
-                <th className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider" rowSpan="3">Total Publications<br />(National + International)</th>
+                <th className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider" rowSpan="3">Total Publications<br />(National + International)<br />with multiple counts</th>
               </tr>
               <tr>
                 <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TCI<br />(Tier 1)</th>
