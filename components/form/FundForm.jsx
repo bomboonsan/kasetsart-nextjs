@@ -231,25 +231,37 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                         </div>
                         <div className="flex-1 space-x-3 flex flex-col gap-4">
                             <div className="flex flex-col gap-2 w-full">
-                                {fundTypeOptions.map((option) => (
-                                    <div key={option.value} className="flex items-center">
-                                        <Input
-                                            id={`${option.value}`}
-                                            type="radio"
-                                            className={"w-4 h-4"}
-                                            value={option.value}
-                                            checked={option.value === formData.fundType}
-                                            onChange={(e) => handleInputChange('fundType', e.target.value)}
-                                        />
-                                        <Label htmlFor={`${option.value}`} className="ml-2 font-normal">
-                                            {option.label}
-                                        </Label>
-
-                                        <div className='ml-4 flex-1'>
-                                            <Input type="text" onChange={(e) => handleInputChange('fundTypeText', e.target.value)}  />
+                                {fundTypeOptions.map((option) => {
+                                    const selected = option.value === String(formData.fundType ?? '')
+                                    return (
+                                        <div key={option.value} className="flex items-start gap-2">
+                                            <div className="flex items-center">
+                                                <Input
+                                                    id={`${option.value}`}
+                                                    name="fundType"
+                                                    type="radio"
+                                                    className={"w-4 h-4"}
+                                                    value={option.value}
+                                                    checked={selected}
+                                                    onChange={(e) => handleInputChange('fundType', e.target.value)}
+                                                />
+                                                <Label htmlFor={`${option.value}`} className="ml-2 font-normal cursor-pointer select-none">
+                                                    {option.label}
+                                                </Label>
+                                            </div>
+                                            {selected && (
+                                                <div className='ml-4 flex-1'>
+                                                    <Input
+                                                        type="text"
+                                                        value={formData.fundTypeText || ''}
+                                                        placeholder="ระบุข้อความเพิ่มเติม"
+                                                        onChange={(e) => handleInputChange('fundTypeText', e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </div>
                     </div>
