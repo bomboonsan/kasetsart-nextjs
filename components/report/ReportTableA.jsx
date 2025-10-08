@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 
 export default function ReportTableA() {
   const { data, loading, error } = useQuery(GET_REPORT_A)
+  const fmt1 = (v) => (v === 0 || v ? Number(v).toFixed(1) : '')
 
   // Constants for IC type documentIds
   const IC_TYPE_IDS = {
@@ -307,45 +308,19 @@ export default function ReportTableA() {
                       <div className="font-medium">{row.discipline}</div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.totalMembers}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.membersWithoutICs}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.membersWithICs}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.bds}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.ais}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.tls}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
-                    {row.total}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.bdsTypes}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.aprEr}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.allOther}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
-                    {row.totalTypes}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                    {row.part}
-                  </td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">
-                    {row.all}
-                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.totalMembers)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.membersWithoutICs)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.membersWithICs)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.bds)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.ais)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.tls)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">{fmt1(row.total)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.bdsTypes)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.aprEr)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.allOther)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">{fmt1(row.totalTypes)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.part)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">{fmt1(row.all)}</td>
                 </tr>
               ))}
               {/* Total Row */}
@@ -353,45 +328,19 @@ export default function ReportTableA() {
                 <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">
                   {totalRow.discipline}
                 </td>
-                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.totalMembers}
-                </td>
-                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.membersWithoutICs}
-                </td>
-                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.membersWithICs}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.bds}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.ais}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.tls}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
-                  {totalRow.total}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.bdsTypes}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.aprEr}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.allOther}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
-                  {totalRow.totalTypes}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {totalRow.part}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">
-                  {totalRow.all}
-                </td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.totalMembers)}</td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.membersWithoutICs)}</td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.membersWithICs)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.bds)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.ais)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.tls)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{fmt1(totalRow.total)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.bdsTypes)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.aprEr)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.allOther)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{fmt1(totalRow.totalTypes)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.part)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">{fmt1(totalRow.all)}</td>
               </tr>
             </tbody>
           </table>

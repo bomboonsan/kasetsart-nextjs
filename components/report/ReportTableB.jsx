@@ -264,11 +264,11 @@ export default function ReportTableB() {
                 rows.map((row, idx) => (
                   <tr key={idx} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900 border-r font-medium">{row.discipline}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.teaching).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.research).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.practice).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.societal).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-center text-gray-900 font-medium">{Number(row.total).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.teaching).toFixed(1)}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.research).toFixed(1)}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.practice).toFixed(1)}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(row.societal).toFixed(1)}</td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-900 font-medium">{Number(row.total).toFixed(1)}</td>
                   </tr>
                 ))
               )}
@@ -276,11 +276,11 @@ export default function ReportTableB() {
               {!loading && !error && rows.length > 0 && (
                 <tr className="bg-gray-100 font-semibold">
                   <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">Total</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(2)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(1)}</td>
                 </tr>
               )}
             </tbody>
