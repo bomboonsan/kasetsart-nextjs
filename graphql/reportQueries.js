@@ -12,34 +12,34 @@ export const GET_IMPACTS = gql`
 export const GET_REPORT_A = gql`
     query ReportA {  
         usersPermissionsUsers {
-            departments {
-                documentId
-            }
+            documentId
             participation
+            departments { documentId }
         }
-        books {
-            funds {
+        departments { documentId title }
+        publications {
+            documentId
+            projects {
+                documentId
+                departments { documentId }
                 partners
+                ic_types { documentId }
             }
         }
         conferences {
-            projects {
-                partners
-            }
-        }
-        publications {
-
-            projects {
-            
-                partners
-                ic_types {
-                    documentId
-                }
-            }
-        }
-        departments {
             documentId
-            title
+            projects {
+                documentId
+                departments { documentId }
+                partners
+            }
+        }
+        books {
+            documentId
+            funds {
+                documentId
+                partners
+            }
         }
     }
 `;
@@ -47,6 +47,50 @@ export const GET_REPORT_A = gql`
 export const GET_REPORT_B = gql`
     query Publications {
         publications {
+            projects {
+                documentId
+                impacts {
+                    documentId
+                    name
+                }
+                users_permissions_users {
+                    departments {
+                        documentId
+                        title
+                    }
+                }
+            }
+            documentId
+            durationStart
+        }
+    }
+`;
+
+export const GET_REPORT_C = gql`
+    query Books {
+        books {
+            projects {
+                documentId
+                impacts {
+                    documentId
+                    name
+                }
+                users_permissions_users {
+                    departments {
+                        documentId
+                        title
+                    }
+                }
+            }
+            documentId
+            durationStart
+        }
+    }
+`;
+
+export const GET_REPORT_D = gql`
+    query Conferences {
+        conferences {
             projects {
                 documentId
                 impacts {
