@@ -19,7 +19,7 @@ import { extractInternalUserIds } from '@/utils/partners'
 // Memoized Writer Form Component to prevent unnecessary re-renders
 const WriterForm = React.memo(({ index, writer, handlers }) => {
     const { updateWriterField, removeWriter } = handlers
-    
+
     const handleFieldChange = useCallback((field, value) => {
         updateWriterField(index, field, value)
     }, [index, updateWriterField])
@@ -31,30 +31,30 @@ const WriterForm = React.memo(({ index, writer, handlers }) => {
     return (
         <div className=''>
             <div className='space-y-2'>
-                <FormInput 
-                    label='ชื่อ-นามสกุล' 
-                    value={writer?.fullName || ''} 
-                    onChange={(e) => handleFieldChange('fullName', e.target.value)} 
+                <FormInput
+                    label='ชื่อ-นามสกุล'
+                    value={writer?.fullName || ''}
+                    onChange={(e) => handleFieldChange('fullName', e.target.value)}
                 />
-                <FormInput 
-                    label='ภาควิชา' 
-                    value={writer?.department || ''} 
-                    onChange={(e) => handleFieldChange('department', e.target.value)} 
+                <FormInput
+                    label='ภาควิชา'
+                    value={writer?.department || ''}
+                    onChange={(e) => handleFieldChange('department', e.target.value)}
                 />
-                <FormInput 
-                    label='คณะ' 
-                    value={writer?.faculty || ''} 
-                    onChange={(e) => handleFieldChange('faculty', e.target.value)} 
+                <FormInput
+                    label='คณะ'
+                    value={writer?.faculty || ''}
+                    onChange={(e) => handleFieldChange('faculty', e.target.value)}
                 />
-                <FormInput 
-                    label='โทรศัพท์' 
-                    value={writer?.phone || ''} 
-                    onChange={(e) => handleFieldChange('phone', e.target.value)} 
+                <FormInput
+                    label='โทรศัพท์'
+                    value={writer?.phone || ''}
+                    onChange={(e) => handleFieldChange('phone', e.target.value)}
                 />
-                <FormInput 
-                    label='อีเมล' 
-                    value={writer?.email || ''} 
-                    onChange={(e) => handleFieldChange('email', e.target.value)} 
+                <FormInput
+                    label='อีเมล'
+                    value={writer?.email || ''}
+                    onChange={(e) => handleFieldChange('email', e.target.value)}
                 />
             </div>
             <div className='flex justify-end my-3'>
@@ -204,7 +204,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
         removeWriter
     }), [updateWriterField, removeWriter])
 
-    return (        
+    return (
         <>
             <Block>
                 <div className='inputGroup'>
@@ -249,16 +249,17 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                                                     {option.label}
                                                 </Label>
                                             </div>
-                                            {selected && (
-                                                <div className='ml-4 flex-1'>
-                                                    <Input
-                                                        type="text"
-                                                        value={formData.fundTypeText || ''}
-                                                        placeholder="ระบุข้อความเพิ่มเติม"
-                                                        onChange={(e) => handleInputChange('fundTypeText', e.target.value)}
-                                                    />
-                                                </div>
-                                            )}
+                                            <div className='ml-4 flex-1'>
+                                                <Input
+                                                    type="text"
+                                                    disabled={!selected}
+                                                    value={selected ? (formData.fundTypeText || '') : ''}
+                                                    placeholder={selected ? 'ระบุข้อความเพิ่มเติม' : 'เลือกตัวเลือกนี้ก่อน'}
+                                                    onChange={(e) => {
+                                                        if (selected) handleInputChange('fundTypeText', e.target.value)
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
                                     )
                                 })}
@@ -284,9 +285,9 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 </div>
             </Block>
             <Block className="mt-4">
-                <Partners 
-                    data={formData.partners || []} 
-                    onChange={(partners) => handleInputChange('partners', partners)} 
+                <Partners
+                    data={formData.partners || []}
+                    onChange={(partners) => handleInputChange('partners', partners)}
                 />
             </Block>
             <div className='flex justify-end items-center gap-3 mt-4'>
