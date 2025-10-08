@@ -4,6 +4,9 @@ import useSWR from 'swr'
 import { reportAPI } from '@/lib/api/reports'
 import ReportFilters from '@/components/report/ReportFilters'
 
+import { useQuery } from '@apollo/client/react'
+import { GET_REPORT_A } from '@/graphql/reportQueries'
+
 export default function ReportTableA() {
   // ดึงข้อมูลจาก API
   const { data: reportResponse, error, isLoading } = useSWR(
@@ -88,176 +91,176 @@ export default function ReportTableA() {
   return (
     <>
       <ReportFilters />
-    <div className="bg-white rounded-lg border overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th
-                className="bg-blue-100 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                rowSpan="2"
-              >
-                Discipline
-              </th>
-              <th
-                className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                rowSpan="2"
-              >
-                Total<br />Members
-              </th>
-              <th
-                className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                rowSpan="2"
-              >
-                Members<br />Without<br />ICs
-              </th>
-              <th
-                className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                rowSpan="2"
-              >
-                Members<br />With ICs
-              </th>
-              <th
-                className="bg-pink-200 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                colSpan="4"
-              >
-                Portfolio Of ICs
-              </th>
-              <th
-                className="bg-green-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
-                colSpan="4"
-              >
-                Types Of Intellectual Contribution
-              </th>
-              <th
-                className="bg-yellow-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider"
-                colSpan="2"
-              >
-                % Faculty Producing ICs
-              </th>
-            </tr>
-            <tr>
-              <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">BDS</th>
-              <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">AIS</th>
-              <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TLS</th>
-              <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TOTAL</th>
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th
+                  className="bg-blue-100 px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  rowSpan="2"
+                >
+                  Discipline
+                </th>
+                <th
+                  className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  rowSpan="2"
+                >
+                  Total<br />Members
+                </th>
+                <th
+                  className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  rowSpan="2"
+                >
+                  Members<br />Without<br />ICs
+                </th>
+                <th
+                  className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  rowSpan="2"
+                >
+                  Members<br />With ICs
+                </th>
+                <th
+                  className="bg-pink-200 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  colSpan="4"
+                >
+                  Portfolio Of ICs
+                </th>
+                <th
+                  className="bg-green-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+                  colSpan="4"
+                >
+                  Types Of Intellectual Contribution
+                </th>
+                <th
+                  className="bg-yellow-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider"
+                  colSpan="2"
+                >
+                  % Faculty Producing ICs
+                </th>
+              </tr>
+              <tr>
+                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">BDS</th>
+                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">AIS</th>
+                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TLS</th>
+                <th className="bg-pink-200 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TOTAL</th>
 
                 <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">PRJ</th>
-              <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">
-                APR/ER<br /><span className="text-[10px]">PROCEEDING</span>
-              </th>
-              <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">ALL OTHER</th>
-              <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TOTAL</th>
+                <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">
+                  APR/ER<br /><span className="text-[10px]">PROCEEDING</span>
+                </th>
+                <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">ALL OTHER</th>
+                <th className="bg-green-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">TOTAL</th>
 
-              <th className="bg-yellow-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">PART</th>
-              <th className="bg-yellow-100 px-2 py-2 text-center text-xs font-medium text-gray-700">ALL</th>
-            </tr>
-          </thead>
+                <th className="bg-yellow-100 px-2 py-2 text-center text-xs font-medium text-gray-700 border-r">PART</th>
+                <th className="bg-yellow-100 px-2 py-2 text-center text-xs font-medium text-gray-700">ALL</th>
+              </tr>
+            </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            {reportData.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-900 border-r">
-                  <div>
-                    <div className="font-medium">{row.discipline}</div>
-                    {row.subdiscipline && (
-                      <div className="text-xs text-gray-500">
-                        {row.subdiscipline}
-                      </div>
-                    )}
-                  </div>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {reportData.map((row, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm text-gray-900 border-r">
+                    <div>
+                      <div className="font-medium">{row.discipline}</div>
+                      {row.subdiscipline && (
+                        <div className="text-xs text-gray-500">
+                          {row.subdiscipline}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.totalMembers}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.membersWithoutICs}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.membersWithICs}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.bds}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.ais}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.tls}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
+                    {row.total}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.bdsTypes}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.aprEr}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.allOther}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
+                    {row.totalTypes}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                    {row.part}
+                  </td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">
+                    {row.all}
+                  </td>
+                </tr>
+              ))}
+              {/* Total Row */}
+              <tr className="bg-gray-100 font-semibold">
+                <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">
+                  {totalRow.discipline}
                 </td>
                 <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.totalMembers}
+                  {totalRow.totalMembers}
                 </td>
                 <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.membersWithoutICs}
+                  {totalRow.membersWithoutICs}
                 </td>
                 <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.membersWithICs}
+                  {totalRow.membersWithICs}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.bds}
+                  {totalRow.bds}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.ais}
+                  {totalRow.ais}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.tls}
+                  {totalRow.tls}
                 </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
-                  {row.total}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.bdsTypes}
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
+                  {totalRow.total}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.aprEr}
+                  {totalRow.bdsTypes}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.allOther}
-                </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">
-                  {row.totalTypes}
+                  {totalRow.aprEr}
                 </td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                  {row.part}
+                  {totalRow.allOther}
                 </td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">
-                  {row.all}
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
+                  {totalRow.totalTypes}
+                </td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
+                  {totalRow.part}
+                </td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">
+                  {totalRow.all}
                 </td>
               </tr>
-            ))}
-            {/* Total Row */}
-            <tr className="bg-gray-100 font-semibold">
-              <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">
-                {totalRow.discipline}
-              </td>
-              <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.totalMembers}
-              </td>
-              <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.membersWithoutICs}
-              </td>
-              <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.membersWithICs}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.bds}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.ais}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.tls}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
-                {totalRow.total}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.bdsTypes}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.aprEr}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.allOther}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">
-                {totalRow.totalTypes}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">
-                {totalRow.part}
-              </td>
-              <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">
-                {totalRow.all}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
-      </div>
-      <CSVLink filename={"Report1.xlsx"} data={csvData}><Button 
+      <CSVLink filename={"Report1.xlsx"} data={csvData}><Button
         variant="success"
         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
       >
