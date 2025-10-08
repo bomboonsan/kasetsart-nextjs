@@ -109,7 +109,7 @@ export const GET_REPORT_C = gql`
 `;
 
 export const GET_REPORT_D = gql`
-    query ReportC {
+    query ReportD {
   
     usersPermissionsUsers {
         departments {
