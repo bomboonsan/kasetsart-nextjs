@@ -67,46 +67,82 @@ export const GET_REPORT_B = gql`
 `;
 
 export const GET_REPORT_C = gql`
-    query Books {
-        books {
-            projects {
-                documentId
-                impacts {
-                    documentId
-                    name
-                }
-                users_permissions_users {
-                    departments {
-                        documentId
-                        title
-                    }
-                }
-            }
-            documentId
-            durationStart
+    query ReportC {
+  
+    usersPermissionsUsers {
+        departments {
+        documentId
         }
+        participation
+    }
+    
+    publications {
+        
+        projects {      
+        partners
+        
+        }
+        level
+        isJournalDatabase
+        isEnvironmentallySustainable
+        isAJG
+        isACI
+        isABDC
+        ajgType
+        abdcType
+        isSSRN
+        isScopus
+        isTCI1
+        isTCI2
+        isWOS
+        isbn
+        issue
+        wosType
+    }
+    departments {
+        documentId
+        title
+    }
     }
 `;
 
 export const GET_REPORT_D = gql`
-    query Conferences {
-        conferences {
-            projects {
-                documentId
-                impacts {
-                    documentId
-                    name
-                }
-                users_permissions_users {
-                    departments {
-                        documentId
-                        title
-                    }
-                }
-            }
-            documentId
-            durationStart
+    query ReportC {
+  
+    usersPermissionsUsers {
+        departments {
+        documentId
         }
+        participation
+    }
+    
+    publications {
+        
+        projects {      
+        partners
+        
+        }
+        level
+        isJournalDatabase
+        isEnvironmentallySustainable
+        isAJG
+        isACI
+        isABDC
+        ajgType
+        abdcType
+        isSSRN
+        isScopus
+        isTCI1
+        isTCI2
+        isWOS
+        isbn
+        issue
+        wosType
+    }
+    departments {
+        documentId
+        title
+    }
     }
 `;
 
