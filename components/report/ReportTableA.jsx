@@ -1,13 +1,17 @@
+import { useEffect, useState, useMemo } from 'react'
 import { CSVLink } from "react-csv";
 import { Button } from "@/components/ui/button";
 import ReportFilters from '@/components/report/ReportFilters'
 import { useQuery } from '@apollo/client/react'
 import { GET_REPORT_A } from '@/graphql/reportQueries'
-import { useMemo } from 'react'
 
 export default function ReportTableA() {
   const { data, loading, error } = useQuery(GET_REPORT_A)
   const fmt1 = (v) => (v === 0 || v ? Number(v).toFixed(1) : '')
+  const currentYear = new Date().getFullYear()
+  const MIN_YEAR = 2019
+  const [startYear, setStartYear] = useState(MIN_YEAR)
+  const [endYear, setEndYear] = useState(currentYear)
 
   // Constants for IC type documentIds
   const IC_TYPE_IDS = {
@@ -234,6 +238,58 @@ export default function ReportTableA() {
   return (
     <>
       <ReportFilters />
+      <div className="mb-4 flex flex-wrap gap-4 items-end justify-between bg-white p-4 rounded-lg shadow">
+        <div className='flex flex-wrap gap-4 '>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Start Year</label>
+            <select
+              value={startYear}
+              onChange={e => {
+                const val = Number(e.target.value)
+                // Ensure ordering
+                if (val > endYear) {
+                  setStartYear(endYear)
+                } else {
+                  setStartYear(val)
+                }
+              }}
+              className="border rounded px-2 py-1 text-sm"
+            >
+              {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">End Year</label>
+            <select
+              value={endYear}
+              onChange={e => {
+                const val = Number(e.target.value)
+                if (val < startYear) {
+                  setEndYear(startYear)
+                } else {
+                  setEndYear(val)
+                }
+              }}
+              className="border rounded px-2 py-1 text-sm"
+            >
+              {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <CSVLink filename={"Report1.xlsx"} data={csvData}><Button
+          variant="success"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+        >
+          <span>Export</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-3 3-3-3M12 12v9M5 20h14" />
+          </svg>
+        </Button></CSVLink>
+      </div>
       <div className="bg-white rounded-lg border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -324,7 +380,7 @@ export default function ReportTableA() {
                 </tr>
               ))}
               {/* Total Row */}
-              <tr className="bg-gray-100 font-semibold">
+              <tr className="bg-gray-300 font-semibold">
                 <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">
                   {totalRow.discipline}
                 </td>
@@ -346,15 +402,7 @@ export default function ReportTableA() {
           </table>
         </div>
       </div>
-      <CSVLink filename={"Report1.xlsx"} data={csvData}><Button
-        variant="success"
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
-      >
-        <span>Export</span>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-3 3-3-3M12 12v9M5 20h14" />
-        </svg>
-      </Button></CSVLink>
+
     </>
   );
 }

@@ -1,6 +1,5 @@
 'use client'
-
-import React, { useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { CSVLink } from 'react-csv'
 import { Button } from '@/components/ui/button'
@@ -29,6 +28,9 @@ function partnerName(p) {
 
 /** รวมรายชื่อผู้วิจัยของโปรเจกต์ */
 function projectAuthors(partners) {
+
+
+
     const list = (Array.isArray(partners) ? partners : []).map(partnerName).filter(Boolean)
     const seen = new Set()
     const out = []
@@ -49,6 +51,10 @@ function formatYear(volume) {
 }
 
 export default function ReportTableE_Publications() {
+    const currentYear = new Date().getFullYear()
+    const MIN_YEAR = 2019
+    const [startYear, setStartYear] = useState(MIN_YEAR)
+    const [endYear, setEndYear] = useState(currentYear)
     const { data: session } = useSession()
 
     const { data, loading, error } = useQuery(GET_REPORT_E, {
@@ -123,19 +129,62 @@ export default function ReportTableE_Publications() {
 
     return (
         <>
+            <div className="mb-4 flex flex-wrap gap-4 items-end justify-between bg-white p-4 rounded-lg shadow">
+                <div className='flex flex-wrap gap-4 '>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Start Year</label>
+                        <select
+                            value={startYear}
+                            onChange={e => {
+                                const val = Number(e.target.value)
+                                // Ensure ordering
+                                if (val > endYear) {
+                                    setStartYear(endYear)
+                                } else {
+                                    setStartYear(val)
+                                }
+                            }}
+                            className="border rounded px-2 py-1 text-sm"
+                        >
+                            {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">End Year</label>
+                        <select
+                            value={endYear}
+                            onChange={e => {
+                                const val = Number(e.target.value)
+                                if (val < startYear) {
+                                    setEndYear(startYear)
+                                } else {
+                                    setEndYear(val)
+                                }
+                            }}
+                            className="border rounded px-2 py-1 text-sm"
+                        >
+                            {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <CSVLink filename="Report5.csv" data={csvData}>
+                    <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <span>Export</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-3 3-3-3M12 12v9M5 20h14" />
+                        </svg>
+                    </Button>
+                </CSVLink>
+            </div>
             <div className="bg-white rounded-lg border overflow-hidden">
                 <div className="p-4 border-b flex items-center justify-between">
                     <h3 className="text-sm font-medium text-gray-800">
                         รายละเอียดข้อมูลการตีพิมพ์ผลงานวิจัยในวารสารวิชาการระดับชาติและนานาชาติ
                     </h3>
-                    <CSVLink filename="Report5.csv" data={csvData}>
-                        <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <span>Export</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-3 3-3-3M12 12v9M5 20h14" />
-                            </svg>
-                        </Button>
-                    </CSVLink>
                 </div>
 
                 <div className="overflow-x-auto">
