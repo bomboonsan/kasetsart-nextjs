@@ -102,9 +102,9 @@ export default function ReportTableC() {
       const proportionPerDept = {}
       // Determine which departments this publication touches via its projects
       const pubDeptIds = new Set()
-      ;(pub.projects || []).forEach(prj => {
-        (prj.departments || []).forEach(d => pubDeptIds.add(d.documentId))
-      })
+        ; (pub.projects || []).forEach(prj => {
+          (prj.departments || []).forEach(d => pubDeptIds.add(d.documentId))
+        })
       if (pubDeptIds.size === 0) return
       // For each department compute proportion (fallback 1)
       pubDeptIds.forEach(depId => {
@@ -117,14 +117,14 @@ export default function ReportTableC() {
         const p = proportionPerDept[depId] || 1
         if (Number(level) === 0) {
           // National
-            if (isJournalDb) {
-              if (String(pub.isTCI1) === '1') row.tciTier1 += p
-              else if (String(pub.isTCI2) === '1') row.tciTier2 += p
-              else if (String(pub.isACI) === '1') row.aci += p
-              else row.nonTci += p // If in DB but not TCI1/2/ACI treat as non-listed? adjust rule if needed
-            } else {
-              row.nonTci += p
-            }
+          if (isJournalDb) {
+            if (String(pub.isTCI1) === '1') row.tciTier1 += p
+            else if (String(pub.isTCI2) === '1') row.tciTier2 += p
+            else if (String(pub.isACI) === '1') row.aci += p
+            else row.nonTci += p // If in DB but not TCI1/2/ACI treat as non-listed? adjust rule if needed
+          } else {
+            row.nonTci += p
+          }
         } else if (Number(level) === 1) {
           // International
           if (isJournalDb) {
@@ -175,7 +175,7 @@ export default function ReportTableC() {
 
     const csvData = [
       [
-        "Discipline","TCI_Tier1","TCI_Tier2","Non_TCI","Total_National","ACI","Q1","Q2","Q3","Q4","Delisted_Scopus","Total_Scopus","SCIE","SSCI","ESCI","ABCI","ESCI2","Total_Web_of_Science","A*","A","B","C","Total_ABDC","AJG1","AJG2","AJG3","AJG4","AJG4*","Total_AJG","Other_PJR","Total_International_MultiCount","Total_Publications_MultiCount"
+        "Discipline", "TCI_Tier1", "TCI_Tier2", "Non_TCI", "Total_National", "ACI", "Q1", "Q2", "Q3", "Q4", "Delisted_Scopus", "Total_Scopus", "SCIE", "SSCI", "ESCI", "ABCI", "ESCI2", "Total_Web_of_Science", "A*", "A", "B", "C", "Total_ABDC", "AJG1", "AJG2", "AJG3", "AJG4", "AJG4*", "Total_AJG", "Other_PJR", "Total_International_MultiCount", "Total_Publications_MultiCount"
       ],
       ...rows.map(row => [
         row.discipline,
@@ -420,7 +420,7 @@ export default function ReportTableC() {
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.q2}</td>
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.q3}</td>
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.q4}</td>
-                    <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">0</td>
+                    <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.delisted}</td>
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.totalScopus}</td>
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.scie}</td>
                     <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{row.ssci}</td>
