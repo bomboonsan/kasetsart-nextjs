@@ -9,6 +9,64 @@ export const GET_IMPACTS = gql`
     }
 `;
 
+export const GET_REPORT_A = gql`
+    query Publications {
+        publications {
+            documentId
+            titleEN
+            titleTH
+            authors
+            journalName
+            journalIssn
+            journalIsbn
+            journalPublisher
+            journalImpactFactor
+            journalDatabase
+            volume
+            issue
+            pages
+            doi
+            publicationYear
+            level
+            isJournalDatabase
+            abstractEN
+            abstractTH
+            keywordsEN
+            keywordsTH
+            urlFulltext
+            urlSupplementary
+            urlDataRepository
+            fundingSource
+            fundingAmount
+            fundingCurrency
+            durationStart
+            durationEnd
+            projects {
+                documentId
+                titleEN
+                titleTH
+                users_permissions_users {
+                    documentId
+                    firstNameTH
+                    lastNameTH
+                    firstNameEN
+                    lastNameEN
+                    email
+                    username
+                    departments {
+                        documentId
+                        title
+                    }
+                }
+                impacts {
+                    documentId
+                    name
+                }
+            }
+        }
+    }
+`;
+
 export const GET_REPORT_B = gql`
     query Publications {
         publications {
