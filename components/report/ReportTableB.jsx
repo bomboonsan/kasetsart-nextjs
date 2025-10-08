@@ -11,6 +11,11 @@ export default function ReportTableB() {
   const [totals, setTotals] = useState({ teaching: 0, research: 0, practice: 0, societal: 0, total: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // Year filters (start/end) - default full range 2019..current year
+  const currentYear = new Date().getFullYear()
+  const MIN_YEAR = 2019
+  const [startYear, setStartYear] = useState(MIN_YEAR)
+  const [endYear, setEndYear] = useState(currentYear)
 
   // Impact names ตามที่กำหนด
   const IMPACT_NAMES = {
@@ -54,6 +59,16 @@ export default function ReportTableB() {
     const deptAcc = new Map() // disciplineName -> { teaching, research, practice, societal }
 
     for (const pub of data.publications || []) {
+      // Filter by publication durationStart year (if present)
+      if (pub.durationStart) {
+        const pubYear = new Date(pub.durationStart).getFullYear()
+        if (Number.isFinite(pubYear)) {
+          if (pubYear < startYear || pubYear > endYear) continue
+        }
+      } else {
+        // If no date, skip (or include? choose skip for clarity)
+        continue
+      }
       // For each publication, gather unique projects (already provided) and their contributors
       const projects = pub.projects || []
       for (const project of projects) {
@@ -125,7 +140,7 @@ export default function ReportTableB() {
     const totalAll = totalsAcc.teaching + totalsAcc.research + totalsAcc.practice + totalsAcc.societal
 
     return { rows: rowsList, totals: { ...totalsAcc, total: totalAll } }
-  }, [data])
+  }, [data, startYear, endYear])
 
   useEffect(() => {
     if (computed) {
@@ -166,6 +181,50 @@ export default function ReportTableB() {
   return (
     <>
       <ReportFilters />
+      <div className="mb-4 flex flex-wrap gap-4 items-end">
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Start Year</label>
+          <select
+            value={startYear}
+            onChange={e => {
+              const val = Number(e.target.value)
+              // Ensure ordering
+              if (val > endYear) {
+                setStartYear(endYear)
+              } else {
+                setStartYear(val)
+              }
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">End Year</label>
+          <select
+            value={endYear}
+            onChange={e => {
+              const val = Number(e.target.value)
+              if (val < startYear) {
+                setEndYear(startYear)
+              } else {
+                setEndYear(val)
+              }
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </div>
+        <div className="text-xs text-gray-500">
+          Showing publications with durationStart between {startYear} and {endYear}
+        </div>
+      </div>
       <div className="bg-white rounded-lg border overflow-hidden">
         <div className="p-4 border-b bg-blue-100">
           <h3 className="text-center text-lg font-bold text-gray-800">Impacts</h3>
