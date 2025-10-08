@@ -80,7 +80,7 @@ export const GET_REPORT_C = gql`
         
         projects {      
         partners
-        
+        departments { documentId }
         }
         level
         isJournalDatabase
@@ -98,6 +98,8 @@ export const GET_REPORT_C = gql`
         isbn
         issue
         wosType
+        scopusType
+        scopusValue
     }
     departments {
         documentId
