@@ -26,6 +26,7 @@ export const GET_REPORT_B = gql`
                 }
             }
             documentId
+            durationStart
         }
     }
 `;

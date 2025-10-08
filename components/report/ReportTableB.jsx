@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { CSVLink } from "react-csv";
 import { Button } from "@/components/ui/button";
 import ReportFilters from '@/components/report/ReportFilters'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { GET_REPORT_B } from '@/graphql/reportQueries'
 
 export default function ReportTableB() {
