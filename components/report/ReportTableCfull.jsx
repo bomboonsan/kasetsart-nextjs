@@ -113,7 +113,18 @@ export default function ReportTableCfull() {
             // In database - check each flag independently
             if (toBool(pub.isTCI1)) row.tciTier1 += p;
             if (toBool(pub.isTCI2)) row.tciTier2 += p;
-            if (toBool(pub.isACI)) row.aci += p;
+            // ACI should be AJG for National level
+            if (toBool(pub.isAJG)) row.aci += p;
+            // Scopus for National
+            if (toBool(pub.isScopus) && pub.scopusValue) {
+              const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];
+              if (qKey && row[qKey] !== undefined) row[qKey] += p;
+            }
+            // WOS for National
+            if (toBool(pub.isWOS) && pub.wosType) {
+              const wKey = WOS_MAP[Number(pub.wosType)];
+              if (wKey && row[wKey] !== undefined) row[wKey] += p;
+            }
           } else if (isNotInDatabase) {
             // Not in database
             row.nonTci += p;
@@ -122,19 +133,19 @@ export default function ReportTableCfull() {
           // International level
           if (isInDatabase) {
             // In database
-            if (toBool(pub.isScopus)) {
-              const qKey = SCOPUS_QUARTER[Number(pub.scopusType)];
+            if (toBool(pub.isScopus) && pub.scopusValue) {
+              const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];
               if (qKey && row[qKey] !== undefined) row[qKey] += p;
             }
-            if (toBool(pub.isWOS)) {
+            if (toBool(pub.isWOS) && pub.wosType) {
               const wKey = WOS_MAP[Number(pub.wosType)];
               if (wKey && row[wKey] !== undefined) row[wKey] += p;
             }
-            if (toBool(pub.isABDC)) {
+            if (toBool(pub.isABDC) && pub.abdcType) {
               const aKey = ABDC_MAP[Number(pub.abdcType)];
               if (aKey && row[aKey] !== undefined) row[aKey] += p;
             }
-            if (toBool(pub.isAJG)) {
+            if (toBool(pub.isAJG) && pub.ajgType) {
               const jKey = AJG_MAP[Number(pub.ajgType)];
               if (jKey && row[jKey] !== undefined) row[jKey] += p;
             }
