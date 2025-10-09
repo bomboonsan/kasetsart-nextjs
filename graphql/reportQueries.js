@@ -75,19 +75,19 @@ export const GET_REPORT_B = gql`
 
 export const GET_REPORT_C = gql`
     query ReportC {
-  
+
     usersPermissionsUsers {
         departments {
-        documentId
+            documentId
         }
         participation
     }
-    
     publications {
-        
+        durationEnd
+        durationStart
         projects {      
-        partners
-        departments { documentId }
+            partners
+            departments { documentId }
         }
         level
         isJournalDatabase
@@ -112,7 +112,7 @@ export const GET_REPORT_C = gql`
         documentId
         title
     }
-    }
+}
 `;
 
 export const GET_REPORT_D = gql`
