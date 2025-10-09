@@ -19,12 +19,15 @@ export const GET_REPORT_A = gql`
         departments { documentId title }
         publications {
             documentId
+            
             projects {
                 documentId
                 departments { documentId }
                 partners
                 ic_types { documentId }
             }
+            durationEnd
+            durationStart
         }
         conferences {
             documentId
@@ -32,8 +35,9 @@ export const GET_REPORT_A = gql`
                 documentId
                 departments { documentId }
                 partners
-                ic_types { documentId }
             }
+            durationEnd
+            durationStart
         }
         books {
             documentId
@@ -41,6 +45,7 @@ export const GET_REPORT_A = gql`
                 documentId
                 partners
             }
+            publishedAt
         }
     }
 `;
