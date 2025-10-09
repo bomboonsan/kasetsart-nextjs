@@ -162,7 +162,7 @@
                 "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
                 "partnerType": "",
                 "partnerProportion_percentage_custom": "",
-                "partnerProportion": 0.5,
+                "partnerProportion": 0.3333333333333333,
                 "partnerComment": "First Author",
                 "isInternal": true,
                 "order": 1
@@ -203,6 +203,139 @@
                 "orgName": "Marketing Business Administration Kasetsart University, Bangkhen Campus",
                 "partnerType": "",
                 "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.3333333333333333,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760040641039,
+                "userID": "uvgoogrnkdxafuhu0b9om0lj",
+                "User": {
+                  "id": "uvgoogrnkdxafuhu0b9om0lj",
+                  "documentId": "uvgoogrnkdxafuhu0b9om0lj",
+                  "username": "bon",
+                  "email": "0bom@gmail.com",
+                  "firstNameTH": "ดฟหก",
+                  "lastNameTH": "ผปแหฟก",
+                  "firstNameEN": "dasdws",
+                  "lastNameEN": "dwewesd",
+                  "academicPosition": "do",
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ดฟหก ผปแหฟก",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.3333333333333333,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              }
+            ],
+            "ic_types": [
+              {
+                "documentId": "ajvjbvrlfv7vz5owyr3qrdsn"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "h78pwewcejk56fr4wpod7gtd",
+        "projects": [
+          {
+            "documentId": "hbeh4irnehxyk794q8vqvst4",
+            "departments": [
+              {
+                "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041523057,
+                "userID": "bclycygche9t7015dubt1hc7",
+                "User": {
+                  "id": "bclycygche9t7015dubt1hc7",
+                  "documentId": "bclycygche9t7015dubt1hc7",
+                  "username": "bomboonsan2",
+                  "email": "bomboonsan2@gmail.com",
+                  "firstNameTH": "ทดสอบ",
+                  "lastNameTH": "ดฟหก",
+                  "firstNameEN": "rqw",
+                  "lastNameEN": "asd",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [],
+                  "organizations": []
+                },
+                "fullname": "ทดสอบ ดฟหก",
+                "orgName": "Marketing",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041529561,
+                "userID": "mjes977864hkwqsncz046i2b",
+                "User": {
+                  "id": "mjes977864hkwqsncz046i2b",
+                  "documentId": "mjes977864hkwqsncz046i2b",
+                  "username": "bomboonsan@gmail.com",
+                  "email": "user@ku.ac.th",
+                  "firstNameTH": "ผู้ใช้คนที่หนึ่ง",
+                  "lastNameTH": "คนน",
+                  "firstNameEN": "user",
+                  "lastNameEN": "sxc",
+                  "academicPosition": "xc",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ใช้คนที่หนึ่ง คนน",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
                 "partnerProportion": 0.5,
                 "partnerComment": "",
                 "isInternal": true,
@@ -211,7 +344,365 @@
             ],
             "ic_types": [
               {
-                "documentId": "ajvjbvrlfv7vz5owyr3qrdsn"
+                "documentId": "bnl6a37iee0vec6aj3q3qm31"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "emumyqff0lq1oid73r1vha63",
+        "projects": [
+          {
+            "documentId": "at1vhkmvdm47h33ty94h37vh",
+            "departments": [
+              {
+                "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041700066,
+                "userID": "uvgoogrnkdxafuhu0b9om0lj",
+                "User": {
+                  "id": "uvgoogrnkdxafuhu0b9om0lj",
+                  "documentId": "uvgoogrnkdxafuhu0b9om0lj",
+                  "username": "bon",
+                  "email": "0bom@gmail.com",
+                  "firstNameTH": "ดฟหก",
+                  "lastNameTH": "ผปแหฟก",
+                  "firstNameEN": "dasdws",
+                  "lastNameEN": "dwewesd",
+                  "academicPosition": "do",
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ดฟหก ผปแหฟก",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041707018,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760041713450,
+                "userID": "p8ndj41qae0qq1uvoiciyxis",
+                "User": {
+                  "id": "p8ndj41qae0qq1uvoiciyxis",
+                  "documentId": "p8ndj41qae0qq1uvoiciyxis",
+                  "username": "admin2",
+                  "email": "admin2@gmail.com",
+                  "firstNameTH": "แอดมินสอง",
+                  "lastNameTH": "คนที่สอง",
+                  "firstNameEN": "admintwo",
+                  "lastNameEN": "twoo",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "แอดมินสอง คนที่สอง",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              },
+              {
+                "id": 1760041719354,
+                "userID": "je2qpb924wqrc9187lw63mta",
+                "User": {
+                  "id": "je2qpb924wqrc9187lw63mta",
+                  "documentId": "je2qpb924wqrc9187lw63mta",
+                  "username": "Yoman",
+                  "email": "yoman@gmail.com",
+                  "firstNameTH": "Yoman",
+                  "lastNameTH": "Toma",
+                  "firstNameEN": "yoman",
+                  "lastNameEN": "ytoman",
+                  "academicPosition": "uouก",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "Yoman Toma",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 4
+              }
+            ],
+            "ic_types": [
+              {
+                "documentId": "fdjpi1aog5lx9gvjxlnf47ym"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "ptnmd7k88vvk7vht0hyiyt9s",
+        "projects": [
+          {
+            "documentId": "vkjca2sc5a1v8k5q3t26yowd",
+            "departments": [
+              {
+                "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041775890,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041781202,
+                "userID": "bclycygche9t7015dubt1hc7",
+                "User": {
+                  "id": "bclycygche9t7015dubt1hc7",
+                  "documentId": "bclycygche9t7015dubt1hc7",
+                  "username": "bomboonsan2",
+                  "email": "bomboonsan2@gmail.com",
+                  "firstNameTH": "ทดสอบ",
+                  "lastNameTH": "ดฟหก",
+                  "firstNameEN": "rqw",
+                  "lastNameEN": "asd",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [],
+                  "organizations": []
+                },
+                "fullname": "ทดสอบ ดฟหก",
+                "orgName": "Marketing",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760041795298,
+                "userID": "rq7h2hp9wpbqfwcmv01js0lv",
+                "User": {
+                  "id": "rq7h2hp9wpbqfwcmv01js0lv",
+                  "documentId": "rq7h2hp9wpbqfwcmv01js0lv",
+                  "username": "first_admin",
+                  "email": "first_admin@gmail.com",
+                  "firstNameTH": "ผู้ดูแล",
+                  "lastNameTH": "คนที่หนึ่ง",
+                  "firstNameEN": "admin",
+                  "lastNameEN": "first",
+                  "academicPosition": null,
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ดูแล คนที่หนึ่ง",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              },
+              {
+                "id": 1760041801122,
+                "userID": "mjes977864hkwqsncz046i2b",
+                "User": {
+                  "id": "mjes977864hkwqsncz046i2b",
+                  "documentId": "mjes977864hkwqsncz046i2b",
+                  "username": "bomboonsan@gmail.com",
+                  "email": "user@ku.ac.th",
+                  "firstNameTH": "ผู้ใช้คนที่หนึ่ง",
+                  "lastNameTH": "คนน",
+                  "firstNameEN": "user",
+                  "lastNameEN": "sxc",
+                  "academicPosition": "xc",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ใช้คนที่หนึ่ง คนน",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 4
+              }
+            ],
+            "ic_types": [
+              {
+                "documentId": "fdjpi1aog5lx9gvjxlnf47ym"
               }
             ]
           }
@@ -266,7 +757,7 @@
                 "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
                 "partnerType": "",
                 "partnerProportion_percentage_custom": "",
-                "partnerProportion": 0.5,
+                "partnerProportion": 0.3333333333333333,
                 "partnerComment": "First Author",
                 "isInternal": true,
                 "order": 1
@@ -307,6 +798,576 @@
                 "orgName": "Marketing Business Administration Kasetsart University, Bangkhen Campus",
                 "partnerType": "",
                 "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.3333333333333333,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760040641039,
+                "userID": "uvgoogrnkdxafuhu0b9om0lj",
+                "User": {
+                  "id": "uvgoogrnkdxafuhu0b9om0lj",
+                  "documentId": "uvgoogrnkdxafuhu0b9om0lj",
+                  "username": "bon",
+                  "email": "0bom@gmail.com",
+                  "firstNameTH": "ดฟหก",
+                  "lastNameTH": "ผปแหฟก",
+                  "firstNameEN": "dasdws",
+                  "lastNameEN": "dwewesd",
+                  "academicPosition": "do",
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ดฟหก ผปแหฟก",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.3333333333333333,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "hxak3lhb610px30dkf14lebn",
+        "projects": [
+          {
+            "documentId": "hbeh4irnehxyk794q8vqvst4",
+            "departments": [
+              {
+                "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041523057,
+                "userID": "bclycygche9t7015dubt1hc7",
+                "User": {
+                  "id": "bclycygche9t7015dubt1hc7",
+                  "documentId": "bclycygche9t7015dubt1hc7",
+                  "username": "bomboonsan2",
+                  "email": "bomboonsan2@gmail.com",
+                  "firstNameTH": "ทดสอบ",
+                  "lastNameTH": "ดฟหก",
+                  "firstNameEN": "rqw",
+                  "lastNameEN": "asd",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [],
+                  "organizations": []
+                },
+                "fullname": "ทดสอบ ดฟหก",
+                "orgName": "Marketing",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041529561,
+                "userID": "mjes977864hkwqsncz046i2b",
+                "User": {
+                  "id": "mjes977864hkwqsncz046i2b",
+                  "documentId": "mjes977864hkwqsncz046i2b",
+                  "username": "bomboonsan@gmail.com",
+                  "email": "user@ku.ac.th",
+                  "firstNameTH": "ผู้ใช้คนที่หนึ่ง",
+                  "lastNameTH": "คนน",
+                  "firstNameEN": "user",
+                  "lastNameEN": "sxc",
+                  "academicPosition": "xc",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ใช้คนที่หนึ่ง คนน",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "j6du8iygr8mypx6icne85ddm",
+        "projects": [
+          {
+            "documentId": "at1vhkmvdm47h33ty94h37vh",
+            "departments": [
+              {
+                "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041700066,
+                "userID": "uvgoogrnkdxafuhu0b9om0lj",
+                "User": {
+                  "id": "uvgoogrnkdxafuhu0b9om0lj",
+                  "documentId": "uvgoogrnkdxafuhu0b9om0lj",
+                  "username": "bon",
+                  "email": "0bom@gmail.com",
+                  "firstNameTH": "ดฟหก",
+                  "lastNameTH": "ผปแหฟก",
+                  "firstNameEN": "dasdws",
+                  "lastNameEN": "dwewesd",
+                  "academicPosition": "do",
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ดฟหก ผปแหฟก",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041707018,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760041713450,
+                "userID": "p8ndj41qae0qq1uvoiciyxis",
+                "User": {
+                  "id": "p8ndj41qae0qq1uvoiciyxis",
+                  "documentId": "p8ndj41qae0qq1uvoiciyxis",
+                  "username": "admin2",
+                  "email": "admin2@gmail.com",
+                  "firstNameTH": "แอดมินสอง",
+                  "lastNameTH": "คนที่สอง",
+                  "firstNameEN": "admintwo",
+                  "lastNameEN": "twoo",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "แอดมินสอง คนที่สอง",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              },
+              {
+                "id": 1760041719354,
+                "userID": "je2qpb924wqrc9187lw63mta",
+                "User": {
+                  "id": "je2qpb924wqrc9187lw63mta",
+                  "documentId": "je2qpb924wqrc9187lw63mta",
+                  "username": "Yoman",
+                  "email": "yoman@gmail.com",
+                  "firstNameTH": "Yoman",
+                  "lastNameTH": "Toma",
+                  "firstNameEN": "yoman",
+                  "lastNameEN": "ytoman",
+                  "academicPosition": "uouก",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "Yoman Toma",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "documentId": "rpzwymwnef9kl2w2zleevc1q",
+        "projects": [
+          {
+            "documentId": "vkjca2sc5a1v8k5q3t26yowd",
+            "departments": [
+              {
+                "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1760041775890,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041781202,
+                "userID": "bclycygche9t7015dubt1hc7",
+                "User": {
+                  "id": "bclycygche9t7015dubt1hc7",
+                  "documentId": "bclycygche9t7015dubt1hc7",
+                  "username": "bomboonsan2",
+                  "email": "bomboonsan2@gmail.com",
+                  "firstNameTH": "ทดสอบ",
+                  "lastNameTH": "ดฟหก",
+                  "firstNameEN": "rqw",
+                  "lastNameEN": "asd",
+                  "academicPosition": "",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [],
+                  "organizations": []
+                },
+                "fullname": "ทดสอบ ดฟหก",
+                "orgName": "Marketing",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              },
+              {
+                "id": 1760041795298,
+                "userID": "rq7h2hp9wpbqfwcmv01js0lv",
+                "User": {
+                  "id": "rq7h2hp9wpbqfwcmv01js0lv",
+                  "documentId": "rq7h2hp9wpbqfwcmv01js0lv",
+                  "username": "first_admin",
+                  "email": "first_admin@gmail.com",
+                  "firstNameTH": "ผู้ดูแล",
+                  "lastNameTH": "คนที่หนึ่ง",
+                  "firstNameEN": "admin",
+                  "lastNameEN": "first",
+                  "academicPosition": null,
+                  "departments": [
+                    {
+                      "id": "tukk64ynbxczeyobssthue1w",
+                      "name": "Accounting"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ดูแล คนที่หนึ่ง",
+                "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 3
+              },
+              {
+                "id": 1760041801122,
+                "userID": "mjes977864hkwqsncz046i2b",
+                "User": {
+                  "id": "mjes977864hkwqsncz046i2b",
+                  "documentId": "mjes977864hkwqsncz046i2b",
+                  "username": "bomboonsan@gmail.com",
+                  "email": "user@ku.ac.th",
+                  "firstNameTH": "ผู้ใช้คนที่หนึ่ง",
+                  "lastNameTH": "คนน",
+                  "firstNameEN": "user",
+                  "lastNameEN": "sxc",
+                  "academicPosition": "xc",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ผู้ใช้คนที่หนึ่ง คนน",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.25,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 4
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "books": [
+      {
+        "documentId": "w2qfto8uc5bbhj57xfjck166",
+        "funds": [
+          {
+            "documentId": "tftoojsfll6t8wp5jzybfqpg",
+            "partners": [
+              {
+                "id": 1760041325481,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1760041329217,
+                "userID": "je2qpb924wqrc9187lw63mta",
+                "User": {
+                  "id": "je2qpb924wqrc9187lw63mta",
+                  "documentId": "je2qpb924wqrc9187lw63mta",
+                  "username": "Yoman",
+                  "email": "yoman@gmail.com",
+                  "firstNameTH": "Yoman",
+                  "lastNameTH": "Toma",
+                  "firstNameEN": "yoman",
+                  "lastNameEN": "ytoman",
+                  "academicPosition": "uouก",
+                  "departments": [
+                    {
+                      "id": "f43p0cgx1s1zjx7jweorl4i4",
+                      "name": "Management"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "Yoman Toma",
+                "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
                 "partnerProportion": 0.5,
                 "partnerComment": "",
                 "isInternal": true,
@@ -316,7 +1377,6 @@
           }
         ]
       }
-    ],
-    "books": []
+    ]
   }
 }
