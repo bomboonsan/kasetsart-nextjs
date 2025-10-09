@@ -49,21 +49,46 @@ export default function ReportTableA() {
 
       publications.forEach(pub => {
         (pub.projects || []).forEach(prj => {
-          // A project contributes to dept if project has department OR any user belongs to dept (we only have project.departments for now)
-          const projectDeptIds = (prj.departments || []).map(d => d.documentId)
-          if (projectDeptIds.includes(depId)) {
-            const types = prj.ic_types || []
-            let hasType = false
-            types.forEach(t => {
-              if (t.documentId === IC_TYPE_IDS.BDS) { bds++; hasType = true }
-              else if (t.documentId === IC_TYPE_IDS.AIS) { ais++; hasType = true }
-              else if (t.documentId === IC_TYPE_IDS.TLS) { tls++; hasType = true }
-            })
-            if (hasType) {
-              // Without project -> user relation we approximate membersWithICs using all dept users (could refine if we had linking)
-              depUsers.forEach(u => membersWithICsSet.add(u.documentId))
-            }
+          const types = prj.ic_types || []
+          const hasBDS = types.some(t => t.documentId === IC_TYPE_IDS.BDS)
+          const hasAIS = types.some(t => t.documentId === IC_TYPE_IDS.AIS)
+          const hasTLS = types.some(t => t.documentId === IC_TYPE_IDS.TLS)
+
+          // Process partners to sum partnerProportion by department
+          let partners = prj.partners || []
+          
+          // Handle if partners is a string (need to parse)
+          if (typeof partners === 'string') {
+            try { partners = JSON.parse(partners) } catch { partners = [] }
           }
+          
+          // Ensure partners is an array
+          if (!Array.isArray(partners)) {
+            partners = []
+          }
+
+          partners.forEach(partner => {
+            const userDeps = partner.User?.departments || []
+            const userDepIds = userDeps.map(d => d.id || d.documentId)
+            
+            // Check if user is internal (has departments) and belongs to current department
+            if (userDeps.length > 0 && userDepIds.includes(depId)) {
+              const proportion = Number(partner.partnerProportion || 0)
+              
+              if (hasBDS) {
+                bds += proportion
+                membersWithICsSet.add(partner.User?.documentId || partner.userID)
+              }
+              if (hasAIS) {
+                ais += proportion
+                membersWithICsSet.add(partner.User?.documentId || partner.userID)
+              }
+              if (hasTLS) {
+                tls += proportion
+                membersWithICsSet.add(partner.User?.documentId || partner.userID)
+              }
+            }
+          })
         })
       })
 

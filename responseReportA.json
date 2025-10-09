@@ -1,0 +1,322 @@
+{
+  "data": {
+    "usersPermissionsUsers": [
+      {
+        "documentId": "qzi3gmav7tdxvy0ftq7792me",
+        "participation": "0",
+        "departments": [
+          {
+            "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+          }
+        ]
+      },
+      {
+        "documentId": "ohnwzil0nq38s7esxmvtigh7",
+        "participation": "",
+        "departments": [
+          {
+            "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+          }
+        ]
+      },
+      {
+        "documentId": "je2qpb924wqrc9187lw63mta",
+        "participation": "0",
+        "departments": [
+          {
+            "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+          }
+        ]
+      },
+      {
+        "documentId": "a2d3dxwqqwhjsd6i5hjyacsv",
+        "participation": null,
+        "departments": [
+          {
+            "documentId": "vath4242pg08hkqol782yggv"
+          }
+        ]
+      },
+      {
+        "documentId": "rqtf4520ykp5hlpc1ysyk4l9",
+        "participation": null,
+        "departments": [
+          {
+            "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+          }
+        ]
+      },
+      {
+        "documentId": "uvgoogrnkdxafuhu0b9om0lj",
+        "participation": "0",
+        "departments": [
+          {
+            "documentId": "tukk64ynbxczeyobssthue1w"
+          }
+        ]
+      },
+      {
+        "documentId": "ximwz17enper25aptn79lvvv",
+        "participation": "",
+        "departments": [
+          {
+            "documentId": "yjb6706tqfrbabpb6p9hu6qe"
+          }
+        ]
+      },
+      {
+        "documentId": "mjes977864hkwqsncz046i2b",
+        "participation": "1",
+        "departments": [
+          {
+            "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+          }
+        ]
+      },
+      {
+        "documentId": "bclycygche9t7015dubt1hc7",
+        "participation": "",
+        "departments": [
+          {
+            "documentId": "vath4242pg08hkqol782yggv"
+          }
+        ]
+      },
+      {
+        "documentId": "rq7h2hp9wpbqfwcmv01js0lv",
+        "participation": null,
+        "departments": [
+          {
+            "documentId": "tukk64ynbxczeyobssthue1w"
+          }
+        ]
+      }
+    ],
+    "departments": [
+      {
+        "documentId": "tukk64ynbxczeyobssthue1w",
+        "title": "Accounting"
+      },
+      {
+        "documentId": "yjb6706tqfrbabpb6p9hu6qe",
+        "title": "Finance"
+      },
+      {
+        "documentId": "f43p0cgx1s1zjx7jweorl4i4",
+        "title": "Management"
+      },
+      {
+        "documentId": "vath4242pg08hkqol782yggv",
+        "title": "Marketing"
+      },
+      {
+        "documentId": "a1cljtpsitsmrxi00zqwllth",
+        "title": "สํานักงานเลขานุการ"
+      }
+    ],
+    "publications": [
+      {
+        "documentId": "tyfqfnv9u9rm9c1sl277updk",
+        "projects": [
+          {
+            "documentId": "jx4srehhg5qhefd1h7nrd53u",
+            "departments": [
+              {
+                "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1759934976069,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "First Author",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1759934984245,
+                "userID": "a2d3dxwqqwhjsd6i5hjyacsv",
+                "User": {
+                  "id": "a2d3dxwqqwhjsd6i5hjyacsv",
+                  "documentId": "a2d3dxwqqwhjsd6i5hjyacsv",
+                  "username": "xyz",
+                  "email": "xyzn@gmail.com",
+                  "firstNameTH": "asdzxc",
+                  "lastNameTH": "sweasd",
+                  "firstNameEN": "xyz",
+                  "lastNameEN": "asd",
+                  "academicPosition": "uou",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "asdzxc sweasd",
+                "orgName": "Marketing Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              }
+            ],
+            "ic_types": [
+              {
+                "documentId": "ajvjbvrlfv7vz5owyr3qrdsn"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "conferences": [
+      {
+        "documentId": "uchbhoodc3bbwsrc0eoep6g4",
+        "projects": [
+          {
+            "documentId": "jx4srehhg5qhefd1h7nrd53u",
+            "departments": [
+              {
+                "documentId": "f43p0cgx1s1zjx7jweorl4i4"
+              }
+            ],
+            "partners": [
+              {
+                "id": 1759934976069,
+                "userID": "qzi3gmav7tdxvy0ftq7792me",
+                "User": {
+                  "id": "qzi3gmav7tdxvy0ftq7792me",
+                  "documentId": "qzi3gmav7tdxvy0ftq7792me",
+                  "username": "bomboonsan",
+                  "email": "bomboonsan@gmail.com",
+                  "firstNameTH": "ณัฐสิทธิ์",
+                  "lastNameTH": "บุญสาร",
+                  "firstNameEN": "ANSDsd",
+                  "lastNameEN": "Boonsan",
+                  "academicPosition": "Dev",
+                  "departments": [
+                    {
+                      "id": "yjb6706tqfrbabpb6p9hu6qe",
+                      "name": "Finance"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "ณัฐสิทธิ์ บุญสาร",
+                "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "First Author",
+                "isInternal": true,
+                "order": 1
+              },
+              {
+                "id": 1759934984245,
+                "userID": "a2d3dxwqqwhjsd6i5hjyacsv",
+                "User": {
+                  "id": "a2d3dxwqqwhjsd6i5hjyacsv",
+                  "documentId": "a2d3dxwqqwhjsd6i5hjyacsv",
+                  "username": "xyz",
+                  "email": "xyzn@gmail.com",
+                  "firstNameTH": "asdzxc",
+                  "lastNameTH": "sweasd",
+                  "firstNameEN": "xyz",
+                  "lastNameEN": "asd",
+                  "academicPosition": "uou",
+                  "departments": [
+                    {
+                      "id": "vath4242pg08hkqol782yggv",
+                      "name": "Marketing"
+                    }
+                  ],
+                  "faculties": [
+                    {
+                      "id": "d8mstwkn971wcma10h34j887",
+                      "name": "Business Administration"
+                    }
+                  ],
+                  "organizations": [
+                    {
+                      "id": "f767rq645nfsfginysf78s4d",
+                      "name": "Kasetsart University, Bangkhen Campus"
+                    }
+                  ]
+                },
+                "fullname": "asdzxc sweasd",
+                "orgName": "Marketing Business Administration Kasetsart University, Bangkhen Campus",
+                "partnerType": "",
+                "partnerProportion_percentage_custom": "",
+                "partnerProportion": 0.5,
+                "partnerComment": "",
+                "isInternal": true,
+                "order": 2
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "books": []
+  }
+}
