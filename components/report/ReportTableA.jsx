@@ -201,11 +201,22 @@ export default function ReportTableA() {
       const membersWithICs = membersWithICsSet.size
       const membersWithoutICs = totalMembers - membersWithICs
 
-      // PART: users with participation == 0
-      const partCount = depUsers.filter(u => Number(u.participation) === 0).length
-
-      // ALL: total users in department (same as totalMembers)
-      const allCount = totalMembers
+      // PART & ALL: Calculate percentages based on participation
+      // Supporting: participation == '1'
+      // Participating: participation == '0'
+      const supportingCount = depUsers.filter(u => u.participation === '1').length
+      const participatingCount = depUsers.filter(u => u.participation === '0').length
+      const totalParticipation = supportingCount + participatingCount
+      
+      // PART: Percentage of participating users
+      const partPercentage = totalParticipation > 0 
+        ? (participatingCount / totalParticipation) * 100 
+        : 0
+      
+      // ALL: Percentage of all participating users (should always be 100%)
+      const allPercentage = totalParticipation > 0 
+        ? (totalParticipation / totalParticipation) * 100 
+        : 0
 
       const portfolioTotal = bds + ais + tls
       const typesTotal = prj + aprEr + allOther
@@ -223,20 +234,42 @@ export default function ReportTableA() {
         aprEr,
         allOther,
         totalTypes: typesTotal,
-        part: partCount,
-        all: allCount
+        part: partPercentage,
+        all: allPercentage,
+        // Keep raw counts for total row calculation
+        _supportingCount: supportingCount,
+        _participatingCount: participatingCount
       }
     })
 
     // Aggregate total row
     const total = deptStats.reduce((acc, row) => {
       Object.keys(row).forEach(k => {
-        if (k === 'discipline') return
+        if (k === 'discipline' || k.startsWith('_')) return
+        if (k === 'part' || k === 'all') return // Skip percentages, calculate separately
         acc[k] = (acc[k] || 0) + (typeof row[k] === 'number' ? row[k] : 0)
       })
       return acc
     }, {})
-    const totalRow = { discipline: 'Total', ...total }
+    
+    // Calculate total percentages
+    const totalSupportingCount = deptStats.reduce((sum, row) => sum + row._supportingCount, 0)
+    const totalParticipatingCount = deptStats.reduce((sum, row) => sum + row._participatingCount, 0)
+    const totalParticipationSum = totalSupportingCount + totalParticipatingCount
+    
+    const totalPartPercentage = totalParticipationSum > 0 
+      ? (totalParticipatingCount / totalParticipationSum) * 100 
+      : 0
+    const totalAllPercentage = totalParticipationSum > 0 
+      ? (totalParticipationSum / totalParticipationSum) * 100 
+      : 0
+    
+    const totalRow = { 
+      discipline: 'Total', 
+      ...total,
+      part: totalPartPercentage,
+      all: totalAllPercentage
+    }
 
     const csvData = [
       [
