@@ -47,8 +47,9 @@ export default function ReportTableA() {
 
       let bds = 0, ais = 0, tls = 0
 
-      publications.forEach(pub => {
-        (pub.projects || []).forEach(prj => {
+      // BDS/AIS/TLS: Calculate from both publications AND conferences
+      const processICTypes = (projects) => {
+        projects.forEach(prj => {
           const types = prj.ic_types || []
           const hasBDS = types.some(t => t.documentId === IC_TYPE_IDS.BDS)
           const hasAIS = types.some(t => t.documentId === IC_TYPE_IDS.AIS)
@@ -90,6 +91,16 @@ export default function ReportTableA() {
             }
           })
         })
+      }
+
+      // Process publications
+      publications.forEach(pub => {
+        processICTypes(pub.projects || [])
+      })
+
+      // Process conferences
+      conferences.forEach(conf => {
+        processICTypes(conf.projects || [])
       })
 
       // Types of ICs (PRJ / APR-ER PROCEEDING / ALL OTHER)

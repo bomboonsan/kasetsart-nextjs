@@ -32,6 +32,7 @@ export const GET_REPORT_A = gql`
                 documentId
                 departments { documentId }
                 partners
+                ic_types { documentId }
             }
         }
         books {
