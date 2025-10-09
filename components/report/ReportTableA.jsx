@@ -93,57 +93,90 @@ export default function ReportTableA() {
       })
 
       // Types of ICs (PRJ / APR-ER PROCEEDING / ALL OTHER)
-      // Based on instructions: PRJ from publication.project.partners, APR/ER from conference.project.partners, ALL OTHER from book.fund.partners
+      // PRJ from publication.projects, APR-ER from conference.projects, ALL OTHER from book.funds
       let prj = 0, aprEr = 0, allOther = 0
 
-      const accumulatePartners = (partners, category) => {
-        if (!Array.isArray(partners)) return
-        partners.forEach(p => {
-          // partners likely stored as JSON string or array of objects; we expect partnerProportion & maybe a user or department linkage.
-          // If object has user departments we could filter; current schema returns scalar 'partners'. So we attempt JSON.parse fallback.
-          let item = p
-          if (typeof p === 'string') {
-            try { item = JSON.parse(p) } catch { /* ignore */ }
-          }
-          // If item is array, recurse
-          if (Array.isArray(item)) return accumulatePartners(item, category)
-          if (item && typeof item === 'object') {
-            // Check department id of user
-            const userDeps = item.user?.departments || item.User?.departments || []
-            const userDepIds = userDeps.map(d => d.documentId || d.id)
-            if (userDepIds.includes(depId) || depUsers.length === 0) {
-              const proportion = Number(item.partnerProportion || item.partnerProportion_percentage_custom || 0)
-              if (!isNaN(proportion)) {
-                if (category === 'prj') prj += proportion
-                else if (category === 'aprEr') aprEr += proportion
-                else if (category === 'allOther') allOther += proportion
-              } else {
-                if (category === 'prj') prj += 1
-                else if (category === 'aprEr') aprEr += 1
-                else if (category === 'allOther') allOther += 1
-              }
-            }
-          }
-        })
-      }
-
+      // PRJ: Calculate from publications
       publications.forEach(pub => {
         (pub.projects || []).forEach(prjObj => {
-          if ((prjObj.departments || []).some(d => d.documentId === depId)) {
-            accumulatePartners(prjObj.partners, 'prj')
+          let partners = prjObj.partners || []
+          
+          // Handle if partners is a string (need to parse)
+          if (typeof partners === 'string') {
+            try { partners = JSON.parse(partners) } catch { partners = [] }
           }
+          
+          // Ensure partners is an array
+          if (!Array.isArray(partners)) {
+            partners = []
+          }
+
+          partners.forEach(partner => {
+            const userDeps = partner.User?.departments || []
+            const userDepIds = userDeps.map(d => d.id || d.documentId)
+            
+            // Check if user is internal (has departments) and belongs to current department
+            if (userDeps.length > 0 && userDepIds.includes(depId)) {
+              const proportion = Number(partner.partnerProportion || 0)
+              prj += proportion
+            }
+          })
         })
       })
+
+      // APR-ER: Calculate from conferences
       conferences.forEach(conf => {
         (conf.projects || []).forEach(prjObj => {
-          if ((prjObj.departments || []).some(d => d.documentId === depId)) {
-            accumulatePartners(prjObj.partners, 'aprEr')
+          let partners = prjObj.partners || []
+          
+          // Handle if partners is a string (need to parse)
+          if (typeof partners === 'string') {
+            try { partners = JSON.parse(partners) } catch { partners = [] }
           }
+          
+          // Ensure partners is an array
+          if (!Array.isArray(partners)) {
+            partners = []
+          }
+
+          partners.forEach(partner => {
+            const userDeps = partner.User?.departments || []
+            const userDepIds = userDeps.map(d => d.id || d.documentId)
+            
+            // Check if user is internal (has departments) and belongs to current department
+            if (userDeps.length > 0 && userDepIds.includes(depId)) {
+              const proportion = Number(partner.partnerProportion || 0)
+              aprEr += proportion
+            }
+          })
         })
       })
+
+      // ALL OTHER: Calculate from books
       books.forEach(book => {
         (book.funds || []).forEach(fund => {
-          accumulatePartners(fund.partners, 'allOther')
+          let partners = fund.partners || []
+          
+          // Handle if partners is a string (need to parse)
+          if (typeof partners === 'string') {
+            try { partners = JSON.parse(partners) } catch { partners = [] }
+          }
+          
+          // Ensure partners is an array
+          if (!Array.isArray(partners)) {
+            partners = []
+          }
+
+          partners.forEach(partner => {
+            const userDeps = partner.User?.departments || []
+            const userDepIds = userDeps.map(d => d.id || d.documentId)
+            
+            // Check if user is internal (has departments) and belongs to current department
+            if (userDeps.length > 0 && userDepIds.includes(depId)) {
+              const proportion = Number(partner.partnerProportion || 0)
+              allOther += proportion
+            }
+          })
         })
       })
 
