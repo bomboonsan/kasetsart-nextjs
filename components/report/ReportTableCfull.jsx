@@ -74,34 +74,54 @@ export default function ReportTableCfull() {
     const toBool = v => v === true || v === 1 || v === '1' || v === 'true';
 
     publications.forEach(pub => {
-      // Collect all department IDs involved through projects
+      // Collect all department IDs involved through partners (internal users only)
       const pubDeptIds = new Set();
-      (pub.projects || []).forEach(prj => (prj.departments || []).forEach(d => pubDeptIds.add(d.documentId)));
-      if (pubDeptIds.size === 0) return; // skip if no dept association
+      (pub.projects || []).forEach(prj => {
+        let partners = prj.partners || [];
+        if (typeof partners === 'string') {
+          try { partners = JSON.parse(partners); } catch { partners = []; }
+        }
+        if (!Array.isArray(partners)) partners = [];
+        
+        partners.forEach(p => {
+          const userDeps = p.user?.departments || p.User?.departments || [];
+          if (userDeps.length > 0) { // Only internal users
+            userDeps.forEach(d => pubDeptIds.add(d.documentId || d.id));
+          }
+        });
+      });
+      
+      if (pubDeptIds.size === 0) return; // skip if no internal user
 
       // Pre-compute department proportions
       const depProportion = {};
       pubDeptIds.forEach(depId => depProportion[depId] = extractDepartmentProportion(pub, depId));
 
-      const level = Number(pub.level); // 0 national, 1 international
-      const isJournalDb = toBool(pub.isJournalDatabase);
+      const level = pub.level; // '0' national, '1' international
+      // isJournalDatabase: '0' = in database, '1' = not in database
+      const isInDatabase = pub.isJournalDatabase === '0';
+      const isNotInDatabase = pub.isJournalDatabase === '1';
 
       pubDeptIds.forEach(depId => {
         const row = rowByDept[depId];
         if (!row) return;
         const p = depProportion[depId] || 1;
 
-        if (level == '0') {
-          if (isJournalDb) {
+        if (level === '0') {
+          // National level
+          if (isInDatabase) {
+            // In database - check each flag independently
             if (toBool(pub.isTCI1)) row.tciTier1 += p;
-            else if (toBool(pub.isTCI2)) row.tciTier2 += p;
-            else if (toBool(pub.isACI)) row.aci += p;
-            else row.nonTci += p; // listed DB but none of the specific flags -> treat as non-listed TCI per requirement nuance
-          } else {
+            if (toBool(pub.isTCI2)) row.tciTier2 += p;
+            if (toBool(pub.isACI)) row.aci += p;
+          } else if (isNotInDatabase) {
+            // Not in database
             row.nonTci += p;
           }
-        } else if (level == '1') {
-          if (isJournalDb) {
+        } else if (level === '1') {
+          // International level
+          if (isInDatabase) {
+            // In database
             if (toBool(pub.isScopus)) {
               const qKey = SCOPUS_QUARTER[Number(pub.scopusType)];
               if (qKey && row[qKey] !== undefined) row[qKey] += p;
@@ -118,8 +138,9 @@ export default function ReportTableCfull() {
               const jKey = AJG_MAP[Number(pub.ajgType)];
               if (jKey && row[jKey] !== undefined) row[jKey] += p;
             }
-          } else {
-            row.otherPjr += p; // International non-database
+          } else if (isNotInDatabase) {
+            // Not in database
+            row.otherPjr += p;
           }
         }
       });
