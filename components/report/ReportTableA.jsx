@@ -130,6 +130,8 @@ export default function ReportTableA() {
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
               prj += proportion
+              // Add user to membersWithICs set
+              membersWithICsSet.add(partner.User?.documentId || partner.userID)
             }
           })
         })
@@ -158,6 +160,8 @@ export default function ReportTableA() {
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
               aprEr += proportion
+              // Add user to membersWithICs set
+              membersWithICsSet.add(partner.User?.documentId || partner.userID)
             }
           })
         })
@@ -186,6 +190,8 @@ export default function ReportTableA() {
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
               allOther += proportion
+              // Add user to membersWithICs set
+              membersWithICsSet.add(partner.User?.documentId || partner.userID)
             }
           })
         })
