@@ -25,9 +25,60 @@ export default function ReportTableA() {
 
     const departments = data.departments || []
     const users = data.usersPermissionsUsers || []
-    const publications = data.publications || []
-    const conferences = data.conferences || []
-    const books = data.books || []
+    const allPublications = data.publications || []
+    const allConferences = data.conferences || []
+    const allBooks = data.books || []
+
+    // Filter data by year range
+    const publications = allPublications.filter(pub => {
+      if (!pub.durationStart && !pub.durationEnd) return true
+      const pubStartYear = pub.durationStart ? new Date(pub.durationStart).getFullYear() : null
+      const pubEndYear = pub.durationEnd ? new Date(pub.durationEnd).getFullYear() : null
+      
+      // If only start date exists
+      if (pubStartYear && !pubEndYear) {
+        return pubStartYear >= startYear && pubStartYear <= endYear
+      }
+      // If only end date exists
+      if (!pubStartYear && pubEndYear) {
+        return pubEndYear >= startYear && pubEndYear <= endYear
+      }
+      // If both dates exist, check if ranges overlap
+      if (pubStartYear && pubEndYear) {
+        const minYear = Math.min(pubStartYear, pubEndYear)
+        const maxYear = Math.max(pubStartYear, pubEndYear)
+        return (minYear <= endYear) && (maxYear >= startYear)
+      }
+      return true
+    })
+
+    const conferences = allConferences.filter(conf => {
+      if (!conf.durationStart && !conf.durationEnd) return true
+      const confStartYear = conf.durationStart ? new Date(conf.durationStart).getFullYear() : null
+      const confEndYear = conf.durationEnd ? new Date(conf.durationEnd).getFullYear() : null
+      
+      // If only start date exists
+      if (confStartYear && !confEndYear) {
+        return confStartYear >= startYear && confStartYear <= endYear
+      }
+      // If only end date exists
+      if (!confStartYear && confEndYear) {
+        return confEndYear >= startYear && confEndYear <= endYear
+      }
+      // If both dates exist, check if ranges overlap
+      if (confStartYear && confEndYear) {
+        const minYear = Math.min(confStartYear, confEndYear)
+        const maxYear = Math.max(confStartYear, confEndYear)
+        return (minYear <= endYear) && (maxYear >= startYear)
+      }
+      return true
+    })
+
+    const books = allBooks.filter(book => {
+      if (!book.publishedAt) return true
+      const publishYear = new Date(book.publishedAt).getFullYear()
+      return publishYear >= startYear && publishYear <= endYear
+    })
 
     // Helper: map departmentId -> users
     const deptUsersMap = new Map()
@@ -323,7 +374,7 @@ export default function ReportTableA() {
     ]
 
     return { rows: deptStats, total: totalRow, csvData }
-  }, [data])
+  }, [data, startYear, endYear])
 
   if (loading) {
     return (
