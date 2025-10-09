@@ -56,12 +56,12 @@ export default function ReportTableA() {
 
           // Process partners to sum partnerProportion by department
           let partners = prj.partners || []
-          
+
           // Handle if partners is a string (need to parse)
           if (typeof partners === 'string') {
             try { partners = JSON.parse(partners) } catch { partners = [] }
           }
-          
+
           // Ensure partners is an array
           if (!Array.isArray(partners)) {
             partners = []
@@ -70,11 +70,11 @@ export default function ReportTableA() {
           partners.forEach(partner => {
             const userDeps = partner.User?.departments || []
             const userDepIds = userDeps.map(d => d.id || d.documentId)
-            
+
             // Check if user is internal (has departments) and belongs to current department
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
-              
+
               if (hasBDS) {
                 bds += proportion
                 membersWithICsSet.add(partner.User?.documentId || partner.userID)
@@ -169,7 +169,7 @@ export default function ReportTableA() {
         ais,
         tls,
         total: portfolioTotal,
-        bdsTypes: prj, // mapping provided: Types_BDS column is PRJ per instructions (naming difference)
+        prj,
         aprEr,
         allOther,
         totalTypes: typesTotal,
@@ -214,7 +214,7 @@ export default function ReportTableA() {
         r.ais,
         r.tls,
         r.total,
-        r.bdsTypes,
+        r.prj,
         r.aprEr,
         r.allOther,
         r.totalTypes,
@@ -230,7 +230,7 @@ export default function ReportTableA() {
         totalRow.ais || 0,
         totalRow.tls || 0,
         totalRow.total || 0,
-        totalRow.bdsTypes || 0,
+        totalRow.prj || 0,
         totalRow.aprEr || 0,
         totalRow.allOther || 0,
         totalRow.totalTypes || 0,
@@ -396,7 +396,7 @@ export default function ReportTableA() {
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.ais)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.tls)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">{fmt1(row.total)}</td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.bdsTypes)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.prj)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.aprEr)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.allOther)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">{fmt1(row.totalTypes)}</td>
@@ -416,7 +416,7 @@ export default function ReportTableA() {
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.ais)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.tls)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{fmt1(totalRow.total)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.bdsTypes)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.prj)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.aprEr)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.allOther)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{fmt1(totalRow.totalTypes)}</td>
