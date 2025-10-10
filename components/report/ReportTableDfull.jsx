@@ -50,19 +50,43 @@ export default function ReportTableDfull() {
       const proportion = Number(p.partnerProportion || p.partnerProportion_percentage_custom || 0);
       const userDeps = p.user?.departments || p.User?.departments || [];
       const depIds = userDeps.map(d => d.documentId || d.id);
-      if (depIds.includes(departmentId)) {
+      // Check if user is internal (has departments) and belongs to department
+      if (userDeps.length > 0 && depIds.includes(departmentId)) {
         if (!isNaN(proportion) && proportion > 0) sum += proportion;
       }
     });
 
-    if (sum === 0) return 1;
-    return sum;
+    return sum === 0 ? 1 : sum;
   }
 
   const { reportData, totalRow, csvData } = useMemo(() => {
     if (!data) return { reportData: [], totalRow: {}, csvData: [] };
-    const departments = (data.departments || []).filter(d => d.title !== 'สำนักงานเลขานุการ');
-    const publications = data.publications || [];
+    const secretariatNames = new Set(['สำนักงานเลขานุการ', 'สํานักงานเลขานุการ']);
+    const departments = (data.departments || []).filter(d => !secretariatNames.has(d.title));
+    const allPublications = data.publications || [];
+
+    // Filter publications by year range
+    const publications = allPublications.filter(pub => {
+      if (!pub.durationStart && !pub.durationEnd) return true;
+      const pubStartYear = pub.durationStart ? new Date(pub.durationStart).getFullYear() : null;
+      const pubEndYear = pub.durationEnd ? new Date(pub.durationEnd).getFullYear() : null;
+      
+      // If only start date exists
+      if (pubStartYear && !pubEndYear) {
+        return pubStartYear >= startYear && pubStartYear <= endYear;
+      }
+      // If only end date exists
+      if (!pubStartYear && pubEndYear) {
+        return pubEndYear >= startYear && pubEndYear <= endYear;
+      }
+      // If both dates exist, check if ranges overlap
+      if (pubStartYear && pubEndYear) {
+        const minYear = Math.min(pubStartYear, pubEndYear);
+        const maxYear = Math.max(pubStartYear, pubEndYear);
+        return (minYear <= endYear) && (maxYear >= startYear);
+      }
+      return true;
+    });
 
     const rows = departments.map(dep => ({
       discipline: dep.title,
@@ -100,52 +124,86 @@ export default function ReportTableDfull() {
     }));
     const rowByDept = Object.fromEntries(rows.map(r => [r._depId, r]));
 
+    const toBool = v => v === true || v === 1 || v === '1' || v === 'true';
+
     publications.forEach(pub => {
-      const level = pub.level;
-      const isJournalDb = String(pub.isJournalDatabase) === '1' || pub.isJournalDatabase === 1;
-      const proportionPerDept = {};
+      // Collect all department IDs involved through partners (internal users only)
       const pubDeptIds = new Set();
       (pub.projects || []).forEach(prj => {
-        (prj.departments || []).forEach(d => pubDeptIds.add(d.documentId));
+        let partners = prj.partners || [];
+        if (typeof partners === 'string') {
+          try { partners = JSON.parse(partners); } catch { partners = []; }
+        }
+        if (!Array.isArray(partners)) partners = [];
+        
+        partners.forEach(p => {
+          const userDeps = p.user?.departments || p.User?.departments || [];
+          if (userDeps.length > 0) { // Only internal users
+            userDeps.forEach(d => pubDeptIds.add(d.documentId || d.id));
+          }
+        });
       });
+      
+      if (pubDeptIds.size === 0) return; // skip if no internal user
 
-      if (pubDeptIds.size === 0) return;
+      // Pre-compute department proportions
+      const depProportion = {};
+      pubDeptIds.forEach(depId => depProportion[depId] = extractDepartmentProportion(pub, depId));
 
-      pubDeptIds.forEach(depId => {
-        proportionPerDept[depId] = extractDepartmentProportion(pub, depId);
-      });
+      const level = pub.level; // '0' national, '1' international
+      // isJournalDatabase: '0' = in database, '1' = not in database
+      const isInDatabase = pub.isJournalDatabase === '0';
+      const isNotInDatabase = pub.isJournalDatabase === '1';
 
       pubDeptIds.forEach(depId => {
         const row = rowByDept[depId];
         if (!row) return;
-        const p = proportionPerDept[depId] || 1;
+        const p = depProportion[depId] || 1;
 
-        if (Number(level) === 0) { // National
-          if (isJournalDb) {
-            if (String(pub.isTCI1) === '1') row.tciTier1 += p;
-            else if (String(pub.isTCI2) === '1') row.tciTier2 += p;
-            else if (String(pub.isACI) === '1') row.aci += p;
-            else row.nonTci += p;
-          } else {
-            row.nonTci += p;
-          }
-        } else if (Number(level) === 1) { // International
-          if (isJournalDb) {
-            // --- SINGLE COUNT LOGIC ---
-            if (String(pub.isScopus) === '1') {
-              const qKey = SCOPUS_QUARTER[Number(pub.scopusType)];
+        if (level === '0') {
+          // National level
+          if (isInDatabase) {
+            // In database - check each flag independently
+            if (toBool(pub.isTCI1)) row.tciTier1 += p;
+            if (toBool(pub.isTCI2)) row.tciTier2 += p;
+            // ACI should be AJG for National level
+            if (toBool(pub.isAJG)) row.aci += p;
+            // Scopus for National
+            if (toBool(pub.isScopus) && pub.scopusValue) {
+              const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];
               if (qKey && row[qKey] !== undefined) row[qKey] += p;
-            } else if (String(pub.isWOS) === '1') {
+            }
+            // WOS for National
+            if (toBool(pub.isWOS) && pub.wosType) {
               const wKey = WOS_MAP[Number(pub.wosType)];
               if (wKey && row[wKey] !== undefined) row[wKey] += p;
-            } else if (String(pub.isABDC) === '1') {
+            }
+          } else if (isNotInDatabase) {
+            // Not in database
+            row.nonTci += p;
+          }
+        } else if (level === '1') {
+          // International level
+          if (isInDatabase) {
+            // In database
+            if (toBool(pub.isScopus) && pub.scopusValue) {
+              const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];
+              if (qKey && row[qKey] !== undefined) row[qKey] += p;
+            }
+            if (toBool(pub.isWOS) && pub.wosType) {
+              const wKey = WOS_MAP[Number(pub.wosType)];
+              if (wKey && row[wKey] !== undefined) row[wKey] += p;
+            }
+            if (toBool(pub.isABDC) && pub.abdcType) {
               const aKey = ABDC_MAP[Number(pub.abdcType)];
               if (aKey && row[aKey] !== undefined) row[aKey] += p;
-            } else if (String(pub.isAJG) === '1') {
+            }
+            if (toBool(pub.isAJG) && pub.ajgType) {
               const jKey = AJG_MAP[Number(pub.ajgType)];
               if (jKey && row[jKey] !== undefined) row[jKey] += p;
             }
-          } else {
+          } else if (isNotInDatabase) {
+            // Not in database
             row.otherPjr += p;
           }
         }
@@ -198,7 +256,7 @@ export default function ReportTableDfull() {
     ];
 
     return { reportData: rows, totalRow, csvData };
-  }, [data]);
+  }, [data, startYear, endYear]);
 
   if (loading) {
     return (
