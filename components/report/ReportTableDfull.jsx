@@ -183,22 +183,24 @@ export default function ReportTableDfull() {
             row.nonTci += p;
           }
         } else if (level === '1') {
-          // International level
+          // International level - SINGLE COUNT: Only count highest tier database
           if (isInDatabase) {
-            // In database
+            // Tier priority: Scopus > WOS > ABDC > AJG
+            // Count only the highest tier database that exists
             if (toBool(pub.isScopus) && pub.scopusValue) {
+              // Highest tier: Scopus
               const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];
               if (qKey && row[qKey] !== undefined) row[qKey] += p;
-            }
-            if (toBool(pub.isWOS) && pub.wosType) {
+            } else if (toBool(pub.isWOS) && pub.wosType) {
+              // Second tier: WOS
               const wKey = WOS_MAP[Number(pub.wosType)];
               if (wKey && row[wKey] !== undefined) row[wKey] += p;
-            }
-            if (toBool(pub.isABDC) && pub.abdcType) {
+            } else if (toBool(pub.isABDC) && pub.abdcType) {
+              // Third tier: ABDC
               const aKey = ABDC_MAP[Number(pub.abdcType)];
               if (aKey && row[aKey] !== undefined) row[aKey] += p;
-            }
-            if (toBool(pub.isAJG) && pub.ajgType) {
+            } else if (toBool(pub.isAJG) && pub.ajgType) {
+              // Fourth tier: AJG
               const jKey = AJG_MAP[Number(pub.ajgType)];
               if (jKey && row[jKey] !== undefined) row[jKey] += p;
             }
