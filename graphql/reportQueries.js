@@ -107,6 +107,7 @@ export const GET_REPORT_C = gql`
         wosType
         scopusType
         scopusValue
+        documentId
     }
     departments {
         documentId

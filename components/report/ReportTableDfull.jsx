@@ -70,7 +70,7 @@ export default function ReportTableDfull() {
       if (!pub.durationStart && !pub.durationEnd) return true;
       const pubStartYear = pub.durationStart ? new Date(pub.durationStart).getFullYear() : null;
       const pubEndYear = pub.durationEnd ? new Date(pub.durationEnd).getFullYear() : null;
-      
+
       // If only start date exists
       if (pubStartYear && !pubEndYear) {
         return pubStartYear >= startYear && pubStartYear <= endYear;
@@ -135,7 +135,7 @@ export default function ReportTableDfull() {
           try { partners = JSON.parse(partners); } catch { partners = []; }
         }
         if (!Array.isArray(partners)) partners = [];
-        
+
         partners.forEach(p => {
           const userDeps = p.user?.departments || p.User?.departments || [];
           if (userDeps.length > 0) { // Only internal users
@@ -143,7 +143,7 @@ export default function ReportTableDfull() {
           }
         });
       });
-      
+
       if (pubDeptIds.size === 0) return; // skip if no internal user
 
       // Pre-compute department proportions
@@ -166,8 +166,7 @@ export default function ReportTableDfull() {
             // In database - check each flag independently
             if (toBool(pub.isTCI1)) row.tciTier1 += p;
             if (toBool(pub.isTCI2)) row.tciTier2 += p;
-            // ACI should be AJG for National level
-            if (toBool(pub.isAJG)) row.aci += p;
+            if (toBool(pub.isACI)) row.aci += p;
             // Scopus for National
             if (toBool(pub.isScopus) && pub.scopusValue) {
               const qKey = SCOPUS_QUARTER[Number(pub.scopusValue)];

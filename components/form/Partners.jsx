@@ -447,7 +447,7 @@ export default function Partners({ data, onChange }) {
                                     <td className="px-4 py-4 whitespace-nowrap">
                                         {p.partnerProportion && (p.partnerProportion !== '' && p.partnerProportion !== null) && (
                                             <div className="text-sm text-gray-900">
-                                                {(Number(p.partnerProportion) || 0).toFixed(1)}
+                                                {(Number(p.partnerProportion) || 0).toFixed(2)}
                                             </div>
                                         )}
                                     </td>

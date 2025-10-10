@@ -32,7 +32,7 @@ export default function AdminUserDetailPage({ params }) {
     return (
         <div>
             <ProfileHeader data={userData} other />
-            {(userData.academic_types.length == 0 && userData.role.name == "Admin") || (userData.academic_types.length == 0 && userData.role.name == "Super Admin") ? (
+            {(userData.academic_types.length == 0 && userData.role.name == "Admin") || (userData.academic_types.length == 0 && userData.role.name == "Super admin") ? (
                 <>
                     {/* ADMIN */}
                 </>
