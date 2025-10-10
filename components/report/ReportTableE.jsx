@@ -170,6 +170,9 @@ export default function ReportTableE_Publications() {
                             ))}
                         </select>
                     </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Department</label>
+                    </div>
                 </div>
                 <CSVLink filename="Report5.csv" data={csvData}>
                     <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">

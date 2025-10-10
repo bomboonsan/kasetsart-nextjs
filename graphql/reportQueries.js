@@ -169,7 +169,12 @@ export const GET_REPORT_E = gql`
                 volume
                 level
                 durationStart
+                durationEnd
             }
+        }
+        departments {
+            documentId
+            title
         }
     }
 `;
@@ -184,7 +189,12 @@ export const GET_REPORT_F = gql`
                 journalName
                 level
                 durationStart
+                durationEnd
             }
+        }
+        departments {
+            documentId
+            title
         }
     }
 `;
