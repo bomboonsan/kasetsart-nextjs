@@ -46,9 +46,17 @@ function projectAuthors(partners) {
 
 /** แปลงปี (volume) เป็นข้อความแสดงผล */
 function formatYear(volume) {
-    if (volume === null || volume === undefined) return ''
-    return String(volume)
+    // if (volume === null || volume === undefined) return ''
+    // return String(volume)
+    if (!volume) return ''
+    const date = new Date(volume)
+    if (Number.isNaN(date.getTime())) return ''
+    const dd = String(date.getDate()).padStart(2, '0')
+    const mm = String(date.getMonth() + 1).padStart(2, '0')
+    const yyyy = date.getFullYear()
+    return `${mm}/${yyyy}`
 }
+
 
 export default function ReportTableE_Publications() {
     const currentYear = new Date().getFullYear()
@@ -76,7 +84,7 @@ export default function ReportTableE_Publications() {
         for (const proj of projects) {
             // Check if project has partners from selected department
             const partners = Array.isArray(proj?.partners) ? proj.partners : []
-            
+
             // Filter by department if not 'all'
             if (selectedDepartment !== 'all') {
                 const hasSelectedDept = partners.some(p => {
@@ -88,28 +96,29 @@ export default function ReportTableE_Publications() {
 
             const authors = projectAuthors(partners)
             const pubs = Array.isArray(proj?.publications) ? proj.publications : []
-            
+
             for (const p of pubs) {
                 // Filter by year range
                 if (p?.durationStart) {
                     const pubStartYear = new Date(p.durationStart).getFullYear()
                     const pubEndYear = p.durationEnd ? new Date(p.durationEnd).getFullYear() : pubStartYear
-                    
+
                     const minYear = Math.min(pubStartYear, pubEndYear)
                     const maxYear = Math.max(pubStartYear, pubEndYear)
-                    
+
                     // Check if publication overlaps with selected year range
                     if (maxYear < startYear || minYear > endYear) {
                         continue // Skip this publication
                     }
                 }
-                
+
                 flat.push({
                     title: p?.abstractTH || p?.abstractEN || '',
                     meeting: p?.journalName || '',              // ชื่อวารสาร
                     authors,
                     level: mapLevelToLabel(p?.level),           // ประเภท
                     date: formatYear(p?.durationStart),                // ปี
+                    dateEnd: formatYear(p?.durationEnd),              // ปี (ถ้ามี)
                     yearSort: p?.durationStart ?? -Infinity,
                     dbFlag: p?.isJournalDatabase ?? null,       // เก็บไว้ใช้ต่อ ถ้าต้องโชว์ภายหลัง
                 })
@@ -260,7 +269,7 @@ export default function ReportTableE_Publications() {
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.meeting}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.authors}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.level}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date} - {r.dateEnd}</td>
                                     </tr>
                                 ))
                             )}

@@ -92,7 +92,7 @@ export default function ReportTableE() {
         for (const proj of projects) {
             // Check if project has partners from selected department
             const partners = Array.isArray(proj?.partners) ? proj.partners : []
-            
+
             // Filter by department if not 'all'
             if (selectedDepartment !== 'all') {
                 const hasSelectedDept = partners.some(p => {
@@ -104,22 +104,22 @@ export default function ReportTableE() {
 
             const authors = projectAuthors(partners)
             const conferences = Array.isArray(proj?.conferences) ? proj.conferences : []
-            
+
             for (const c of conferences) {
                 // Filter by year range
                 if (c?.durationStart) {
                     const confStartYear = new Date(c.durationStart).getFullYear()
                     const confEndYear = c.durationEnd ? new Date(c.durationEnd).getFullYear() : confStartYear
-                    
+
                     const minYear = Math.min(confStartYear, confEndYear)
                     const maxYear = Math.max(confStartYear, confEndYear)
-                    
+
                     // Check if conference overlaps with selected year range
                     if (maxYear < startYear || minYear > endYear) {
                         continue // Skip this conference
                     }
                 }
-                
+
                 flat.push({
                     title: c?.abstractTH || c?.abstractEN || '',
                     meeting: c?.journalName || '',
@@ -128,6 +128,7 @@ export default function ReportTableE() {
                     level: c?.level == 0 ? "ระดับชาติ" : "นานาชาติ",
                     rawDate: c?.durationStart || null,
                     date: formatDate(c?.durationStart),
+                    dateEnd: formatDate(c?.durationEnd),
                 })
             }
         }
@@ -278,7 +279,7 @@ export default function ReportTableE() {
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.meeting}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.authors}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.level}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date} - {r.dateEnd}</td>
                                     </tr>
                                 ))
                             )}
