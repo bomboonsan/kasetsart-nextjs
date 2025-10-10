@@ -51,7 +51,30 @@ export default function ReportTableCfull() {
     if (!data) return { reportData: [], totalRow: {}, csvData: [] };
     const secretariatNames = new Set(['สำนักงานเลขานุการ', 'สํานักงานเลขานุการ']);
     const departments = (data.departments || []).filter(d => !secretariatNames.has(d.title));
-    const publications = data.publications || [];
+    const allPublications = data.publications || [];
+
+    // Filter publications by year range
+    const publications = allPublications.filter(pub => {
+      if (!pub.durationStart && !pub.durationEnd) return true;
+      const pubStartYear = pub.durationStart ? new Date(pub.durationStart).getFullYear() : null;
+      const pubEndYear = pub.durationEnd ? new Date(pub.durationEnd).getFullYear() : null;
+      
+      // If only start date exists
+      if (pubStartYear && !pubEndYear) {
+        return pubStartYear >= startYear && pubStartYear <= endYear;
+      }
+      // If only end date exists
+      if (!pubStartYear && pubEndYear) {
+        return pubEndYear >= startYear && pubEndYear <= endYear;
+      }
+      // If both dates exist, check if ranges overlap
+      if (pubStartYear && pubEndYear) {
+        const minYear = Math.min(pubStartYear, pubEndYear);
+        const maxYear = Math.max(pubStartYear, pubEndYear);
+        return (minYear <= endYear) && (maxYear >= startYear);
+      }
+      return true;
+    });
 
     const rows = departments.map(dep => ({
       discipline: dep.title,
@@ -197,7 +220,7 @@ export default function ReportTableCfull() {
     ]);
 
     return { reportData: rows, totalRow, csvData: [csvHeaders, ...csvRows] };
-  }, [data]);
+  }, [data, startYear, endYear]);
 
   if (loading) {
     return (
