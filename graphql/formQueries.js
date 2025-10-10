@@ -383,6 +383,7 @@ export const GET_MY_FUNDS = gql`
 export const GET_FUND = gql`
   query GetFund($documentId: ID!) {
     fund(documentId: $documentId) {
+      fundName
       documentId
       writers
       fundType
@@ -396,6 +397,9 @@ export const GET_FUND = gql`
       duration
       period
       references
+      references2
+      references3
+      references4
       partners
       attachments { documentId name url size mime }
       users_permissions_users { documentId username email }

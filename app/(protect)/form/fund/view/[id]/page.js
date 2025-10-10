@@ -25,8 +25,8 @@ export default function FundViewPage() {
 
   const fund = data?.fund
 
-  if (!fund && !loading) { 
-    return <div className="p-6">ไม่พบข้อมูลคำขอรับทุน</div> 
+  if (!fund && !loading) {
+    return <div className="p-6">ไม่พบข้อมูลคำขอรับทุน</div>
   }
 
   return (
@@ -41,6 +41,7 @@ export default function FundViewPage() {
               <Button variant="default" onClick={() => router.push(`/form/fund/edit/${fund.documentId}`)}>แก้ไข</Button>
             </div>
             <div className="inputGroup">
+              <FieldView label="ชื่อทุนตำราหรือหนังสือ" value={fund.fundName} />
               <FieldView label="ลักษณะของผลงานวิชาการที่จะขอรับทุน" value={fund.fundTypeText} />
               <FieldView label="คำอธิบายเนื้อหาของตำราหรือหนังสือ" value={fund.contentDesc} />
               <FieldView label="เอกสารทางวิชาการ ตำรา หรือหนังสือ ที่ผ่านมา" value={fund.pastPublications} />
@@ -50,6 +51,9 @@ export default function FundViewPage() {
               <FieldView label="จำนวนหน้าประมาณ" value={fund.pages} />
               <FieldView label="ระยะเวลาที่จะใช้ในการเขียนประมาณ" value={fund.duration} />
               <FieldView label="รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม)" value={fund.references} />
+              <FieldView label=" " value={fund.references2} />
+              <FieldView label=" " value={fund.references3} />
+              <FieldView label=" " value={fund.references4} />
             </div>
           </Block>
 
