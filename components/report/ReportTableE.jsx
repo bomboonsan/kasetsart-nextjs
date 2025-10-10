@@ -55,6 +55,7 @@ export default function ReportTableE_Publications() {
     const MIN_YEAR = 2019
     const [startYear, setStartYear] = useState(MIN_YEAR)
     const [endYear, setEndYear] = useState(currentYear)
+    const [selectedDepartment, setSelectedDepartment] = useState('all')
     const { data: session } = useSession()
 
     const { data, loading, error } = useQuery(GET_REPORT_E, {
@@ -62,15 +63,47 @@ export default function ReportTableE_Publications() {
         fetchPolicy: 'cache-and-network',
     })
 
-    // flatten: ทุก project → ทุก publication
+    // Get unique departments for filter
+    const departments = useMemo(() => {
+        return data?.departments ?? []
+    }, [data])
+
+    // flatten: ทุก project → ทุก publication (with filters)
     const rows = useMemo(() => {
         const projects = data?.projects ?? []
         const flat = []
 
         for (const proj of projects) {
-            const authors = projectAuthors(proj?.partners)
+            // Check if project has partners from selected department
+            const partners = Array.isArray(proj?.partners) ? proj.partners : []
+            
+            // Filter by department if not 'all'
+            if (selectedDepartment !== 'all') {
+                const hasSelectedDept = partners.some(p => {
+                    const userDepts = p?.User?.departments || []
+                    return userDepts.some(d => (d.id || d.documentId) === selectedDepartment)
+                })
+                if (!hasSelectedDept) continue // Skip this project
+            }
+
+            const authors = projectAuthors(partners)
             const pubs = Array.isArray(proj?.publications) ? proj.publications : []
+            
             for (const p of pubs) {
+                // Filter by year range
+                if (p?.durationStart) {
+                    const pubStartYear = new Date(p.durationStart).getFullYear()
+                    const pubEndYear = p.durationEnd ? new Date(p.durationEnd).getFullYear() : pubStartYear
+                    
+                    const minYear = Math.min(pubStartYear, pubEndYear)
+                    const maxYear = Math.max(pubStartYear, pubEndYear)
+                    
+                    // Check if publication overlaps with selected year range
+                    if (maxYear < startYear || minYear > endYear) {
+                        continue // Skip this publication
+                    }
+                }
+                
                 flat.push({
                     title: p?.abstractTH || p?.abstractEN || '',
                     meeting: p?.journalName || '',              // ชื่อวารสาร
@@ -91,7 +124,7 @@ export default function ReportTableE_Publications() {
         })
 
         return flat.map((r, i) => ({ no: i + 1, ...r }))
-    }, [data])
+    }, [data, startYear, endYear, selectedDepartment])
 
     const csvData = useMemo(
         () => [
@@ -172,6 +205,18 @@ export default function ReportTableE_Publications() {
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">Department</label>
+                        <select
+                            value={selectedDepartment}
+                            onChange={e => setSelectedDepartment(e.target.value)}
+                            className="border rounded px-2 py-1 text-sm"
+                        >
+                            <option value="all">All Departments</option>
+                            {departments.map(dept => (
+                                <option key={dept.documentId} value={dept.documentId}>
+                                    {dept.title}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
                 <CSVLink filename="Report5.csv" data={csvData}>

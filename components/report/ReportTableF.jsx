@@ -65,6 +65,7 @@ export default function ReportTableE() {
     const MIN_YEAR = 2019
     const [startYear, setStartYear] = useState(MIN_YEAR)
     const [endYear, setEndYear] = useState(currentYear)
+    const [selectedDepartment, setSelectedDepartment] = useState('all')
 
     const { data: session } = useSession()
 
@@ -73,6 +74,11 @@ export default function ReportTableE() {
         context: session?.jwt ? { headers: { Authorization: `Bearer ${session.jwt}` } } : undefined,
         fetchPolicy: 'cache-and-network',
     })
+
+    // Get unique departments for filter
+    const departments = useMemo(() => {
+        return data?.departments ?? []
+    }, [data])
 
 
     /**
@@ -84,9 +90,36 @@ export default function ReportTableE() {
         const flat = []
 
         for (const proj of projects) {
-            const authors = projectAuthors(proj?.partners)
+            // Check if project has partners from selected department
+            const partners = Array.isArray(proj?.partners) ? proj.partners : []
+            
+            // Filter by department if not 'all'
+            if (selectedDepartment !== 'all') {
+                const hasSelectedDept = partners.some(p => {
+                    const userDepts = p?.User?.departments || []
+                    return userDepts.some(d => (d.id || d.documentId) === selectedDepartment)
+                })
+                if (!hasSelectedDept) continue // Skip this project
+            }
+
+            const authors = projectAuthors(partners)
             const conferences = Array.isArray(proj?.conferences) ? proj.conferences : []
+            
             for (const c of conferences) {
+                // Filter by year range
+                if (c?.durationStart) {
+                    const confStartYear = new Date(c.durationStart).getFullYear()
+                    const confEndYear = c.durationEnd ? new Date(c.durationEnd).getFullYear() : confStartYear
+                    
+                    const minYear = Math.min(confStartYear, confEndYear)
+                    const maxYear = Math.max(confStartYear, confEndYear)
+                    
+                    // Check if conference overlaps with selected year range
+                    if (maxYear < startYear || minYear > endYear) {
+                        continue // Skip this conference
+                    }
+                }
+                
                 flat.push({
                     title: c?.abstractTH || c?.abstractEN || '',
                     meeting: c?.journalName || '',
@@ -97,7 +130,6 @@ export default function ReportTableE() {
                     date: formatDate(c?.durationStart),
                 })
             }
-            console.log('proj', proj)
         }
 
         // เรียงจากวันที่ใหม่ไปเก่า ถ้าไม่มีวันที่ให้ไปท้าย
@@ -109,7 +141,7 @@ export default function ReportTableE() {
 
         // ใส่ running number
         return flat.map((r, i) => ({ no: i + 1, ...r }))
-    }, [data])
+    }, [data, startYear, endYear, selectedDepartment])
 
     /** ข้อมูลสำหรับ CSV */
     const csvData = useMemo(
@@ -186,6 +218,21 @@ export default function ReportTableE() {
                         >
                             {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
                                 <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Department</label>
+                        <select
+                            value={selectedDepartment}
+                            onChange={e => setSelectedDepartment(e.target.value)}
+                            className="border rounded px-2 py-1 text-sm"
+                        >
+                            <option value="all">All Departments</option>
+                            {departments.map(dept => (
+                                <option key={dept.documentId} value={dept.documentId}>
+                                    {dept.title}
+                                </option>
                             ))}
                         </select>
                     </div>
