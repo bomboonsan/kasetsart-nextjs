@@ -217,6 +217,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const updatePartnersFromFunding = useCallback(() => {
 		if (!formData.__fundingObj) return;
 		setFormData((prev) => ({ ...prev, partners: formData.__fundingObj.partners || [] }));
+		setFormData((prev) => ({ ...prev, numberPages: formData.__fundingObj.pages || null }));
 	}, [formData.__fundingObj]);
 
 	useEffect(() => {

@@ -346,6 +346,7 @@ export const UPDATE_PUBLICATION = gql`
 export const GET_FUNDS = gql`
   query GetFunds($pagination: PaginationArg, $sort: [String], $filters: FundFiltersInput) {
     funds(pagination: $pagination, sort: $sort, filters: $filters) {
+      fundName
       documentId
       contentDesc
       fundType
