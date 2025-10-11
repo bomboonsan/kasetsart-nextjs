@@ -157,6 +157,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 references2: formData.references2 || null,
                 references3: formData.references3 || null,
                 references4: formData.references4 || null,
+                period: formData.period || null,
                 partners: formData.partners || [],
                 attachments: attachmentIds,
                 users_permissions_users: usersPermissionsUsers

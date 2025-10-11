@@ -95,12 +95,12 @@ export default function ReportTableA() {
       const depId = dep.documentId
       const depUsers = deptUsersMap.get(depId) || []
 
-      // totalMembers: users with academicPosition > 0
-      const totalMembers = depUsers.filter(u => (u.academicPosition || []).length > 0).length
+      // totalMembers: users with academic_types > 0
+      const totalMembers = depUsers.filter(u => (u.academic_types || []).length > 0).length
 
-      // membersWithICs: users with academicPosition > 0 AND (projects > 0 OR funds > 0)
+      // membersWithICs: users with academic_types > 0 AND (projects > 0 OR funds > 0)
       const usersWithICs = depUsers.filter(u => {
-        const hasAcademicTypes = (u.academicPosition || []).length > 0
+        const hasAcademicTypes = (u.academic_types || []).length > 0
         const hasProjects = (u.projects || []).length > 0
         const hasFunds = (u.funds || []).length > 0
         return hasAcademicTypes && (hasProjects || hasFunds)
@@ -261,15 +261,15 @@ export default function ReportTableA() {
       })
 
       // Members with/without ICs
-      // membersWithICs is already calculated based on users with academicPosition AND (projects OR funds)
+      // membersWithICs is already calculated based on users with academic_types AND (projects OR funds)
       const membersWithICs = usersWithICs.length
       const membersWithoutICs = totalMembers - membersWithICs
 
       // PART & ALL: Calculate percentages based on participation
-      // Filter users with academicPosition > 0
-      const usersWithAcademicTypes = depUsers.filter(u => (u.academicPosition || []).length > 0)
+      // Filter users with academic_types > 0
+      const usersWithAcademicTypes = depUsers.filter(u => (u.academic_types || []).length > 0)
 
-      // PART: users with academicPosition > 0 AND participation == '0'
+      // PART: users with academic_types > 0 AND participation == '0'
       const partCount = usersWithAcademicTypes.filter(u => u.participation === '0').length
 
       // ALL: users with academic_types > 0 AND (participation == '0' OR participation == '1')
