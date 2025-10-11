@@ -282,45 +282,45 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		<>
 			<Block>
 				<div className="inputGroup">
-					<FormRadio 
-						id="bookType" 
-						label="ประเภทผลงาน" 
-						value={String(formData.bookType)} 
-						onChange={handleBookTypeChange} 
-						options={bookTypeOptions} 
+					<FormRadio
+						id="bookType"
+						label="ประเภทผลงาน"
+						value={String(formData.bookType)}
+						onChange={handleBookTypeChange}
+						options={bookTypeOptions}
 					/>
-					<FormTextarea 
-						id="titleTH" 
-						label="ชื่อผลงาน (ไทย)" 
-						value={formData.titleTH} 
-						onChange={handleTitleTHChange} 
-						rows={4} 
+					<FormTextarea
+						id="titleTH"
+						label="ชื่อผลงาน (ไทย)"
+						value={formData.titleTH}
+						onChange={handleTitleTHChange}
+						rows={4}
 					/>
-					<FormTextarea 
-						id="titleEN" 
-						label="ชื่อผลงาน (อังกฤษ)" 
-						value={formData.titleEN} 
-						onChange={handleTitleENChange} 
-						rows={4} 
+					<FormTextarea
+						id="titleEN"
+						label="ชื่อผลงาน (อังกฤษ)"
+						value={formData.titleEN}
+						onChange={handleTitleENChange}
+						rows={4}
 					/>
-					<FormTextarea 
-						id="detail" 
-						label="รายละเอียดเบื้องต้น" 
-						value={formData.detail} 
-						onChange={handleDetailChange} 
-						rows={6} 
+					<FormTextarea
+						id="detail"
+						label="รายละเอียดเบื้องต้น"
+						value={formData.detail}
+						onChange={handleDetailChange}
+						rows={6}
 					/>
 					<FundPicker
 						label="ทุนที่เกี่ยวข้อง"
 						selectedFund={formData.__fundingObj}
 						onSelect={handleFundChange}
 					/>
-					<FormRadio 
-						id="level" 
-						label="ระดับผลงาน" 
-						value={formData.level} 
-						onChange={handleLevelChange} 
-						options={levelOptions} 
+					<FormRadio
+						id="level"
+						label="ระดับผลงาน"
+						value={formData.level}
+						onChange={handleLevelChange}
+						options={levelOptions}
 					/>
 					<FormSelect
 						id="revision"
@@ -354,7 +354,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 					/>
 					<FormSelect
 						id="yearContracted"
-						label="Year contracted (ถ้ามีโปรดระบุปี)"
+						label="Year contracted (ระบุเป็น ค.ศ.)"
 						value={formData.yearContracted ?? ""}
 						placeholder="เลือก Year contracted"
 						onChange={(val) => handleInputChange('yearContracted', val)}
@@ -382,11 +382,11 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 						type="number"
 						value={formData.numberPages || ''}
 						onChange={(e) => handleInputChange('numberPages', e.target.value)}
-					/>					
-					<FileUploadField 
-						label="เอกสารแนบ" 
-						value={Array.isArray(formData.attachments) ? formData.attachments : []} 
-						onFilesChange={handleAttachmentsChange} 
+					/>
+					<FileUploadField
+						label="เอกสารแนบ"
+						value={Array.isArray(formData.attachments) ? formData.attachments : []}
+						onFilesChange={handleAttachmentsChange}
 					/>
 					{/* <WritersEditor 
 						writers={formData.writers} 
@@ -395,9 +395,9 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				</div>
 			</Block>
 			<Block className="mt-4">
-				<Partners 
-					data={formData.partners} 
-					onChange={handlePartnersChange} 
+				<Partners
+					data={formData.partners}
+					onChange={handlePartnersChange}
 				/>
 			</Block>
 			<div className='flex justify-end items-center gap-3 mt-4'>

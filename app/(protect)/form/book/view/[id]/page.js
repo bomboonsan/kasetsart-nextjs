@@ -58,7 +58,7 @@ export default function BookView() {
                             <FieldView label="รายละเอียด" value={book.detail || '-'} />
                             <FieldView label="วันที่ตีพิมพ์" value={book.publicationDate || '-'} />
                             <FieldView label="Revision" value={book.revision || '-'} />
-                            <FieldView label="ทุนที่เกี่ยวข้อง" value={book.funds[0].fundName || '-'} />
+                            <FieldView label="ทุนที่เกี่ยวข้อง" value={book.funds?.[0]?.fundName || '-'} />
                             <FieldView label="ระดับผลงาน" value={getLevelText(book.level) || '-'} />
                             <FieldView label="Status" value={book.bookStatus || '-'} />
                             <FieldView label="ISBN" value={book.isbn || '-'} />
@@ -87,10 +87,10 @@ export default function BookView() {
                         </div>
                     </Block>
 
-                    {book.partners && book.partners.length > 0 && (
+                    {book.funds?.[0]?.partners && book.funds?.[0]?.partners.length > 0 && (
                         <Block>
                             <h2 className="text-lg font-medium mb-3">ผู้ร่วมงาน</h2>
-                            <PartnersView data={book.partners} />
+                            <PartnersView data={book.funds?.[0]?.partners} />
                         </Block>
                     )}
                 </div>
