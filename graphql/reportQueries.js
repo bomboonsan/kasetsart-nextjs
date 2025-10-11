@@ -15,6 +15,15 @@ export const GET_REPORT_A = gql`
             documentId
             participation
             departments { documentId }
+            academic_types {
+                documentId
+            }
+            projects {
+                documentId
+            }
+            funds {
+                documentId
+            }
         }
         departments { documentId title }
         publications {
