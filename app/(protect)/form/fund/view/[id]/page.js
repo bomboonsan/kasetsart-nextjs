@@ -49,7 +49,7 @@ export default function FundViewPage() {
               <FieldView label="กลุ่มเป้าหมายของตำราหรือหนังสือ" value={fund.targetGroup} />
               <FieldView label="การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ" value={fund.chapterDetails} />
               <FieldView label="จำนวนหน้าประมาณ" value={fund.pages} />
-              <FieldView label="ระยะเวลาที่จะใช้ในการเขียนประมาณ" value={fund.duration} />
+              <FieldView label="ระยะเวลาที่จะใช้ในการเขียนประมาณ" value={fund.period} />
               <FieldView label="รายชื่อหนังสือและเอกสารอ้างอิง (บรรณานุกรม)" value={fund.references} />
               <FieldView label=" " value={fund.references2} />
               <FieldView label=" " value={fund.references3} />
