@@ -455,7 +455,7 @@ export const GET_BOOK = gql`
       refereed
       numberPages
 
-      funds { documentId contentDesc fundType fundTypeText partners }
+      funds { documentId fundName contentDesc fundType fundTypeText partners }
     }
   }
 `;

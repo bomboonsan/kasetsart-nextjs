@@ -34,6 +34,11 @@ export default function BookView() {
         if (v === 1 || v === '1') return 'ตำรา';
         return '-';
     }
+    const getLevelText = (v) => {
+        if (v === 0 || v === '0') return 'ระดับชาติ';
+        if (v === 1 || v === '1') return 'ระดับนานาชาติ';
+        return '-';
+    }
 
     return (
         <div>
@@ -53,13 +58,15 @@ export default function BookView() {
                             <FieldView label="รายละเอียด" value={book.detail || '-'} />
                             <FieldView label="วันที่ตีพิมพ์" value={book.publicationDate || '-'} />
                             <FieldView label="Revision" value={book.revision || '-'} />
+                            <FieldView label="ทุนที่เกี่ยวข้อง" value={book.funds[0].fundName || '-'} />
+                            <FieldView label="ระดับผลงาน" value={getLevelText(book.level) || '-'} />
                             <FieldView label="Status" value={book.bookStatus || '-'} />
                             <FieldView label="ISBN" value={book.isbn || '-'} />
                             <FieldView label="Publisher" value={book.publisher || '-'} />
                             <FieldView label="Year contracted" value={book.yearContracted || '-'} />
                             <FieldView label="Refereed" value={book.refereed || '-'} />
-                            <FieldView label="วันที่ตีพิมพ์" value={book.numberPages || '-'} />
-                            <FieldView label="Number of Pages" value={book.researchType || '-'} />
+                            <FieldView label="Research Type" value={book.researchType || '-'} />
+                            <FieldView label="Number of Pages" value={book.numberPages || '-'} />
                         </div>
                     </Block>
 
