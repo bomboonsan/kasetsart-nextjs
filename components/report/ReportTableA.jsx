@@ -34,7 +34,7 @@ export default function ReportTableA() {
       if (!pub.durationStart && !pub.durationEnd) return true
       const pubStartYear = pub.durationStart ? new Date(pub.durationStart).getFullYear() : null
       const pubEndYear = pub.durationEnd ? new Date(pub.durationEnd).getFullYear() : null
-      
+
       // If only start date exists
       if (pubStartYear && !pubEndYear) {
         return pubStartYear >= startYear && pubStartYear <= endYear
@@ -56,7 +56,7 @@ export default function ReportTableA() {
       if (!conf.durationStart && !conf.durationEnd) return true
       const confStartYear = conf.durationStart ? new Date(conf.durationStart).getFullYear() : null
       const confEndYear = conf.durationEnd ? new Date(conf.durationEnd).getFullYear() : null
-      
+
       // If only start date exists
       if (confStartYear && !confEndYear) {
         return confStartYear >= startYear && confStartYear <= endYear
@@ -93,7 +93,18 @@ export default function ReportTableA() {
     const deptStats = departments.map(dep => {
       const depId = dep.documentId
       const depUsers = deptUsersMap.get(depId) || []
-      const totalMembers = depUsers.length
+
+      // totalMembers: users with academic_types > 0
+      const totalMembers = depUsers.filter(u => (u.academic_types || []).length > 0).length
+
+      // membersWithICs: users with academic_types > 0 AND (projects > 0 OR funds > 0)
+      const usersWithICs = depUsers.filter(u => {
+        const hasAcademicTypes = (u.academic_types || []).length > 0
+        const hasProjects = (u.projects || []).length > 0
+        const hasFunds = (u.funds || []).length > 0
+        return hasAcademicTypes && (hasProjects || hasFunds)
+      })
+
       const membersWithICsSet = new Set()
 
       let bds = 0, ais = 0, tls = 0
@@ -162,12 +173,12 @@ export default function ReportTableA() {
       publications.forEach(pub => {
         (pub.projects || []).forEach(prjObj => {
           let partners = prjObj.partners || []
-          
+
           // Handle if partners is a string (need to parse)
           if (typeof partners === 'string') {
             try { partners = JSON.parse(partners) } catch { partners = [] }
           }
-          
+
           // Ensure partners is an array
           if (!Array.isArray(partners)) {
             partners = []
@@ -176,7 +187,7 @@ export default function ReportTableA() {
           partners.forEach(partner => {
             const userDeps = partner.User?.departments || []
             const userDepIds = userDeps.map(d => d.id || d.documentId)
-            
+
             // Check if user is internal (has departments) and belongs to current department
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
@@ -192,12 +203,12 @@ export default function ReportTableA() {
       conferences.forEach(conf => {
         (conf.projects || []).forEach(prjObj => {
           let partners = prjObj.partners || []
-          
+
           // Handle if partners is a string (need to parse)
           if (typeof partners === 'string') {
             try { partners = JSON.parse(partners) } catch { partners = [] }
           }
-          
+
           // Ensure partners is an array
           if (!Array.isArray(partners)) {
             partners = []
@@ -206,7 +217,7 @@ export default function ReportTableA() {
           partners.forEach(partner => {
             const userDeps = partner.User?.departments || []
             const userDepIds = userDeps.map(d => d.id || d.documentId)
-            
+
             // Check if user is internal (has departments) and belongs to current department
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
@@ -222,12 +233,12 @@ export default function ReportTableA() {
       books.forEach(book => {
         (book.funds || []).forEach(fund => {
           let partners = fund.partners || []
-          
+
           // Handle if partners is a string (need to parse)
           if (typeof partners === 'string') {
             try { partners = JSON.parse(partners) } catch { partners = [] }
           }
-          
+
           // Ensure partners is an array
           if (!Array.isArray(partners)) {
             partners = []
@@ -236,7 +247,7 @@ export default function ReportTableA() {
           partners.forEach(partner => {
             const userDeps = partner.User?.departments || []
             const userDepIds = userDeps.map(d => d.id || d.documentId)
-            
+
             // Check if user is internal (has departments) and belongs to current department
             if (userDeps.length > 0 && userDepIds.includes(depId)) {
               const proportion = Number(partner.partnerProportion || 0)
@@ -249,7 +260,8 @@ export default function ReportTableA() {
       })
 
       // Members with/without ICs
-      const membersWithICs = membersWithICsSet.size
+      // membersWithICs is already calculated based on users with academic_types AND (projects OR funds)
+      const membersWithICs = usersWithICs.length
       const membersWithoutICs = totalMembers - membersWithICs
 
       // PART & ALL: Calculate percentages based on participation
@@ -258,15 +270,15 @@ export default function ReportTableA() {
       const supportingCount = depUsers.filter(u => u.participation === '1').length
       const participatingCount = depUsers.filter(u => u.participation === '0').length
       const totalParticipation = supportingCount + participatingCount
-      
+
       // PART: Percentage of participating users
-      const partPercentage = totalParticipation > 0 
-        ? (participatingCount / totalParticipation) * 100 
+      const partPercentage = totalParticipation > 0
+        ? (participatingCount / totalParticipation) * 100
         : 0
-      
+
       // ALL: Percentage of all participating users (should always be 100%)
-      const allPercentage = totalParticipation > 0 
-        ? (totalParticipation / totalParticipation) * 100 
+      const allPercentage = totalParticipation > 0
+        ? (totalParticipation / totalParticipation) * 100
         : 0
 
       const portfolioTotal = bds + ais + tls
@@ -302,21 +314,21 @@ export default function ReportTableA() {
       })
       return acc
     }, {})
-    
+
     // Calculate total percentages
     const totalSupportingCount = deptStats.reduce((sum, row) => sum + row._supportingCount, 0)
     const totalParticipatingCount = deptStats.reduce((sum, row) => sum + row._participatingCount, 0)
     const totalParticipationSum = totalSupportingCount + totalParticipatingCount
-    
-    const totalPartPercentage = totalParticipationSum > 0 
-      ? (totalParticipatingCount / totalParticipationSum) * 100 
+
+    const totalPartPercentage = totalParticipationSum > 0
+      ? (totalParticipatingCount / totalParticipationSum) * 100
       : 0
-    const totalAllPercentage = totalParticipationSum > 0 
-      ? (totalParticipationSum / totalParticipationSum) * 100 
+    const totalAllPercentage = totalParticipationSum > 0
+      ? (totalParticipationSum / totalParticipationSum) * 100
       : 0
-    
-    const totalRow = { 
-      discipline: 'Total', 
+
+    const totalRow = {
+      discipline: 'Total',
       ...total,
       part: totalPartPercentage,
       all: totalAllPercentage
