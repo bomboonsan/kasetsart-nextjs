@@ -551,8 +551,8 @@ export default function ReportTableA() {
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.aprEr)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.allOther)}</td>
                   <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-medium">{fmt1(row.totalTypes)}</td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.part)}</td>
-                  <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">{fmt1(row.all)}</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(row.part)}%</td>
+                  <td className="px-2 py-3 text-sm text-center text-gray-900 font-medium">{fmt1(row.all)}%</td>
                 </tr>
               ))}
               {/* Total Row */}
@@ -571,8 +571,8 @@ export default function ReportTableA() {
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt0(totalRow.aprEr)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt0(totalRow.allOther)}</td>
                 <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{fmt0(totalRow.totalTypes)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.part)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">{fmt1(totalRow.all)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{fmt1(totalRow.part)}%</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 font-bold">{fmt1(totalRow.all)}%</td>
               </tr>
             </tbody>
           </table>
