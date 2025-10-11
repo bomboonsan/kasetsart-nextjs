@@ -288,11 +288,11 @@ export default function ReportTableB() {
               {!loading && !error && rows.length > 0 && (
                 <tr className="bg-gray-300 font-semibold">
                   <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">Total</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(0)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(0)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(0)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(0)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(0)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(1)}</td>
                 </tr>
               )}
             </tbody>
