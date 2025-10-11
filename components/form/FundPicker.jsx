@@ -54,6 +54,7 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 			const mapped = returned.map(f => ({
 				id: f.documentId || f.id,
 				documentId: f.documentId || f.id,
+				fundName: f.fundName,
 				contentDesc: f.contentDesc,
 				fundType: f.fundType,
 				fundTypeText: f.fundTypeText,
@@ -79,7 +80,7 @@ export default function FundPicker({ label = 'ทุนที่เกี่ย�
 	};
 
 	const formatFundDisplay = (fund) => {
-		return fund.contentDesc || `Fund #${fund.id}`;
+		return fund.fundName || `Fund #${fund.id}`;
 	};
 
 	const formatFundDetails = (fund) => {

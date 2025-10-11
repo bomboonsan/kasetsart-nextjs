@@ -367,6 +367,7 @@ export const GET_MY_FUNDS = gql`
         $filters
       ]
     }) {
+      fundName
       documentId
       contentDesc
       fundType
