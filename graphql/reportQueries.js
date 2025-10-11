@@ -10,8 +10,8 @@ export const GET_IMPACTS = gql`
 `;
 
 export const GET_REPORT_A = gql`
-    query ReportA {  
-        usersPermissionsUsers {
+    query ReportA($pagination: PaginationArg) {  
+        usersPermissionsUsers(pagination: $pagination) {
             documentId
             participation
             departments { documentId }
@@ -26,7 +26,7 @@ export const GET_REPORT_A = gql`
             }
         }
         departments { documentId title }
-        publications {
+        publications(pagination: $pagination) {
             documentId
             
             projects {
@@ -38,7 +38,7 @@ export const GET_REPORT_A = gql`
             durationEnd
             durationStart
         }
-        conferences {
+        conferences(pagination: $pagination) {
             documentId
             projects {
                 documentId
@@ -49,7 +49,7 @@ export const GET_REPORT_A = gql`
             durationEnd
             durationStart
         }
-        books {
+        books(pagination: $pagination) {
             documentId
             funds {
                 documentId
@@ -61,8 +61,8 @@ export const GET_REPORT_A = gql`
 `;
 
 export const GET_REPORT_B = gql`
-    query Publications {
-        publications {
+    query Publications($pagination: PaginationArg) {
+        publications(pagination: $pagination) {
             projects {
                 documentId
                 impacts {
@@ -83,15 +83,15 @@ export const GET_REPORT_B = gql`
 `;
 
 export const GET_REPORT_C = gql`
-    query ReportC {
+    query ReportC($pagination: PaginationArg) {
 
-    usersPermissionsUsers {
+    usersPermissionsUsers(pagination: $pagination) {
         departments {
             documentId
         }
         participation
     }
-    publications {
+    publications(pagination: $pagination) {
         durationEnd
         durationStart
         projects {      
@@ -126,15 +126,15 @@ export const GET_REPORT_C = gql`
 `;
 
 export const GET_REPORT_D = gql`
-    query ReportC {
+    query ReportD($pagination: PaginationArg) {
 
-    usersPermissionsUsers {
+    usersPermissionsUsers(pagination: $pagination) {
         departments {
             documentId
         }
         participation
     }
-    publications {
+    publications(pagination: $pagination) {
         durationEnd
         durationStart
         projects {      
@@ -168,8 +168,8 @@ export const GET_REPORT_D = gql`
 `;
 
 export const GET_REPORT_E = gql`
-    query Projects {
-        projects {            
+    query Projects($pagination: PaginationArg) {
+        projects(pagination: $pagination) {            
             partners
             publications {
                 abstractEN
@@ -190,8 +190,8 @@ export const GET_REPORT_E = gql`
 `;
 
 export const GET_REPORT_F = gql`
-    query Projects {
-        projects {        
+    query Projects($pagination: PaginationArg) {
+        projects(pagination: $pagination) {        
             partners
             conferences {
                 abstractTH

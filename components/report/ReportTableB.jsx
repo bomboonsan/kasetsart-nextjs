@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { CSVLink } from "react-csv";
 import { Button } from "@/components/ui/button";
 import ReportFilters from '@/components/report/ReportFilters'
-import { useQuery } from '@apollo/client/react'
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery'
 import { GET_REPORT_B } from '@/graphql/reportQueries'
 
 export default function ReportTableB() {
@@ -40,7 +40,7 @@ export default function ReportTableB() {
   // FINANCE | 0.3 |
   // ในขณะที่อาจารย์ อีก 2 คนที่มีรายชื่อทำผลงานด้วยกัน ก็จะไปขึ้นค่าแบบนี้ หลักการเดียวกัน แต่อยู่ใน row ของภาคตนเอง นั้นเอง
 
-  const { data, loading: gqlLoading, error: gqlError } = useQuery(GET_REPORT_B)
+  const { data, loading: gqlLoading, error: gqlError } = usePaginatedQuery(GET_REPORT_B)
 
   useEffect(() => {
     setLoading(gqlLoading)
@@ -288,11 +288,11 @@ export default function ReportTableB() {
               {!loading && !error && rows.length > 0 && (
                 <tr className="bg-gray-300 font-semibold">
                   <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">Total</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(1)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(1)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(1)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(1)}</td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(1)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.teaching).toFixed(0)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.research).toFixed(0)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.practice).toFixed(0)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 border-r">{Number(totals.societal).toFixed(0)}</td>
+                  <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{Number(totals.total).toFixed(0)}</td>
                 </tr>
               )}
             </tbody>

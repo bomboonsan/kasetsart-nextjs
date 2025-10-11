@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { CSVLink } from 'react-csv'
 import { Button } from '@/components/ui/button'
-import { useQuery } from '@apollo/client/react'
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery'
 import { GET_REPORT_F } from '@/graphql/reportQueries'
 
 /** แปลงวันที่เป็น DD/MM/YYYY */
@@ -91,7 +91,7 @@ export default function ReportTableE() {
     const { data: session } = useSession()
 
     // ใช้ GraphQL อย่างเดียว
-    const { data, loading, error } = useQuery(GET_REPORT_F, {
+    const { data, loading, error } = usePaginatedQuery(GET_REPORT_F, {
         context: session?.jwt ? { headers: { Authorization: `Bearer ${session.jwt}` } } : undefined,
         fetchPolicy: 'cache-and-network',
     })

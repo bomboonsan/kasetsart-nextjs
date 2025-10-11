@@ -2,11 +2,12 @@ import { useEffect, useState, useMemo } from 'react'
 import { CSVLink } from "react-csv";
 import { Button } from "@/components/ui/button";
 import ReportFilters from '@/components/report/ReportFilters';
-import { useQuery } from '@apollo/client/react';
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery';
 import { GET_REPORT_D } from '@/graphql/reportQueries';
 
 export default function ReportTableDfull() {
-  const { data, loading, error } = useQuery(GET_REPORT_D);
+  const { data, loading, error } = usePaginatedQuery(GET_REPORT_D);
+  const f0 = v => (v === 0 || v ? Number(v).toFixed(0) : '');
   const f1 = v => (v === 0 || v ? Number(v).toFixed(1) : '');
   const currentYear = new Date().getFullYear()
   const MIN_YEAR = 2019
@@ -415,36 +416,36 @@ export default function ReportTableDfull() {
               {/* Total Row */}
               <tr className="bg-gray-300 font-semibold">
                 <td className="px-4 py-3 text-sm text-gray-900 border-r font-bold">{totalRow.discipline}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.tciTier1)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.tciTier2)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.nonTci)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{f1(totalRow.totalNational)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.aci)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.q1)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.q2)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.q3)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.q4)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.delisted)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.totalScopus)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.scie)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ssci)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ahci)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.esci)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.totalWebOfScience)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.aStar)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.a)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.b)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.c)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.totalAbdc)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ajg1)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ajg2)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ajg3)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ajg4)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.ajg4Star)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.totalAjg)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f1(totalRow.otherPjr)}</td>
-                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{f1(totalRow.totalInternational)}</td>
-                <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{f1(totalRow.totalPublications)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.tciTier1)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.tciTier2)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.nonTci)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{f0(totalRow.totalNational)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.aci)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.q1)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.q2)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.q3)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.q4)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.delisted)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.totalScopus)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.scie)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ssci)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ahci)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.esci)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.totalWebOfScience)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.aStar)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.a)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.b)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.c)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.totalAbdc)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ajg1)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ajg2)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ajg3)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ajg4)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.ajg4Star)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.totalAjg)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r">{f0(totalRow.otherPjr)}</td>
+                <td className="px-2 py-3 text-sm text-center text-gray-900 border-r font-bold">{f0(totalRow.totalInternational)}</td>
+                <td className="px-4 py-3 text-sm text-center text-gray-900 font-bold">{f0(totalRow.totalPublications)}</td>
               </tr>
             </tbody>
           </table>

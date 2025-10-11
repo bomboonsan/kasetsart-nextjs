@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { CSVLink } from 'react-csv'
 import { Button } from '@/components/ui/button'
-import { useQuery } from '@apollo/client/react'
+import { usePaginatedQuery } from '@/hooks/usePaginatedQuery'
 import { GET_REPORT_E } from '@/graphql/reportQueries'
 
 /** map ประเภทสิ่งพิมพ์ */
@@ -84,7 +84,7 @@ export default function ReportTableE_Publications() {
     const [selectedDepartment, setSelectedDepartment] = useState('all')
     const { data: session } = useSession()
 
-    const { data, loading, error } = useQuery(GET_REPORT_E, {
+    const { data, loading, error } = usePaginatedQuery(GET_REPORT_E, {
         context: session?.jwt ? { headers: { Authorization: `Bearer ${session.jwt}` } } : undefined,
         fetchPolicy: 'cache-and-network',
     })
