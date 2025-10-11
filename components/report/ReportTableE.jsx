@@ -273,12 +273,12 @@ export default function ReportTableE_Publications() {
                     <table className="w-full table-fixed border-collapse">
                         <thead>
                             <tr>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ลำดับ</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-20">ลำดับ</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อผลงานที่ตีพิมพ์</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อวารสารวิชาการ</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อคณะผู้วิจัย</th>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ระดับการตีพิมพ์</th>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">วัน/เดือน/ปีที่ตีพิมพ์</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-40">ระดับการตีพิมพ์</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-40">วัน/เดือน/ปีที่ตีพิมพ์</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -289,7 +289,7 @@ export default function ReportTableE_Publications() {
                             ) : (
                                 rows.map(r => (
                                     <tr key={r.no} className="hover:bg-gray-50 align-top">
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.no}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.no}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.title}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.meeting}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">
@@ -301,8 +301,8 @@ export default function ReportTableE_Publications() {
                                                 r.authors
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.level}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date} - {r.dateEnd}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.level}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.date} - {r.dateEnd}</td>
                                     </tr>
                                 ))
                             )}

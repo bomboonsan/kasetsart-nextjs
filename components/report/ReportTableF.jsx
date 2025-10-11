@@ -46,7 +46,28 @@ function partnerName(p) {
 
 /** รวมรายชื่อ partner ของโปรเจกต์และลบชื่อซ้ำแบบหยาบ */
 function projectAuthors(partners) {
-    const list = (Array.isArray(partners) ? partners : []).map(partnerName).filter(Boolean)
+    if (!Array.isArray(partners)) return []
+
+    // Sort partners: First Author → Corresponding Author → others
+    const sorted = [...partners].sort((a, b) => {
+        const commentA = (a?.partnerComment || '').toLowerCase()
+        const commentB = (b?.partnerComment || '').toLowerCase()
+
+        const isFirstA = commentA.includes('first author')
+        const isFirstB = commentB.includes('first author')
+        const isCorrespondingA = commentA.includes('corresponding author')
+        const isCorrespondingB = commentB.includes('corresponding author')
+
+        if (isFirstA && !isFirstB) return -1
+        if (!isFirstA && isFirstB) return 1
+        if (isCorrespondingA && !isCorrespondingB) return -1
+        if (!isCorrespondingA && isCorrespondingB) return 1
+
+        // Keep original order for others
+        return (a?.order || 0) - (b?.order || 0)
+    })
+
+    const list = sorted.map(partnerName).filter(Boolean)
     // ลบซ้ำแบบ case-insensitive
     const seen = new Set()
     const dedup = []
@@ -57,7 +78,7 @@ function projectAuthors(partners) {
             dedup.push(name)
         }
     }
-    return dedup.join(', ')
+    return dedup
 }
 
 export default function ReportTableE() {
@@ -148,7 +169,14 @@ export default function ReportTableE() {
     const csvData = useMemo(
         () => [
             ['ลำดับ', 'ชื่อผลงานวิจัย/นำเสนอ', 'ชื่อการประชุม/วารสาร', 'ชื่อคณะผู้วิจัย', 'ระดับการประชุม', 'วัน/เดือน/ปีที่เสนอ'],
-            ...rows.map(r => [r.no, r.title, r.meeting, r.authors, r.level, r.date]),
+            ...rows.map(r => [
+                r.no,
+                r.title,
+                r.meeting,
+                Array.isArray(r.authors) ? r.authors.join(', ') : r.authors,
+                r.level,
+                r.date
+            ]),
         ],
         [rows]
     )
@@ -258,12 +286,12 @@ export default function ReportTableE() {
                     <table className="w-full table-fixed border-collapse">
                         <thead>
                             <tr>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ลำดับ</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-20">ลำดับ</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อผลงานวิจัย</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อการประชุม</th>
                                 <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ชื่อคณะผู้วิจัย</th>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">ระดับการประชุม</th>
-                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border">วัน/เดือน/ปีที่เสนอ</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-40">ระดับการประชุม</th>
+                                <th className="px-3 py-2 text-xs font-semibold text-gray-700 border w-40">วัน/เดือน/ปีที่เสนอ</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -274,12 +302,20 @@ export default function ReportTableE() {
                             ) : (
                                 rows.map(r => (
                                     <tr key={r.no} className="hover:bg-gray-50 align-top">
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.no}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.no}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.title}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.meeting}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.authors}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.level}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.date} - {r.dateEnd}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border">
+                                            {Array.isArray(r.authors) && r.authors.length > 0 ? (
+                                                r.authors.map((author, idx) => (
+                                                    <div key={idx}>{author}</div>
+                                                ))
+                                            ) : (
+                                                r.authors
+                                            )}
+                                        </td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.level}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border text-center">{r.date} - {r.dateEnd}</td>
                                     </tr>
                                 ))
                             )}
