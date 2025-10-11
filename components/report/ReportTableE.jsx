@@ -28,10 +28,28 @@ function partnerName(p) {
 
 /** รวมรายชื่อผู้วิจัยของโปรเจกต์ */
 function projectAuthors(partners) {
+    if (!Array.isArray(partners)) return []
 
+    // Sort partners: First Author → Corresponding Author → others
+    const sorted = [...partners].sort((a, b) => {
+        const commentA = (a?.partnerComment || '').toLowerCase()
+        const commentB = (b?.partnerComment || '').toLowerCase()
 
+        const isFirstA = commentA.includes('first author')
+        const isFirstB = commentB.includes('first author')
+        const isCorrespondingA = commentA.includes('corresponding author')
+        const isCorrespondingB = commentB.includes('corresponding author')
 
-    const list = (Array.isArray(partners) ? partners : []).map(partnerName).filter(Boolean)
+        if (isFirstA && !isFirstB) return -1
+        if (!isFirstA && isFirstB) return 1
+        if (isCorrespondingA && !isCorrespondingB) return -1
+        if (!isCorrespondingA && isCorrespondingB) return 1
+
+        // Keep original order for others
+        return (a?.order || 0) - (b?.order || 0)
+    })
+
+    const list = sorted.map(partnerName).filter(Boolean)
     const seen = new Set()
     const out = []
     for (const name of list) {
@@ -41,7 +59,7 @@ function projectAuthors(partners) {
             out.push(name)
         }
     }
-    return out.join(', ')
+    return out
 }
 
 /** แปลงปี (volume) เป็นข้อความแสดงผล */
@@ -138,7 +156,14 @@ export default function ReportTableE_Publications() {
     const csvData = useMemo(
         () => [
             ['ลำดับ', 'ชื่อผลงานที่ตีพิมพ์', 'ชื่อวารสารวิชาการ', 'ชื่อคณะผู้วิจัย', 'ระดับการตีพิมพ์', 'วัน/เดือน/ปีที่ตีพิมพ์'],
-            ...rows.map(r => [r.no, r.title, r.meeting, r.authors, r.level, r.date]),
+            ...rows.map(r => [
+                r.no,
+                r.title,
+                r.meeting,
+                Array.isArray(r.authors) ? r.authors.join(', ') : r.authors,
+                r.level,
+                r.date
+            ]),
         ],
         [rows]
     )
@@ -267,7 +292,15 @@ export default function ReportTableE_Publications() {
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.no}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.title}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.meeting}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 border">{r.authors}</td>
+                                        <td className="px-3 py-2 text-sm text-gray-900 border">
+                                            {Array.isArray(r.authors) && r.authors.length > 0 ? (
+                                                r.authors.map((author, idx) => (
+                                                    <div key={idx}>{author}</div>
+                                                ))
+                                            ) : (
+                                                r.authors
+                                            )}
+                                        </td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.level}</td>
                                         <td className="px-3 py-2 text-sm text-gray-900 border">{r.date} - {r.dateEnd}</td>
                                     </tr>

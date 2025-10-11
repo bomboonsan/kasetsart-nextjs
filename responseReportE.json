@@ -266,7 +266,7 @@
             "orgName": "Accounting Business Administration Kasetsart University, Bangkhen Campus",
             "partnerType": "",
             "partnerProportion_percentage_custom": "",
-            "partnerProportion": 0.25,
+            "partnerProportion": 0.2,
             "partnerComment": "",
             "isInternal": true,
             "order": 1
@@ -307,7 +307,7 @@
             "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
             "partnerType": "",
             "partnerProportion_percentage_custom": "",
-            "partnerProportion": 0.25,
+            "partnerProportion": 0.2,
             "partnerComment": "",
             "isInternal": true,
             "order": 2
@@ -348,13 +348,13 @@
             "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
             "partnerType": "",
             "partnerProportion_percentage_custom": "",
-            "partnerProportion": 0.25,
+            "partnerProportion": 0.2,
             "partnerComment": "",
             "isInternal": true,
             "order": 3
           },
           {
-            "id": 1760041719354,
+            "id": 1760087578165,
             "userID": "je2qpb924wqrc9187lw63mta",
             "User": {
               "id": "je2qpb924wqrc9187lw63mta",
@@ -389,10 +389,51 @@
             "orgName": "Management Business Administration Kasetsart University, Bangkhen Campus",
             "partnerType": "",
             "partnerProportion_percentage_custom": "",
-            "partnerProportion": 0.25,
+            "partnerProportion": 0.2,
             "partnerComment": "",
             "isInternal": true,
             "order": 4
+          },
+          {
+            "id": 1760087586795,
+            "userID": "ohnwzil0nq38s7esxmvtigh7",
+            "User": {
+              "id": "ohnwzil0nq38s7esxmvtigh7",
+              "documentId": "ohnwzil0nq38s7esxmvtigh7",
+              "username": "test",
+              "email": "test@gmail.com",
+              "firstNameTH": "bomtest",
+              "lastNameTH": "lasttest",
+              "firstNameEN": "BomTestd",
+              "lastNameEN": "LastTest",
+              "academicPosition": "fdx",
+              "departments": [
+                {
+                  "id": "yjb6706tqfrbabpb6p9hu6qe",
+                  "name": "Finance"
+                }
+              ],
+              "faculties": [
+                {
+                  "id": "d8mstwkn971wcma10h34j887",
+                  "name": "Business Administration"
+                }
+              ],
+              "organizations": [
+                {
+                  "id": "f767rq645nfsfginysf78s4d",
+                  "name": "Kasetsart University, Bangkhen Campus"
+                }
+              ]
+            },
+            "fullname": "bomtest lasttest",
+            "orgName": "Finance Business Administration Kasetsart University, Bangkhen Campus",
+            "partnerType": "",
+            "partnerProportion_percentage_custom": "",
+            "partnerProportion": 0.2,
+            "partnerComment": "",
+            "isInternal": true,
+            "order": 5
           }
         ],
         "publications": [
@@ -403,6 +444,16 @@
             "isJournalDatabase": "1",
             "volume": "Odio eum sequi ullam quibusdam accusantium id eos magnam. Quas nesciunt eligendi itaque error occaecati officia. Molestiae ex illo culpa temporibus dicta dolorum debitis tenetur.",
             "level": "0",
+            "durationStart": "2022-02-01",
+            "durationEnd": "2024-03-01"
+          },
+          {
+            "abstractEN": "Nesciunt repudiandae sunt officia recusandae modi facere.",
+            "abstractTH": "Ratione a similique magnam ullam natus enim vel non occaecati.",
+            "journalName": "Isobel Blanda",
+            "isJournalDatabase": "0",
+            "volume": "Suscipit molestias sapiente necessitatibus in culpa. Hic atque sit id dolor rem ducimus maxime. Soluta eos quia pariatur mollitia veritatis unde voluptates rem vero.",
+            "level": "1",
             "durationStart": "2025-01-01",
             "durationEnd": "2025-01-01"
           }
