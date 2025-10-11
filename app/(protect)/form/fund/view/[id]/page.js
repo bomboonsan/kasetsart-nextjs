@@ -75,24 +75,6 @@ export default function FundViewPage() {
           </Block>
 
           <Block>
-            <h2 className="text-lg font-medium mb-3">ผู้เขียน</h2>
-            <div className="space-y-2">
-              {fund.writers && fund.writers.length > 0 ? (
-                fund.writers.map((writer, index) => (
-                  <div key={index} className="p-3 bg-gray-50 rounded">
-                    <div className="font-medium">{writer.fullName}</div>
-                    <div className="text-sm text-gray-600">{writer.department} - {writer.faculty}</div>
-                    {writer.phone && <div className="text-sm text-gray-600">โทร: {writer.phone}</div>}
-                    {writer.email && <div className="text-sm text-gray-600">อีเมล: {writer.email}</div>}
-                  </div>
-                ))
-              ) : (
-                <div>ไม่มีข้อมูลผู้เขียน</div>
-              )}
-            </div>
-          </Block>
-
-          <Block>
             <h2 className="text-lg font-medium mb-3">ผู้ร่วมงาน</h2>
             <PartnersView data={fund.partners} />
           </Block>

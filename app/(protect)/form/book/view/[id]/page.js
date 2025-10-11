@@ -47,12 +47,19 @@ export default function BookView() {
                             <Button variant="default" onClick={() => router.push(`/admin/form/book/edit/${book.documentId}`)}>แก้ไข</Button>
                         </div>
                         <div className="inputGroup">
+                            <FieldView label="ประเภท" value={getTypeText(book.bookType)} />
                             <FieldView label="ชื่อผลงาน (ไทย)" value={book.titleTH || '-'} />
                             <FieldView label="ชื่อผลงาน (อังกฤษ)" value={book.titleEN || '-'} />
-                            <FieldView label="ประเภท" value={getTypeText(book.bookType)} />
                             <FieldView label="รายละเอียด" value={book.detail || '-'} />
                             <FieldView label="วันที่ตีพิมพ์" value={book.publicationDate || '-'} />
-                            <FieldView label="ผู้แต่ง" value={(book.writers || []).length > 0 ? (book.writers.map(w => w.name || w).join(', ')) : '-'} />
+                            <FieldView label="Revision" value={book.revision || '-'} />
+                            <FieldView label="Status" value={book.bookStatus || '-'} />
+                            <FieldView label="ISBN" value={book.isbn || '-'} />
+                            <FieldView label="Publisher" value={book.publisher || '-'} />
+                            <FieldView label="Year contracted" value={book.yearContracted || '-'} />
+                            <FieldView label="Refereed" value={book.refereed || '-'} />
+                            <FieldView label="วันที่ตีพิมพ์" value={book.numberPages || '-'} />
+                            <FieldView label="Number of Pages" value={book.researchType || '-'} />
                         </div>
                     </Block>
 
@@ -70,7 +77,7 @@ export default function BookView() {
                             ) : (
                                 <div>ไม่มีไฟล์แนบ</div>
                             )}
-                        </div>  
+                        </div>
                     </Block>
 
                     {book.partners && book.partners.length > 0 && (
