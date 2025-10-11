@@ -265,20 +265,25 @@ export default function ReportTableA() {
       const membersWithoutICs = totalMembers - membersWithICs
 
       // PART & ALL: Calculate percentages based on participation
-      // Supporting: participation == '1'
-      // Participating: participation == '0'
-      const supportingCount = depUsers.filter(u => u.participation === '1').length
-      const participatingCount = depUsers.filter(u => u.participation === '0').length
-      const totalParticipation = supportingCount + participatingCount
+      // Filter users with academic_types > 0
+      const usersWithAcademicTypes = depUsers.filter(u => (u.academic_types || []).length > 0)
 
-      // PART: Percentage of participating users
-      const partPercentage = totalParticipation > 0
-        ? (participatingCount / totalParticipation) * 100
+      // PART: users with academic_types > 0 AND participation == '0'
+      const partCount = usersWithAcademicTypes.filter(u => u.participation === '0').length
+
+      // ALL: users with academic_types > 0 AND (participation == '0' OR participation == '1')
+      const allCount = usersWithAcademicTypes.filter(u =>
+        u.participation === '0' || u.participation === '1'
+      ).length
+
+      // PART: Percentage of participating users (participation == '0')
+      const partPercentage = allCount > 0
+        ? (partCount / allCount) * 100
         : 0
 
       // ALL: Percentage of all participating users (should always be 100%)
-      const allPercentage = totalParticipation > 0
-        ? (totalParticipation / totalParticipation) * 100
+      const allPercentage = allCount > 0
+        ? (allCount / allCount) * 100
         : 0
 
       const portfolioTotal = bds + ais + tls
@@ -300,8 +305,8 @@ export default function ReportTableA() {
         part: partPercentage,
         all: allPercentage,
         // Keep raw counts for total row calculation
-        _supportingCount: supportingCount,
-        _participatingCount: participatingCount
+        _partCount: partCount,
+        _allCount: allCount
       }
     })
 
@@ -316,15 +321,14 @@ export default function ReportTableA() {
     }, {})
 
     // Calculate total percentages
-    const totalSupportingCount = deptStats.reduce((sum, row) => sum + row._supportingCount, 0)
-    const totalParticipatingCount = deptStats.reduce((sum, row) => sum + row._participatingCount, 0)
-    const totalParticipationSum = totalSupportingCount + totalParticipatingCount
+    const totalPartCount = deptStats.reduce((sum, row) => sum + row._partCount, 0)
+    const totalAllCount = deptStats.reduce((sum, row) => sum + row._allCount, 0)
 
-    const totalPartPercentage = totalParticipationSum > 0
-      ? (totalParticipatingCount / totalParticipationSum) * 100
+    const totalPartPercentage = totalAllCount > 0
+      ? (totalPartCount / totalAllCount) * 100
       : 0
-    const totalAllPercentage = totalParticipationSum > 0
-      ? (totalParticipationSum / totalParticipationSum) * 100
+    const totalAllPercentage = totalAllCount > 0
+      ? (totalAllCount / totalAllCount) * 100
       : 0
 
     const totalRow = {
