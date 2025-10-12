@@ -102,8 +102,10 @@ export default function ReportTableA() {
       const usersWithICs = depUsers.filter(u => {
         const hasAcademicTypes = (u.academic_types || []).length > 0
         const hasProjects = (u.projects || []).length > 0
+        const hasPublications = (u.publications || []).length > 0
+        const hasConferences = (u.conferences || []).length > 0
         const hasFunds = (u.funds || []).length > 0
-        return hasAcademicTypes && (hasProjects || hasFunds)
+        return hasAcademicTypes && ((hasPublications || hasConferences) || hasFunds)
       })
 
       const membersWithICsSet = new Set()
@@ -270,21 +272,21 @@ export default function ReportTableA() {
       const usersWithAcademicTypes = depUsers.filter(u => (u.academic_types || []).length > 0)
 
       // PART: users with academic_types > 0 AND participation == '0'
-      const partCount = usersWithAcademicTypes.filter(u => u.participation === '0').length
+      const partCount = usersWithICs.filter(u => u.participation === '0').length
 
       // ALL: users with academic_types > 0 AND (participation == '0' OR participation == '1')
-      const allCount = usersWithAcademicTypes.filter(u =>
+      const allCount = usersWithICs.filter(u =>
         u.participation === '0' || u.participation === '1'
       ).length
 
       // PART: Percentage of participating users (participation == '0')
-      const partPercentage = allCount > 0
-        ? (partCount / allCount) * 100
+      const partPercentage = totalMembers > 0
+        ? (partCount / totalMembers) * 100
         : 0
 
       // ALL: Percentage of all participating users (should always be 100%)
-      const allPercentage = allCount > 0
-        ? (allCount / allCount) * 100
+      const allPercentage = totalMembers > 0
+        ? (allCount / totalMembers) * 100
         : 0
 
       const portfolioTotal = bds + ais + tls
@@ -324,12 +326,13 @@ export default function ReportTableA() {
     // Calculate total percentages
     const totalPartCount = deptStats.reduce((sum, row) => sum + row._partCount, 0)
     const totalAllCount = deptStats.reduce((sum, row) => sum + row._allCount, 0)
+    const totalMembers = total.totalMembers || 0
 
-    const totalPartPercentage = totalAllCount > 0
-      ? (totalPartCount / totalAllCount) * 100
+    const totalPartPercentage = totalMembers > 0
+      ? (totalPartCount / totalMembers) * 100
       : 0
-    const totalAllPercentage = totalAllCount > 0
-      ? (totalAllCount / totalAllCount) * 100
+    const totalAllPercentage = totalMembers > 0
+      ? (totalAllCount / totalMembers) * 100
       : 0
 
     const totalRow = {
