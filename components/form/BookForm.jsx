@@ -217,7 +217,11 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const updatePartnersFromFunding = useCallback(() => {
 		if (!formData.__fundingObj) return;
 		setFormData((prev) => ({ ...prev, partners: formData.__fundingObj.partners || [] }));
-		setFormData((prev) => ({ ...prev, numberPages: String(formData.__fundingObj.pages) || null }));
+		if (!formData.numberPages) {
+			setFormData((prev) => ({ ...prev, numberPages: String(formData.__fundingObj.pages) || null }));
+		} else if (formData.__fundingObj.pages) {
+			setFormData((prev) => ({ ...prev, numberPages: String(formData.__fundingObj.pages) || null }));
+		}
 	}, [formData.__fundingObj]);
 
 	useEffect(() => {
@@ -278,6 +282,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const handleWritersChange = useCallback((writers) => handleInputChange('writers', writers), [handleInputChange]);
 	const handlePartnersChange = useCallback((partners) => handleInputChange('partners', partners), [handleInputChange]);
 
+	console.log('Rendering BookForm with formData:', formData);
 
 	return (
 		<>
@@ -380,7 +385,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 					<FormInput
 						id="numberPages"
 						label="Number of Pages"
-						type="number"
+						type="text"
 						value={formData.numberPages || ''}
 						onChange={(e) => handleInputChange('numberPages', e.target.value)}
 					/>

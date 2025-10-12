@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useMemo } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useQuery } from '@apollo/client/react'
 import Pageheader from '@/components/layout/Pageheader'
@@ -40,6 +40,19 @@ export default function BookView() {
         return '-';
     }
 
+    const researchTypeOptions = [
+        { value: 'bds', label: 'BDS (Basic or Discovery Scholarship)' },
+        { value: 'ais', label: 'AIS (Applied or Integrative / application Scholarship)' },
+        { value: 'tls', label: 'TLS (Teaching and Learning Scholarship)' },
+        { value: 'nic', label: 'NIC (Not counted as a separate Intellectual Contribution)' },
+    ]
+
+    const getResearchTypeText = (v) => {
+        const option = researchTypeOptions.find(opt => opt.value === v);
+        return option ? option.label : '-';
+    }
+
+
     return (
         <div>
             <Pageheader title="ข้อมูลหนังสือ" />
@@ -56,7 +69,6 @@ export default function BookView() {
                             <FieldView label="ชื่อผลงาน (ไทย)" value={book.titleTH || '-'} />
                             <FieldView label="ชื่อผลงาน (อังกฤษ)" value={book.titleEN || '-'} />
                             <FieldView label="รายละเอียด" value={book.detail || '-'} />
-                            <FieldView label="วันที่ตีพิมพ์" value={book.publicationDate || '-'} />
                             <FieldView label="Revision" value={book.revision || '-'} />
                             <FieldView label="ทุนที่เกี่ยวข้อง" value={book.funds?.[0]?.fundName || '-'} />
                             <FieldView label="ระดับผลงาน" value={getLevelText(book.level) || '-'} />
@@ -65,7 +77,7 @@ export default function BookView() {
                             <FieldView label="Publisher" value={book.publisher || '-'} />
                             <FieldView label="Year contracted" value={book.yearContracted || '-'} />
                             <FieldView label="Refereed" value={book.refereed || '-'} />
-                            <FieldView label="Research Type" value={book.researchType || '-'} />
+                            <FieldView label="Research Type" value={getResearchTypeText(book.researchType) || '-'} />
                             <FieldView label="Number of Pages" value={book.numberPages || '-'} />
                         </div>
                     </Block>

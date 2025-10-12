@@ -455,6 +455,7 @@ export const GET_BOOK = gql`
       publisher
       yearContracted
       refereed
+      researchType
       numberPages
 
       funds { documentId fundName contentDesc fundType fundTypeText partners }
