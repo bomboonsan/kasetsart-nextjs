@@ -33,15 +33,30 @@ function mapLevelToLabel(level) {
     return map[v] || ''
 }
 
-/** สกัดชื่อผู้ร่วมวิจัยจาก partner หนึ่งคน */
+/** สกัดชื่อผู้ร่วมวิจัยจาก partner หนึ่งคน พร้อม department */
 function partnerName(p) {
+    let name = ''
+    let deptNames = []
+    
     if (p?.User) {
         const u = p.User
         const th = [u.firstNameTH, u.lastNameTH].filter(Boolean).join(' ').trim()
         const en = [u.firstNameEN, u.lastNameEN].filter(Boolean).join(' ').trim()
-        return th || en || u.email || u.username || p.fullname || 'ไม่ระบุชื่อ'
+        name = th || en || u.email || u.username || p.fullname || 'ไม่ระบุชื่อ'
+        
+        // ดึงชื่อ departments
+        if (Array.isArray(u.departments) && u.departments.length > 0) {
+            deptNames = u.departments.map(d => d.title).filter(Boolean)
+        }
+    } else {
+        name = p?.fullname || p?.orgName || 'ไม่ระบุชื่อ'
     }
-    return p?.fullname || p?.orgName || 'ไม่ระบุชื่อ'
+    
+    // ถ้ามี department ให้แสดงตามหลัง
+    if (deptNames.length > 0) {
+        return `${name} (${deptNames.join(', ')})`
+    }
+    return name
 }
 
 /** รวมรายชื่อ partner ของโปรเจกต์และลบชื่อซ้ำแบบหยาบ */
