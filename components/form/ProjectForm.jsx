@@ -90,16 +90,16 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
     const [sdgsOptions, setSdgsOptions] = useState([]);
     const [departmentsOptions, setDepartmentsOptions] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Memoize computed values
     const isEditing = useMemo(() => isEdit || Boolean(initialData?.documentId), [isEdit, initialData?.documentId]);
-    
+
     // เก็บ attachments เดิมเพื่อเช็คความเปลี่ยนแปลงเวลา update
     const originalAttachmentIdsRef = useRef([]);
 
     // Memoize fund sub type options based on fund type
     const fundSubTypeOptions = useMemo(() => {
-        switch(formData.fundType) {
+        switch (formData.fundType) {
             case "12": return subFundType1;
             case "11": return subFundType2;
             case "13": return subFundType3;
@@ -142,6 +142,21 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         setFormData((prev) => ({ ...prev, [field]: value }));
     }, []);
 
+    // Check if fundName is "อื่นๆ" or custom value
+    const isFundNameOther = useMemo(() => {
+        if (!formData.fundName) return false;
+        // Check if fundName is not in the predefined options
+        const isInOptions = fundNameOptions.some(opt => opt.value === formData.fundName);
+        return formData.fundName === 'อื่นๆ' || !isInOptions;
+    }, [formData.fundName]);
+
+    // Get display value for fundName select
+    const fundNameSelectValue = useMemo(() => {
+        if (!formData.fundName) return "";
+        const isInOptions = fundNameOptions.some(opt => opt.value === formData.fundName);
+        return isInOptions ? formData.fundName : 'อื่นๆ';
+    }, [formData.fundName]);
+
     // Memoize submit handler to prevent re-creation
     const handleSubmit = useCallback(async () => {
         if (!session?.jwt) {
@@ -161,7 +176,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         }
 
         setIsSubmitting(true);
-        
+
         try {
             const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners).map(normalizeId).filter(Boolean)));
 
@@ -291,7 +306,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             toast.error('เกิดข้อผิดพลาดในการโหลดตัวเลือก: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
         }
     });
-    
+
     // Memoize options processing to prevent unnecessary recalculations
     const memoizedOptions = useMemo(() => {
         if (!projectOptions) {
@@ -302,27 +317,27 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 departments: []
             };
         }
-        
+
         return {
-            icTypes: (projectOptions.icTypes ?? []).map(ic => ({ 
-                value: String(ic.documentId), 
-                label: ic.name 
+            icTypes: (projectOptions.icTypes ?? []).map(ic => ({
+                value: String(ic.documentId),
+                label: ic.name
             })),
-            impacts: (projectOptions.impacts ?? []).map(imp => ({ 
-                value: String(imp.documentId), 
-                label: imp.name 
+            impacts: (projectOptions.impacts ?? []).map(imp => ({
+                value: String(imp.documentId),
+                label: imp.name
             })),
-            sdgs: (projectOptions.sdgs ?? []).map(sdg => ({ 
-                value: String(sdg.documentId), 
-                label: sdg.name 
+            sdgs: (projectOptions.sdgs ?? []).map(sdg => ({
+                value: String(sdg.documentId),
+                label: sdg.name
             })),
-            departments: (projectOptions.departments ?? []).map(dep => ({ 
-                value: String(dep.documentId), 
-                label: dep.title 
+            departments: (projectOptions.departments ?? []).map(dep => ({
+                value: String(dep.documentId),
+                label: dep.title
             }))
         };
     }, [projectOptions]);
-    
+
     // Update options state only when memoizedOptions change
     useEffect(() => {
         setIcTypesOptions(memoizedOptions.icTypes);
@@ -351,7 +366,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
     }
 
     return (
-        <> 
+        <>
             <Block>
                 <div className="inputGroup">
                     <FormInput id="fiscalYear" label="ปีงบประมาณ" value={formData.fiscalYear} placeholder="กรอกปีงบประมาณ" onChange={(e) => handleInputChange('fiscalYear', e.target.value)} />
@@ -383,8 +398,16 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     {fundSubTypeOptions.length > 0 && (
                         <FormSelect id="fundSubType" label=" " value={formData.fundSubType ?? ""} placeholder="เลือกประเภทแหล่งทุน" onChange={(val) => handleInputChange('fundSubType', val)} options={fundSubTypeOptions} />
                     )}
-                    <FormSelect id="fundName" label="ชื่อแหล่งทุน" disabled={formData.fundSubType == ""} value={formData.fundName ?? ""} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
-                    <FormTextarea label=" " value={formData.fundName} readOnly disabled />
+                    <FormSelect id="fundName" label="ชื่อแหล่งทุน" disabled={formData.fundSubType == ""} value={fundNameSelectValue} placeholder="ชื่อแหล่งทุน" onChange={(val) => handleInputChange('fundName', val)} options={fundNameOptions} />
+                    {isFundNameOther && (
+                        <FormTextarea
+                            label="ระบุชื่อแหล่งทุน"
+                            value={formData.fundName === 'อื่นๆ' ? '' : formData.fundName}
+                            onChange={(e) => handleInputChange('fundName', e.target.value)}
+                            placeholder="กรุณาระบุชื่อแหล่งทุน"
+                            rows={3}
+                        />
+                    )}
                     <FormInput id="budget" type='number' label="งบวิจัย" value={formData.budget} placeholder="0" onChange={(e) => handleInputChange('budget', e.target.value)} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={(e) => handleInputChange('keywords', e.target.value)} placeholder="" rows={5} />
                     <FormSelect id="icTypes" label="IC Types" value={formData.icTypes ?? ""} placeholder="เลือก IC Types" onChange={(val) => handleInputChange('icTypes', val)} options={icTypesOptions} />

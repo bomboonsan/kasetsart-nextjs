@@ -282,7 +282,6 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const handleWritersChange = useCallback((writers) => handleInputChange('writers', writers), [handleInputChange]);
 	const handlePartnersChange = useCallback((partners) => handleInputChange('partners', partners), [handleInputChange]);
 
-	console.log('Rendering BookForm with formData:', formData);
 
 	return (
 		<>

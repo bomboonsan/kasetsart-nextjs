@@ -181,6 +181,12 @@ export const GET_REPORT_E = gql`
                 durationStart
                 durationEnd
             }
+            users_permissions_users {
+                departments {
+                    documentId
+                    title
+                }
+            }
         }
         departments {
             documentId
@@ -200,6 +206,12 @@ export const GET_REPORT_F = gql`
                 level
                 durationStart
                 durationEnd
+            }
+            users_permissions_users {
+                departments {
+                    documentId
+                    title
+                }
             }
         }
         departments {

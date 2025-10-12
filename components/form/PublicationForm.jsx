@@ -150,7 +150,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             if (isEdit && onSubmit) {
                 await onSubmit(data);
             } else if (isEdit) {
-                // console.log('Updating publication with data:', data);
                 await updatePublication({ variables: { documentId: initialData.documentId, data } });
             } else if (onSubmit) {
                 await onSubmit(data);

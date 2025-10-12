@@ -7,7 +7,6 @@ import { GET_REPORT_C } from '@/graphql/reportQueries';
 
 export default function ReportTableCfull() {
   const { data, loading, error } = usePaginatedQuery(GET_REPORT_C);
-  console.log('data', data);
   const f0 = v => (v === 0 || v ? Number(v).toFixed(0) : '');
   const f1 = v => (v === 0 || v ? Number(v).toFixed(1) : '');
   const currentYear = new Date().getFullYear()
