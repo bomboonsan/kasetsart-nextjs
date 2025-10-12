@@ -26,34 +26,49 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
     // ใช้ ref เพื่อป้องกัน infinite loop ใน onChange effect
     const isInternalChangeRef = useRef(false)
     const prevValueRef = useRef(value)
-    
+
     /** 
-     * แปลงค่า value (YYYY-MM-DD, ค.ศ.) -> state เริ่มต้นของ day, month, yearTh
+     * แปลงค่า value (YYYY-MM-DD หรือ YYYY-MM, ค.ศ.) -> state เริ่มต้นของ day, month, yearTh
      * ใช้ useMemo เพื่อคำนวณครั้งเดียวต่อ value ที่เปลี่ยน
      * เพิ่ม error handling เพื่อป้องกัน client-side exception
      */
     const initialParts = useMemo(() => {
         try {
-            if (!value || typeof value !== 'string') return null
-            
+            if (!value || typeof value !== 'string') {
+                return null
+            }
+
             const parts = value.split("-")
-            if (parts.length !== 3) return null
-            
+            // รองรับทั้ง YYYY-MM-DD (3 parts) และ YYYY-MM (2 parts)
+            if (parts.length !== 3 && parts.length !== 2) {
+                return null
+            }
+
             const [y, m, d] = parts.map((v) => {
                 const num = parseInt(v, 10)
                 return Number.isInteger(num) ? num : null
             })
-            
-            if (!y || !m || (!noDay && !d)) return null
-            if (m < 1 || m > 12) return null
-            if (!noDay && (d < 1 || d > 31)) return null
-            
+
+            // ถ้า noDay หรือไม่มี day ใน value ให้ใช้วันที่ 1
+            const dayValue = noDay || !d ? 1 : d
+
+            if (!y || !m) {
+                return null
+            }
+            if (m < 1 || m > 12) {
+                return null
+            }
+            if (!noDay && d && (d < 1 || d > 31)) {
+                return null
+            }
+
             return {
-                day: noDay ? 1 : d,
+                day: dayValue,
                 month: monthThai[m - 1] ?? monthThai[0],
                 yearTh: y + 543,
             }
-        } catch {
+        } catch (error) {
+            console.error('DateSelect parsing error:', error)
             return null
         }
     }, [value, noDay])
@@ -67,19 +82,19 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
     useEffect(() => {
         // ตรวจสอบว่า value เปลี่ยนจริงๆ หรือไม่
         if (prevValueRef.current === value) return
-        
+
         if (!initialParts) {
             prevValueRef.current = value
             return
         }
-        
+
         // อัพเดต state เฉพาะเมื่อ value มาจากภายนอก (ไม่ใช่จาก internal change)
         if (!isInternalChangeRef.current) {
             setDay(initialParts.day)
             setMonth(initialParts.month)
             setYearTh(initialParts.yearTh)
         }
-        
+
         prevValueRef.current = value
         isInternalChangeRef.current = false
     }, [initialParts, value])
@@ -107,7 +122,7 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         try {
             const m = monthMap[month]
             if (!m || m < 1 || m > 12) return 31 // fallback
-            
+
             if ([1, 3, 5, 7, 8, 10, 12].includes(m)) return 31
             if ([4, 6, 9, 11].includes(m)) return 30
             // กุมภาพันธ์
@@ -131,14 +146,23 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         }
     }, [maxDays, day, noDay])
 
-    /** ค่าที่จะส่งออกในรูปแบบ YYYY-MM-DD (ค.ศ.) - เพิ่ม error handling */
+    /** ค่าที่จะส่งออกในรูปแบบ YYYY-MM-DD (ค.ศ.) - ถ้า noDay=true จะตั้งวันเป็น 01 เสมอ */
     const outValue = useMemo(() => {
         try {
             const mNum = monthMap[month]
-            if (!mNum || mNum < 1 || mNum > 12) return `${gYear}-01-01` // fallback
-            
+            if (!mNum || mNum < 1 || mNum > 12) {
+                return `${gYear}-01-01` // fallback
+            }
+
             const mm = String(mNum).padStart(2, "0")
-            const dayValue = noDay ? 1 : Math.max(1, Math.min(day, 31))
+
+            // ถ้า noDay=true ให้ส่ง YYYY-MM-01 (วันที่ 1 เสมอ)
+            if (noDay) {
+                return `${gYear}-${mm}-01`
+            }
+
+            // ถ้ามีวัน ให้ส่ง YYYY-MM-DD ตามปกติ
+            const dayValue = Math.max(1, Math.min(day, 31))
             const dd = String(dayValue).padStart(2, "0")
             return `${gYear}-${mm}-${dd}`
         } catch {
@@ -150,10 +174,14 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
     useEffect(() => {
         if (!onChange || typeof onChange !== 'function') return
         if (value === outValue) return
-        
+
+        // ไม่ trigger onChange ถ้า value เป็น empty string (ยังไม่มีการตั้งค่า)
+        // ป้องกันการ override ค่า initialData ด้วยค่า default
+        if (!value || value === '') return
+
         // ป้องกัน infinite loop โดยการทำ flag
         isInternalChangeRef.current = true
-        
+
         try {
             onChange(outValue)
         } catch (error) {

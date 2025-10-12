@@ -21,12 +21,12 @@ import { extractInternalUserIds } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
-    const router = useRouter();const { data: session } = useSession();
+    const router = useRouter(); const { data: session } = useSession();
     const [isHydrated, setIsHydrated] = useState(false);
     const [formData, setFormData] = useState(PUBLICATION_FORM_INITIAL);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const originalAttachmentIdsRef = useRef([]);
-    
+
     // Handle hydration
     useEffect(() => {
         setIsHydrated(true);
@@ -150,6 +150,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             if (isEdit && onSubmit) {
                 await onSubmit(data);
             } else if (isEdit) {
+                // console.log('Updating publication with data:', data);
                 await updatePublication({ variables: { documentId: initialData.documentId, data } });
             } else if (onSubmit) {
                 await onSubmit(data);
@@ -266,10 +267,10 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     const attachmentsArray = useMemo(() => {
         return Array.isArray(formData.attachments) ? formData.attachments : [];
     }, [formData.attachments]);
-    
+
 
     if (isEdit && !initialData) return <div className="p-6">Loading...</div>;
-    
+
     // Prevent hydration mismatch by not rendering complex form until hydrated
     if (!isHydrated) {
         return <div className="p-6">Loading...</div>;
@@ -297,7 +298,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                     <div className="space-y-1 flex flex-wrap items-center forminput">
                         <div className="w-1/3">ดัชนี / มาตรฐานวารสาร</div>
                         <div className="grid grid-cols-2 gap-3 text-sm w-2/3">
-                            <label className={formData.level == "0" ? "hidden" :  "flex flex-wrap items-center gap-2"}>
+                            <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
                                 <input disabled={formData.isJournalDatabase == '1'} type="checkbox" checked={!!formData.isScopus && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isScopus', e.target.checked)} />
                                 <span>Scopus</span>
                                 <div className='w-full'>
@@ -348,14 +349,14 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                                 <span>Web of Science</span>
                                 <div className='w-full'>
                                     {formData.isWOS && formData.isJournalDatabase == '0' ? (
-                                    <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={handleWosTypeChange} options={wosOptions} />
-                                ) : null}
+                                        <FormSelect id="wosType" label="" value={formData.wosType || ''} placeholder="เลือกประเภท" onChange={handleWosTypeChange} options={wosOptions} />
+                                    ) : null}
                                 </div>
                             </label>
                         </div>
-                        
+
                     </div>
-                    
+
                     <FormTextarea id="fundName" label="ชื่อแหล่งทุน" value={formData.fundName} onChange={e => handleInputChange('fundName', e.target.value)} rows={3} />
                     <FormTextarea id="keywords" label="คำสำคัญ (คั่นระหว่างคำด้วยเครื่องหมาย “;” เช่น ข้าว; พืช; อาหาร)" value={formData.keywords} onChange={e => handleInputChange('keywords', e.target.value)} rows={3} />
                     <FormTextarea id="abstractTH" label="บทคัดย่อ (ไทย) (ไม่มีข้อมูลให้ใส่ “-”)" value={formData.abstractTH} onChange={e => handleInputChange('abstractTH', e.target.value)} rows={4} />
