@@ -55,8 +55,15 @@ export default function ReportTableB() {
     // Map impact documentId -> impact category key (teaching/research/practice/societal)
     const impactIdToCategory = IMPACT_MAP.reduce((acc, i) => { acc[i.key] = i.label; return acc }, {})
 
-    // Accumulator per department
+    // Accumulator per department - initialize with all departments from data
     const deptAcc = new Map() // disciplineName -> { teaching, research, practice, societal }
+    
+    // Initialize all departments with zero values
+    const allDepartments = data.departments || []
+    for (const dept of allDepartments) {
+      const deptTitle = dept.title || 'Unknown Department'
+      deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
+    }
 
     for (const pub of data.publications || []) {
       // Filter by publication durationStart year (if present)
@@ -82,8 +89,8 @@ export default function ReportTableB() {
         for (const user of contributors) {
           const departments = user.departments || []
           if (departments.length === 0) {
-            // Put into Unknown Department bucket
-            userDeptPairs.push('Unknown Department')
+            // Skip users without departments instead of creating "Unknown Department"
+            continue
           } else {
             for (const d of departments) {
               userDeptPairs.push(d.title || 'Unknown Department')
@@ -111,6 +118,7 @@ export default function ReportTableB() {
 
           for (const deptTitle of userDeptPairs) {
             if (!deptAcc.has(deptTitle)) {
+              // This shouldn't happen now since we pre-initialized all departments
               deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
             }
             const bucket = deptAcc.get(deptTitle)
