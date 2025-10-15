@@ -47,10 +47,10 @@ export default function ReportTableB() {
     if (gqlError) setError(gqlError.message)
   }, [gqlLoading, gqlError])
 
-  // Compute rows based on publications -> projects -> impacts -> contributors (users_permissions_users)
+  // Compute rows based on publications & conferences -> projects -> impacts -> contributors (users_permissions_users)
   const computed = useMemo(() => {
     // Early states
-    if (!data || !data.publications) return { rows: [], totals: { teaching: 0, research: 0, practice: 0, societal: 0, total: 0 } }
+    if (!data || (!data.publications && !data.conferences)) return { rows: [], totals: { teaching: 0, research: 0, practice: 0, societal: 0, total: 0 } }
 
     // Map impact documentId -> impact category key (teaching/research/practice/societal)
     const impactIdToCategory = IMPACT_MAP.reduce((acc, i) => { acc[i.key] = i.label; return acc }, {})
@@ -65,68 +65,75 @@ export default function ReportTableB() {
       deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
     }
 
-    for (const pub of data.publications || []) {
-      // Filter by publication durationStart year (if present)
-      if (pub.durationStart) {
-        const pubYear = new Date(pub.durationStart).getFullYear()
-        if (Number.isFinite(pubYear)) {
-          if (pubYear < startYear || pubYear > endYear) continue
+    // Helper function to process items (publications or conferences)
+    const processItems = (items) => {
+      for (const item of items || []) {
+        // Filter by durationStart year (if present)
+        if (item.durationStart) {
+          const itemYear = new Date(item.durationStart).getFullYear()
+          if (Number.isFinite(itemYear)) {
+            if (itemYear < startYear || itemYear > endYear) continue
+          }
+        } else {
+          // If no date, skip (or include? choose skip for clarity)
+          continue
         }
-      } else {
-        // If no date, skip (or include? choose skip for clarity)
-        continue
-      }
-      // For each publication, gather unique projects (already provided) and their contributors
-      const projects = pub.projects || []
-      for (const project of projects) {
-        const projectImpacts = project.impacts || []
-        if (projectImpacts.length === 0) continue // no impact classification -> skip
+        // For each item, gather unique projects (already provided) and their contributors
+        const projects = item.projects || []
+        for (const project of projects) {
+          const projectImpacts = project.impacts || []
+          if (projectImpacts.length === 0) continue // no impact classification -> skip
 
-        const contributors = project.users_permissions_users || []
-        // Build list of (userDepartments)
-        // If a user has multiple departments, we will attribute equally to each department (common approach). Adjust if needed.
-        const userDeptPairs = []
-        for (const user of contributors) {
-          const departments = user.departments || []
-          if (departments.length === 0) {
-            // Skip users without departments instead of creating "Unknown Department"
-            continue
-          } else {
-            for (const d of departments) {
-              userDeptPairs.push(d.title || 'Unknown Department')
+          const contributors = project.users_permissions_users || []
+          // Build list of (userDepartments)
+          // If a user has multiple departments, we will attribute equally to each department (common approach). Adjust if needed.
+          const userDeptPairs = []
+          for (const user of contributors) {
+            const departments = user.departments || []
+            if (departments.length === 0) {
+              // Skip users without departments instead of creating "Unknown Department"
+              continue
+            } else {
+              for (const d of departments) {
+                userDeptPairs.push(d.title || 'Unknown Department')
+              }
             }
           }
-        }
 
-        if (userDeptPairs.length === 0) continue // avoid division by zero
+          if (userDeptPairs.length === 0) continue // avoid division by zero
 
-        // Weight per contributor-department association (proportional allocation)
-        const weight = 1 / userDeptPairs.length
+          // Weight per contributor-department association (proportional allocation)
+          const weight = 1 / userDeptPairs.length
 
-        // For each impact of the project add weight to department accumulator in the correct category
-        for (const impact of projectImpacts) {
-          const impactLabel = impactIdToCategory[impact.documentId]
-          if (!impactLabel) continue // impact not one of the 4 tracked
+          // For each impact of the project add weight to department accumulator in the correct category
+          for (const impact of projectImpacts) {
+            const impactLabel = impactIdToCategory[impact.documentId]
+            if (!impactLabel) continue // impact not one of the 4 tracked
 
-          // Translate full label back to category key used in table totals (teaching, research, etc.)
-          let categoryKey = null
-          if (impactLabel === IMPACT_NAMES.teaching) categoryKey = 'teaching'
-          else if (impactLabel === IMPACT_NAMES.research) categoryKey = 'research'
-          else if (impactLabel === IMPACT_NAMES.practice) categoryKey = 'practice'
-          else if (impactLabel === IMPACT_NAMES.societal) categoryKey = 'societal'
-          if (!categoryKey) continue
+            // Translate full label back to category key used in table totals (teaching, research, etc.)
+            let categoryKey = null
+            if (impactLabel === IMPACT_NAMES.teaching) categoryKey = 'teaching'
+            else if (impactLabel === IMPACT_NAMES.research) categoryKey = 'research'
+            else if (impactLabel === IMPACT_NAMES.practice) categoryKey = 'practice'
+            else if (impactLabel === IMPACT_NAMES.societal) categoryKey = 'societal'
+            if (!categoryKey) continue
 
-          for (const deptTitle of userDeptPairs) {
-            if (!deptAcc.has(deptTitle)) {
-              // This shouldn't happen now since we pre-initialized all departments
-              deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
+            for (const deptTitle of userDeptPairs) {
+              if (!deptAcc.has(deptTitle)) {
+                // This shouldn't happen now since we pre-initialized all departments
+                deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
+              }
+              const bucket = deptAcc.get(deptTitle)
+              bucket[categoryKey] += weight
             }
-            const bucket = deptAcc.get(deptTitle)
-            bucket[categoryKey] += weight
           }
         }
       }
     }
+
+    // Process both publications and conferences
+    processItems(data.publications)
+    processItems(data.conferences)
 
     // Build row list
     const rowsList = Array.from(deptAcc.entries()).map(([discipline, vals]) => {

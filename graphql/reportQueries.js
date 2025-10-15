@@ -79,6 +79,23 @@ export const GET_REPORT_B = gql`
             documentId
             durationStart
         }
+        conferences(pagination: $pagination) {
+            projects {
+                documentId
+                impacts {
+                    documentId
+                    name
+                }
+                users_permissions_users {
+                    departments {
+                        documentId
+                        title
+                    }
+                }
+            }
+            documentId
+            durationStart
+        }
         departments {
             documentId
             title
