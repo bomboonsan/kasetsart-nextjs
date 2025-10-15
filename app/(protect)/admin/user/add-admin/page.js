@@ -17,6 +17,8 @@ import { useFormOptions } from '@/hooks/useFormOptions';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
+
+
 const initialFormData = {
     firstNameTH: '',
     lastNameTH: '',
@@ -46,14 +48,14 @@ export default function AddAdminPage() {
 
     // Role options
     const roleOptions = [
-        { 
-            value: 'nv62t3lijrmcf91kf97zc18j', 
+        {
+            value: 'nv62t3lijrmcf91kf97zc18j',
             label: 'Admin',
             id: 3,
             documentId: 'nv62t3lijrmcf91kf97zc18j'
         },
-        { 
-            value: 'paz95zzzpd60h4c9toxlbqkl', 
+        {
+            value: 'paz95zzzpd60h4c9toxlbqkl',
             label: 'Super Admin',
             id: 4,
             documentId: 'paz95zzzpd60h4c9toxlbqkl'
@@ -153,7 +155,7 @@ export default function AddAdminPage() {
             const departmentId = resolveRelationId(formData.departments, options.departments);
             const facultyId = resolveRelationId(formData.faculties, options.faculties);
             const organizationId = resolveRelationId(formData.organizations, options.organizations);
-            
+
             // Get the role ID from the selected role
             const selectedRole = roleOptions.find(r => r.value === formData.role || r.documentId === formData.role);
             const roleId = selectedRole?.id || 3; // Default to Admin (3) if not found
@@ -195,7 +197,10 @@ export default function AddAdminPage() {
                 throw new Error(json?.error || json?.message || 'Create failed');
             }
             // Redirect
-            router.push('/admin/user');
+            toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
+            setTimeout(() => {
+                router.push('/admin/user');
+            }, 1000);
         } catch (err) {
             console.error(err);
             setErrorMsg(err.message || String(err));
@@ -248,12 +253,12 @@ export default function AddAdminPage() {
                         <FieldInput label="รหัสผ่าน" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="กำหนดรหัสผ่านเริ่มต้น" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FieldSelect 
-                            label="บทบาท (Role)" 
-                            value={formData.role || ''} 
-                            onChange={(value) => handleInputChange('role', value)} 
-                            placeholder="เลือกบทบาท" 
-                            options={roleOptions} 
+                        <FieldSelect
+                            label="บทบาท (Role)"
+                            value={formData.role || ''}
+                            onChange={(value) => handleInputChange('role', value)}
+                            placeholder="เลือกบทบาท"
+                            options={roleOptions}
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

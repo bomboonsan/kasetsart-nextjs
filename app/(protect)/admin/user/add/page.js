@@ -17,6 +17,8 @@ import { useFormOptions } from '@/hooks/useFormOptions';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
 
+import toast from 'react-hot-toast';
+
 const initialFormData = {
     firstNameTH: '',
     lastNameTH: '',
@@ -191,7 +193,10 @@ export default function AddUserPage() {
                 throw new Error(json?.error || json?.message || 'Create failed');
             }
             // Redirect
-            router.push('/admin/user');
+            toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
+            setTimeout(() => {
+                router.push('/admin/user');
+            }, 1000);
         } catch (err) {
             console.error(err);
             setErrorMsg(err.message || String(err));
