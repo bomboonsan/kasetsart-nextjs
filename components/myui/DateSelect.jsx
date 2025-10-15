@@ -175,10 +175,6 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         if (!onChange || typeof onChange !== 'function') return
         if (value === outValue) return
 
-        // ไม่ trigger onChange ถ้า value เป็น empty string (ยังไม่มีการตั้งค่า)
-        // ป้องกันการ override ค่า initialData ด้วยค่า default
-        if (!value || value === '') return
-
         // ป้องกัน infinite loop โดยการทำ flag
         isInternalChangeRef.current = true
 
