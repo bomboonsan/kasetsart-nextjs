@@ -197,7 +197,7 @@ export default function AddAdminPage() {
                 throw new Error(json?.error || json?.message || 'Create failed');
             }
             // Redirect
-            toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
+            toast.success('เพิ่มผู้ดูแลระบบสำเร็จ!');
             setTimeout(() => {
                 router.push('/admin/user');
             }, 1000);

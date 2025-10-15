@@ -193,7 +193,7 @@ export default function AddUserPage() {
                 throw new Error(json?.error || json?.message || 'Create failed');
             }
             // Redirect
-            toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
+            toast.success('เพิ่มผู้ใช้สำเร็จ!');
             setTimeout(() => {
                 router.push('/admin/user');
             }, 1000);
