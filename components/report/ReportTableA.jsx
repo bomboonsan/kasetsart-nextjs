@@ -101,11 +101,10 @@ export default function ReportTableA() {
       // membersWithICs: users with academic_types > 0 AND (projects > 0 OR funds > 0)
       const usersWithICs = depUsers.filter(u => {
         const hasAcademicTypes = (u.academic_types || []).length > 0
-        const hasProjects = (u.projects || []).length > 0
         const hasPublications = (u.publications || []).length > 0
         const hasConferences = (u.conferences || []).length > 0
-        const hasFunds = (u.funds || []).length > 0
-        return hasAcademicTypes && ((hasPublications || hasConferences) || hasFunds)
+        // const hasBooks = (u.books || []).length > 0
+        return hasAcademicTypes && ((hasPublications || hasConferences))
       })
 
       const membersWithICsSet = new Set()

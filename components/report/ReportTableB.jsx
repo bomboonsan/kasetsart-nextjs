@@ -57,7 +57,7 @@ export default function ReportTableB() {
 
     // Accumulator per department - initialize with all departments from data
     const deptAcc = new Map() // disciplineName -> { teaching, research, practice, societal }
-    
+
     // Initialize all departments with zero values
     const allDepartments = data.departments || []
     for (const dept of allDepartments) {

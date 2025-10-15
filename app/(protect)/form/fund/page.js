@@ -93,7 +93,7 @@ export default function FundTable() {
                                 <TableCell className={'px-5'}>{f.writers ? f.writers.length : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{f.updatedAt ? new Date(f.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/admin/form/fund/view/${f.documentId}`}>ดู</a>
+                                    <a className="text-blue-600 mr-3" href={`/form/fund/view/${f.documentId}`}>ดู</a>
                                     <a className="text-green-600" href={`/admin/form/fund/edit/${f.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
