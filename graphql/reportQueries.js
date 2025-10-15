@@ -20,9 +20,12 @@ export const GET_REPORT_A = gql`
             }
             projects {
                 documentId
+                conferences { documentId }
+                publications { documentId }
             }
             funds {
                 documentId
+                books { documentId }
             }
         }
         departments { documentId title }
