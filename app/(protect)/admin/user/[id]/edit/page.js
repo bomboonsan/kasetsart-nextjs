@@ -17,6 +17,7 @@ import { useFormOptions } from '@/hooks/useFormOptions';
 import { GET_USER_PROFILE, GET_PROFILE_OPTIONS } from '@/graphql/userQueries';
 // Utils
 import { formatToDigitsOnly, formatToEnglishOnly, formatToThaiOnly } from '@/utils/formatters';
+import { API_BASE } from '@/lib/api-base';
 
 const initialFormData = {
     firstNameTH: '',
@@ -185,26 +186,29 @@ export default function AdminUserEditPage({ params }) {
             const uploadFormData = new FormData();
             uploadFormData.append('files', avatarFile);
 
-            const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
             const token = session?.jwt;
 
             try {
-                const uploadRes = await fetch(`${strapiUrl}/api/upload`, {
+                const uploadRes = await fetch(`${API_BASE}/api/upload`, {
                     method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        ...(token && { Authorization: `Bearer ${token}` }),
                     },
                     body: uploadFormData,
                 });
 
                 if (!uploadRes.ok) {
-                    const errorBody = await uploadRes.json();
-                    throw new Error(errorBody.error?.message || 'Failed to upload image');
+                    const errorText = await uploadRes.text().catch(() => uploadRes.statusText);
+                    throw new Error(`Failed to upload image: ${uploadRes.status} ${errorText}`);
                 }
 
                 const uploadData = await uploadRes.json();
+                if (!uploadData || !Array.isArray(uploadData) || uploadData.length === 0) {
+                    throw new Error('No file uploaded');
+                }
                 uploadedAvatarId = uploadData[0].id;
             } catch (uploadError) {
+                console.error('Upload error:', uploadError);
                 toast.error(`Error uploading image: ${uploadError.message}`);
                 return;
             }
