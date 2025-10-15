@@ -276,6 +276,7 @@ export default function AdminUserEditPage({ params }) {
     if (loading && !profileData) return <p>Loading...</p>;
     if (error) return <p>Error loading profile: {error.message}</p>;
 
+    if (loading && !optionsXLoading) return <p>Loading...</p>;
     if (optionsLoading) return <p>Loading form options...</p>;
     if (optionsError) return <p>Error: {optionsError}</p>;
 

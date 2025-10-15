@@ -291,6 +291,10 @@ export default function ProfileEditPage() {
     // if (!formData) {
     //     return <p>No profile data found.</p>;
     // }
+    if (loading && !optionsXLoading) return <p>Loading...</p>;
+    if (optionsLoading) return <p>Loading form options...</p>;
+    if (optionsError) return <p>Error: {optionsError}</p>;
+
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
