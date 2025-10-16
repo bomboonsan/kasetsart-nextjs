@@ -39,10 +39,10 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         for (const attachment of arr) {
             // Skip if attachment is null/undefined or doesn't have valid structure
             if (!attachment || typeof attachment !== 'object') continue;
-            
+
             const rawId = attachment?.documentId ?? attachment?.id;
             const normalized = normalizeDocumentId(rawId);
-            
+
             // Additional validation: ensure it's a valid number or numeric string
             if (normalized) {
                 const numericId = Number(normalized);
@@ -193,8 +193,12 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
 
             if (isEdit && onSubmit) {
                 await onSubmit(data);
+                // Update originalAttachmentIdsRef to reflect the new state after save
+                originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (isEdit) {
                 await updatePublication({ variables: { documentId: initialData.documentId, data } });
+                // Update originalAttachmentIdsRef to reflect the new state after save
+                originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (onSubmit) {
                 await onSubmit(data);
             } else {

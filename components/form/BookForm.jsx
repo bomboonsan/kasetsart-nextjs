@@ -35,10 +35,10 @@ const extractAttachmentIds = (arr) => {
 	for (const attachment of arr) {
 		// Skip if attachment is null/undefined or doesn't have valid structure
 		if (!attachment || typeof attachment !== 'object') continue;
-		
+
 		const rawId = attachment?.documentId ?? attachment?.id;
 		const normalized = normalizeDocumentId(rawId);
-		
+
 		// Additional validation: ensure it's a valid number or numeric string
 		if (normalized) {
 			const numericId = Number(normalized);
@@ -108,7 +108,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 
 	// If editing and initialData not provided, fetch existing book
 	const shouldFetch = isEdit && !initialData && documentId;
-	const { data: existingBookData } = useQuery(GET_BOOK, {
+	const { data: existingBookData, refetch: refetchBook } = useQuery(GET_BOOK, {
 		variables: { documentId },
 		skip: !shouldFetch,
 		context: authHeaders,
@@ -231,6 +231,17 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 
 			if (isEdit) {
 				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
+				// Update originalAttachmentIdsRef to reflect the new state after save
+				originalAttachmentIdsRef.current = finalAttachmentIds;
+				
+				// Refetch data to sync UI with backend
+				if (refetchBook && documentId) {
+					try {
+						await refetchBook();
+					} catch (refetchError) {
+						console.warn('Failed to refetch book data:', refetchError);
+					}
+				}
 			} else {
 				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
 				setFormData(BOOK_FORM_INITIAL);
@@ -241,7 +252,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId]);
+	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId, refetchBook]);
 
 	// Memoize partners update to prevent infinite loop
 	const updatePartnersFromFunding = useCallback(() => {

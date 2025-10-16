@@ -38,10 +38,10 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         for (const attachment of arr) {
             // Skip if attachment is null/undefined or doesn't have valid structure
             if (!attachment || typeof attachment !== 'object') continue;
-            
+
             const rawId = attachment?.documentId ?? attachment?.id;
             const normalized = normalizeDocumentId(rawId);
-            
+
             // Additional validation: ensure it's a valid number or numeric string
             if (normalized) {
                 const numericId = Number(normalized);
@@ -237,6 +237,8 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
             if (isEdit && onSubmit) {
                 await onSubmit(conferenceData);
+                // Update originalAttachmentIdsRef to reflect the new state after save
+                originalAttachmentIdsRef.current = finalAttachmentIds;
             } else {
                 // สร้าง conference ใหม่
                 const conferenceResult = await createConference({

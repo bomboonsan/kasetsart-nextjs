@@ -70,6 +70,11 @@ export default function FileUploadField({
         try {
             const incoming = JSON.stringify(normalizedIncomingValue)
             if (incoming !== lastAppliedRef.current) {
+                console.log('📎 FileUploadField syncing from parent:', {
+                    previous: lastAppliedRef.current?.length,
+                    incoming: incoming?.length,
+                    count: normalizedIncomingValue.length
+                })
                 lastAppliedRef.current = incoming
                 setAttachments(normalizedIncomingValue)
             }
