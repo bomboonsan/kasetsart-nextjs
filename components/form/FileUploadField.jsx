@@ -32,8 +32,20 @@ export default function FileUploadField({
     const parseId = useCallback((v) => {
         if (v === undefined || v === null) return null
         if (typeof v === 'bigint') return v.toString()
+
+        if (typeof v === 'string') {
+            const trimmed = v.trim()
+            return trimmed.length ? trimmed : null
+        }
+
+        if (typeof v === 'number') {
+            return Number.isFinite(v) ? String(v) : null
+        }
+
         const n = Number(v)
-        return Number.isFinite(n) ? String(n) : null
+        if (Number.isFinite(n)) return String(n)
+
+        return null
     }, [])
 
     // Memoize the normalization of incoming value to prevent unnecessary recalculations
@@ -76,7 +88,7 @@ export default function FileUploadField({
                     count: normalizedIncomingValue.length,
                     currentLocal: attachments.length
                 })
-                
+
                 // Prevent overwriting if we have more files locally than parent is sending
                 // This can happen when files are uploaded but parent hasn't received the update yet
                 if (attachments.length > normalizedIncomingValue.length) {
@@ -86,7 +98,7 @@ export default function FileUploadField({
                     });
                     return;
                 }
-                
+
                 lastAppliedRef.current = incoming
                 setAttachments(normalizedIncomingValue)
             }
@@ -167,6 +179,11 @@ export default function FileUploadField({
             const uploadedFiles = await response.json()
             // Strapi REST returns an array of uploaded file objects
             const newAttachments = (Array.isArray(uploadedFiles) ? uploadedFiles : []).map(normalize).filter(Boolean)
+
+            console.log('⬆️ Upload response normalized:', {
+                raw: uploadedFiles,
+                normalized: newAttachments
+            })
 
             // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
             let mergedAttachments;

@@ -265,22 +265,22 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
 				// Update originalAttachmentIdsRef to reflect the new state after save
 				originalAttachmentIdsRef.current = finalAttachmentIds;
-				
+
 				// Update formData.attachments to reflect saved attachments
 				// Convert IDs back to attachment objects to maintain UI consistency
 				const savedAttachments = finalAttachmentIds.map(id => {
 					// Find the attachment object from current formData
-					const existing = formData.attachments?.find(a => 
+					const existing = formData.attachments?.find(a =>
 						(a.documentId === id || a.id === id)
 					);
 					return existing || { documentId: id, id: id };
 				}).filter(Boolean);
-				
+
 				setFormData(prev => ({
 					...prev,
 					attachments: savedAttachments
 				}));
-				
+
 				console.log('✅ Updated formData.attachments after save:', savedAttachments);
 			} else {
 				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
