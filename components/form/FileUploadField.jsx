@@ -16,7 +16,7 @@ export default function FileUploadField({
 }) {
     const { data: session, status } = useSession();
     const [dragActive, setDragActive] = useState(false)
-    
+
     const [files, setFiles] = useState([]) // เก็บ File objects ที่เพิ่งเลือก (ยังไม่รวม metadata จาก Strapi)
     const [attachments, setAttachments] = useState(Array.isArray(value) ? value : []) // เก็บผลการอัปโหลด (id, name, url) จาก Strapi
     const [uploading, setUploading] = useState(false)
@@ -27,19 +27,19 @@ export default function FileUploadField({
     // ซิงค์ค่าจากภายนอก (กรณีแก้ไข/รีเฟรช state จาก parent)
     // ป้องกันการเรียก setAttachments ซ้ำๆ เมื่อ prop `value` มี reference ใหม่แต่ข้อมูลเดิม
     const lastAppliedRef = useRef(JSON.stringify(value || []))
-    
+
     // Memoize the normalization of incoming value to prevent unnecessary recalculations
     const normalizedIncomingValue = useMemo(() => {
         try {
             if (!Array.isArray(value)) return []
-            
+
             return value.map(file => {
                 if (!file) return null
-                
+
                 const hasGraphQLId = file.documentId
                 const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
                 const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || '')
-                
+
                 return {
                     id: file.id ?? file.documentId ?? file.document_id, // รองรับ field ต่างรูปแบบ
                     documentId: file.documentId ?? file.document_id ?? file.id,
@@ -158,7 +158,7 @@ export default function FileUploadField({
                 }
                 return merged
             })
-            
+
             // success toast
             if (newAttachments.length > 0) {
                 toast.success(`อัปโหลด ${newAttachments.length} ไฟล์สำเร็จ`)
@@ -177,13 +177,13 @@ export default function FileUploadField({
         setAttachments(prevAttachments => {
             const next = prevAttachments.filter((_, i) => i !== idx)
             const normalized = dedupe(next.map(normalize).filter(Boolean))
-            
+
             try {
                 onFilesChange?.(normalized)
             } catch (e) {
                 console.warn('onFilesChange threw in removeAttachment', e)
             }
-            
+
             return normalized
         })
     }, [dedupe, normalize, onFilesChange])
@@ -282,7 +282,7 @@ export default function FileUploadField({
             {/* แสดงรายการไฟล์ที่อัปโหลดแล้วแบบสะสม */}
             {useMemo(() => {
                 if (attachments.length === 0) return null
-                
+
                 return (
                     <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-700">ไฟล์ที่อัปโหลดแล้ว:</p>
@@ -298,14 +298,14 @@ export default function FileUploadField({
                                         return '#'
                                     }
                                 })()
-                                
+
                                 const fileName = file?.name || 'ไฟล์ไม่มีชื่อ'
                                 const fileId = file?.documentId ?? file?.id
-                                const fileSize = typeof file?.size === 'number' && !Number.isNaN(file.size) 
-                                    ? `${(file.size / 1024 / 1024).toFixed(2)} MB` 
+                                const fileSize = typeof file?.size === 'number' && !Number.isNaN(file.size)
+                                    ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
                                     : null
                                 const fileMime = file?.mime || null
-                                
+
                                 return (
                                     <li key={fileId ?? file?.url ?? index} className="text-sm text-gray-600 flex items-center justify-between gap-4">
                                         <div className="flex-1 truncate">

@@ -19,7 +19,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
-import { extractInternalUserIds } from '@/utils/partners';
+import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 export default function ConferenceForm({ initialData, onSubmit, isEdit = false }) {
@@ -34,10 +34,12 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     // Safe extraction with null checks - optimized with useCallback
     const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return [];
-        return arr
-            .filter(a => a && (a.documentId || a.id))
-            .map(a => Number(a.documentId ?? a.id))
-            .filter(n => Number.isFinite(n) && n > 0);
+        const ids = [];
+        for (const attachment of arr) {
+            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id);
+            if (normalized) ids.push(normalized);
+        }
+        return Array.from(new Set(ids));
     }, []);
 
     // Hydrate form data when editing with proper error handling

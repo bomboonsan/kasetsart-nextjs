@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { FUND_FORM_INITIAL } from '@/data/fund'
 import toast from 'react-hot-toast'
 
-import { extractInternalUserIds } from '@/utils/partners'
+import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners'
 
 // Memoized Writer Form Component to prevent unnecessary re-renders
 const WriterForm = React.memo(({ index, writer, handlers }) => {
@@ -77,10 +77,12 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
     // Memoize expensive operations
     const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return []
-        return arr
-            .filter(a => a && (a.documentId || a.id))
-            .map(a => Number(a.documentId ?? a.id))
-            .filter(n => Number.isFinite(n) && n > 0)
+        const ids = []
+        for (const attachment of arr) {
+            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id)
+            if (normalized) ids.push(normalized)
+        }
+        return Array.from(new Set(ids))
     }, [])
 
     const sanitize = useCallback((value) => {

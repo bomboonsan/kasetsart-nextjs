@@ -74,7 +74,7 @@ export default function ProfileEditPage() {
     useEffect(() => {
         if (optionsData) {
             setSelectData({
-                departments: optionsData.departments,
+                departments: optionsData.departments.filter(d => d.title !== 'สํานักงานเลขานุการ'),
                 faculties: optionsData.faculties,
                 organizations: optionsData.organizations,
             });

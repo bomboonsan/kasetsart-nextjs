@@ -17,7 +17,7 @@ import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
-import { extractInternalUserIds } from '@/utils/partners';
+import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
@@ -35,10 +35,12 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     // Memoize helper functions
     const extractAttachmentIds = useCallback((arr) => {
         if (!Array.isArray(arr)) return [];
-        return arr
-            .filter(a => a && (a.documentId || a.id))
-            .map(a => Number(a.documentId ?? a.id))
-            .filter(n => Number.isFinite(n) && n > 0);
+        const ids = [];
+        for (const attachment of arr) {
+            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id);
+            if (normalized) ids.push(normalized);
+        }
+        return Array.from(new Set(ids));
     }, []);
 
     const booleanToString = useCallback((v) => {
