@@ -22,7 +22,7 @@ const isLeap = (y) => {
     }
 }
 
-export default function DateSelect({ title, value, onChange, noDay = false }) {
+export default function DateSelect({ title = '', value, onChange, noDay = false }) {
     // ใช้ ref เพื่อป้องกัน infinite loop ใน onChange effect
     const isInternalChangeRef = useRef(false)
     const prevValueRef = useRef(value)
@@ -76,31 +76,38 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
         }
     }, [value, noDay])
 
-    /** state เลือกวัน เดือน ปี (พ.ศ.) */
+    /** 
+     * state เลือกวัน เดือน ปี (พ.ศ.)
+     * ใช้ initialParts เป็น default แต่ให้ controlled จาก parent
+     */
     const [day, setDay] = useState(() => initialParts?.day ?? 1)
     const [month, setMonth] = useState(() => initialParts?.month ?? monthThai[0])
     const [yearTh, setYearTh] = useState(() => initialParts?.yearTh ?? 2568)
 
-    /** sync state เมื่อ value ภายนอกเปลี่ยน - เพิ่ม safety check */
+    /** 
+     * sync state เมื่อ value ภายนอกเปลี่ยน
+     * ปรับปรุงให้ sync ได้ทั้งกรณี mount ครั้งแรกและเมื่อ value เปลี่ยนทีหลัง
+     */
     useEffect(() => {
         // ตรวจสอบว่า value เปลี่ยนจริงๆ หรือไม่
-        if (prevValueRef.current === value) return
+        const valueChanged = prevValueRef.current !== value
 
-        if (!initialParts) {
-            prevValueRef.current = value
+        // ถ้า value ไม่เปลี่ยน หรือเป็นการ change จาก internal ให้ skip
+        if (!valueChanged || isInternalChangeRef.current) {
+            isInternalChangeRef.current = false
             return
         }
 
-        // อัพเดต state เฉพาะเมื่อ value มาจากภายนอก (ไม่ใช่จาก internal change)
-        if (!isInternalChangeRef.current) {
+        // ถ้ามี initialParts ใหม่ ให้ sync state
+        if (initialParts) {
             setDay(initialParts.day)
             setMonth(initialParts.month)
             setYearTh(initialParts.yearTh)
         }
 
+        // Update ref สำหรับ comparison ครั้งถัดไป
         prevValueRef.current = value
-        isInternalChangeRef.current = false
-    }, [initialParts, value])
+    }, [value, initialParts])
 
     /** ตัวเลือกปี (พ.ศ.) ใช้ useMemo ให้สร้างครั้งเดียว */
     const yearOptions = useMemo(() => {
