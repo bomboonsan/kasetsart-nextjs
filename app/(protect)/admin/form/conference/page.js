@@ -27,7 +27,7 @@ export default function ConferenceTable() {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData, loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
@@ -149,9 +149,9 @@ export default function ConferenceTable() {
                                 <TableCell className={'px-5'}>{getLevelText(c.level)}</TableCell>
                                 <TableCell className={'px-5'}>{getLocationText(c)}</TableCell>
                                 <TableCell className={'px-5'}>
-                                    {c.durationStart && c.durationEnd
+                                    {c.durationStart && c.durationEnd && (c.durationStart !== c.durationEnd)
                                         ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`
-                                        : c.durationStart || c.durationEnd || '-'
+                                        : `${formatDateToDDMMYYYY(c.durationStart)}` || '-'
                                     }
                                 </TableCell>
                                 <TableCell className={'px-5'}>{c.publishedAt ? new Date(c.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
