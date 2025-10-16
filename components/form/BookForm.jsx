@@ -32,9 +32,14 @@ const hydrateBook = (b) => ({
 const extractAttachmentIds = (arr) => {
 	if (!Array.isArray(arr)) return [];
 	const ids = [];
+	const skipped = [];
+	
 	for (const attachment of arr) {
 		// Skip if attachment is null/undefined or doesn't have valid structure
-		if (!attachment || typeof attachment !== 'object') continue;
+		if (!attachment || typeof attachment !== 'object') {
+			skipped.push({ reason: 'invalid_object', attachment });
+			continue;
+		}
 
 		const rawId = attachment?.documentId ?? attachment?.id;
 		const normalized = normalizeDocumentId(rawId);
@@ -44,9 +49,18 @@ const extractAttachmentIds = (arr) => {
 			const numericId = Number(normalized);
 			if (Number.isFinite(numericId) && numericId > 0) {
 				ids.push(normalized);
+			} else {
+				skipped.push({ reason: 'invalid_numeric', rawId, normalized, numericId, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
 			}
+		} else {
+			skipped.push({ reason: 'no_normalized_id', rawId, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
 		}
 	}
+	
+	if (skipped.length > 0) {
+		console.warn('⚠️ extractAttachmentIds skipped items:', skipped);
+	}
+	
 	return Array.from(new Set(ids));
 };
 
@@ -176,6 +190,13 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 			const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
 			const attachmentsChanged = JSON.stringify(currentIdsSorted) !== JSON.stringify(originalIdsSorted);
 
+			console.log('🔍 Attachments comparison:', {
+				attachmentsChanged,
+				currentIdsSorted,
+				originalIdsSorted,
+				willSendAttachments: !(isEdit && !attachmentsChanged)
+			});
+
 			const fundDocumentId = normalizeDocumentId(formData.__fundingObj?.documentId ?? formData.__fundingObj?.id);
 
 			const bookData = {
@@ -201,8 +222,15 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				if (bookData[k] === null || bookData[k] === '') delete bookData[k];
 			});
 			if (isEdit && !attachmentsChanged) {
+				console.warn('⚠️ Deleting attachments field because no changes detected');
 				delete bookData.attachments;
 			}
+
+			console.log('📤 Sending bookData to backend:', {
+				hasAttachments: 'attachments' in bookData,
+				attachmentsCount: bookData.attachments?.length,
+				attachmentIds: bookData.attachments
+			});
 
 			const partnersForRelation = Array.isArray(formData.partners) ? formData.partners : [];
 			const usersPermissionsUsers = fundDocumentId ? Array.from(new Set(extractInternalUserIds(partnersForRelation))) : [];
