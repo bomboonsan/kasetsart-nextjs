@@ -26,6 +26,8 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
     // ใช้ ref เพื่อป้องกัน infinite loop ใน onChange effect
     const isInternalChangeRef = useRef(false)
     const prevValueRef = useRef(value)
+    const isSyncingFromValueRef = useRef(false)
+    const hasUserInteractionRef = useRef(false)
 
     /** 
      * แปลงค่า value (YYYY-MM-DD หรือ YYYY-MM, ค.ศ.) -> state เริ่มต้นของ day, month, yearTh
@@ -89,23 +91,33 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
      * ปรับปรุงให้ sync ได้ทั้งกรณี mount ครั้งแรกและเมื่อ value เปลี่ยนทีหลัง
      */
     useEffect(() => {
-        // ตรวจสอบว่า value เปลี่ยนจริงๆ หรือไม่
+        const hasExternalValue = typeof value === 'string' && value.trim() !== ''
         const valueChanged = prevValueRef.current !== value
 
-        // ถ้า value ไม่เปลี่ยน หรือเป็นการ change จาก internal ให้ skip
-        if (!valueChanged || isInternalChangeRef.current) {
-            isInternalChangeRef.current = false
+        if (!valueChanged) {
+            if (!hasExternalValue) {
+                hasUserInteractionRef.current = false
+            }
             return
         }
 
-        // ถ้ามี initialParts ใหม่ ให้ sync state
+        if (isInternalChangeRef.current) {
+            isInternalChangeRef.current = false
+            prevValueRef.current = value
+            return
+        }
+
+        if (!hasExternalValue) {
+            hasUserInteractionRef.current = false
+        }
+
         if (initialParts) {
+            isSyncingFromValueRef.current = true
             setDay(initialParts.day)
             setMonth(initialParts.month)
             setYearTh(initialParts.yearTh)
         }
 
-        // Update ref สำหรับ comparison ครั้งถัดไป
         prevValueRef.current = value
     }, [value, initialParts])
 
@@ -183,6 +195,17 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
     /** เรียก onChange เฉพาะเมื่อค่าที่คำนวณต่างจาก value ภายนอก เพื่อลด re-render chain */
     useEffect(() => {
         if (!onChange || typeof onChange !== 'function') return
+
+        if (isSyncingFromValueRef.current) {
+            isSyncingFromValueRef.current = false
+            return
+        }
+
+        const hasExternalValue = typeof value === 'string' && value.trim() !== ''
+        if (!hasExternalValue && !hasUserInteractionRef.current) {
+            return
+        }
+
         if (value === outValue) return
 
         // ป้องกัน infinite loop โดยการทำ flag
@@ -201,6 +224,7 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
         try {
             const newDay = parseInt(e.target.value, 10)
             if (Number.isInteger(newDay) && newDay >= 1 && newDay <= 31) {
+                hasUserInteractionRef.current = true
                 setDay(newDay)
             }
         } catch {
@@ -212,6 +236,7 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
         try {
             const newMonth = e.target.value
             if (typeof newMonth === 'string' && monthThai.includes(newMonth)) {
+                hasUserInteractionRef.current = true
                 setMonth(newMonth)
             }
         } catch {
@@ -223,6 +248,7 @@ export default function DateSelect({ title = '', value, onChange, noDay = false 
         try {
             const newYear = parseInt(e.target.value, 10)
             if (Number.isInteger(newYear) && newYear >= 2460 && newYear <= 3000) {
+                hasUserInteractionRef.current = true
                 setYearTh(newYear)
             }
         } catch {

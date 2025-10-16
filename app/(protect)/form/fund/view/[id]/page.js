@@ -42,7 +42,7 @@ export default function FundViewPage() {
             </div>
             <div className="inputGroup">
               <FieldView label="ชื่อทุนตำราหรือหนังสือ" value={fund.fundName} />
-              <FieldView label="ลักษณะของผลงานวิชาการที่จะขอรับทุน" value={fund.fundTypeText} />
+              <FieldView label="ลักษณะของผลงานวิชาการที่จะขอรับทุน" value={`${fund.fundType == '0' ? 'ตำรา' : 'หนังสือ'} ${fund.fundTypeText}`} />
               <FieldView label="คำอธิบายเนื้อหาของตำราหรือหนังสือ" value={fund.contentDesc} />
               <FieldView label="เอกสารทางวิชาการ ตำรา หรือหนังสือ ที่ผ่านมา" value={fund.pastPublications} />
               <FieldView label="วัตถุประสงค์ของตำราหรือหนังสือ" value={fund.purpose} />
