@@ -152,16 +152,20 @@ export default function FileUploadField({
             const newAttachments = (Array.isArray(uploadedFiles) ? uploadedFiles : []).map(normalize).filter(Boolean)
 
             // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
+            let mergedAttachments;
             setAttachments(prevAttachments => {
-                const merged = dedupe([...prevAttachments, ...newAttachments])
-                // แจ้ง parent ด้วยรายการรวม (normalized)
-                try {
-                    onFilesChange?.(merged)
-                } catch (e) {
-                    console.warn('onFilesChange threw', e)
-                }
-                return merged
+                mergedAttachments = dedupe([...prevAttachments, ...newAttachments])
+                return mergedAttachments
             })
+
+            // แจ้ง parent ด้วยรายการรวม (normalized) - เรียกหลัง setState เพื่อหลีกเลี่ยง warning
+            try {
+                if (mergedAttachments) {
+                    onFilesChange?.(mergedAttachments)
+                }
+            } catch (e) {
+                console.warn('onFilesChange threw', e)
+            }
 
             // success toast
             if (newAttachments.length > 0) {
@@ -178,18 +182,21 @@ export default function FileUploadField({
 
     const removeAttachment = useCallback((idx) => {
         // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
+        let normalizedAttachments;
         setAttachments(prevAttachments => {
             const next = prevAttachments.filter((_, i) => i !== idx)
-            const normalized = dedupe(next.map(normalize).filter(Boolean))
-
-            try {
-                onFilesChange?.(normalized)
-            } catch (e) {
-                console.warn('onFilesChange threw in removeAttachment', e)
-            }
-
-            return normalized
+            normalizedAttachments = dedupe(next.map(normalize).filter(Boolean))
+            return normalizedAttachments
         })
+
+        // แจ้ง parent หลัง setState เพื่อหลีกเลี่ยง warning
+        try {
+            if (normalizedAttachments) {
+                onFilesChange?.(normalizedAttachments)
+            }
+        } catch (e) {
+            console.warn('onFilesChange threw in removeAttachment', e)
+        }
     }, [dedupe, normalize, onFilesChange])
 
     const handleDrag = useCallback((e) => {

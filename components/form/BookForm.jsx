@@ -33,8 +33,19 @@ const extractAttachmentIds = (arr) => {
 	if (!Array.isArray(arr)) return [];
 	const ids = [];
 	for (const attachment of arr) {
-		const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id);
-		if (normalized) ids.push(normalized);
+		// Skip if attachment is null/undefined or doesn't have valid structure
+		if (!attachment || typeof attachment !== 'object') continue;
+		
+		const rawId = attachment?.documentId ?? attachment?.id;
+		const normalized = normalizeDocumentId(rawId);
+		
+		// Additional validation: ensure it's a valid number or numeric string
+		if (normalized) {
+			const numericId = Number(normalized);
+			if (Number.isFinite(numericId) && numericId > 0) {
+				ids.push(normalized);
+			}
+		}
 	}
 	return Array.from(new Set(ids));
 };
@@ -143,8 +154,25 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		}
 		setIsSubmitting(true);
 		try {
+			// Extract all attachment IDs from formData (includes both old and new files)
 			const attachmentIds = extractAttachmentIds(formData.attachments);
-			const currentIdsSorted = [...attachmentIds].sort();
+
+			// When editing, merge original IDs with new IDs to ensure old files are preserved
+			const finalAttachmentIds = isEdit
+				? Array.from(new Set([...originalAttachmentIdsRef.current, ...attachmentIds]))
+				: attachmentIds;
+
+			// Debug logging
+			if (isEdit) {
+				console.log('📎 BookForm attachments debug:', {
+					original: originalAttachmentIdsRef.current,
+					extracted: attachmentIds,
+					final: finalAttachmentIds,
+					rawAttachments: formData.attachments
+				});
+			}
+
+			const currentIdsSorted = [...finalAttachmentIds].sort();
 			const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
 			const attachmentsChanged = JSON.stringify(currentIdsSorted) !== JSON.stringify(originalIdsSorted);
 
@@ -157,7 +185,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				detail: formData.detail?.trim() || null,
 				level: formData.level === '' ? null : formData.level,
 				publicationDate: formData.publicationDate || null,
-				attachments: attachmentIds,
+				attachments: finalAttachmentIds,
 				writers: formData.writers || [],
 				funds: fundDocumentId ? [fundDocumentId] : [],
 				revision: formData.revision || null,

@@ -37,8 +37,19 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         if (!Array.isArray(arr)) return [];
         const ids = [];
         for (const attachment of arr) {
-            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id);
-            if (normalized) ids.push(normalized);
+            // Skip if attachment is null/undefined or doesn't have valid structure
+            if (!attachment || typeof attachment !== 'object') continue;
+            
+            const rawId = attachment?.documentId ?? attachment?.id;
+            const normalized = normalizeDocumentId(rawId);
+            
+            // Additional validation: ensure it's a valid number or numeric string
+            if (normalized) {
+                const numericId = Number(normalized);
+                if (Number.isFinite(numericId) && numericId > 0) {
+                    ids.push(normalized);
+                }
+            }
         }
         return Array.from(new Set(ids));
     }, []);
@@ -120,8 +131,14 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         setIsSubmitting(true);
         try {
             const attachmentIds = extractAttachmentIds(formData.attachments);
+
+            // When editing, merge original IDs with new IDs to ensure old files are preserved
+            const finalAttachmentIds = isEdit
+                ? Array.from(new Set([...originalAttachmentIdsRef.current, ...attachmentIds]))
+                : attachmentIds;
+
             const originalIdsSorted = [...originalAttachmentIdsRef.current].sort();
-            const currentIdsSorted = [...attachmentIds].sort();
+            const currentIdsSorted = [...finalAttachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             // Helper function to ensure date format is YYYY-MM-01 for noDay mode
@@ -168,7 +185,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                 abstractTH: formData.abstractTH || null,
                 abstractEN: formData.abstractEN || null,
                 projects: formData.__projectObj?.documentId ? [formData.__projectObj.documentId] : [],
-                attachments: attachmentIds.length ? attachmentIds : [],
+                attachments: finalAttachmentIds.length ? finalAttachmentIds : [],
             };
             Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
             if (isEdit && !attachmentsChanged) delete data.attachments;

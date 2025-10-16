@@ -36,8 +36,19 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         if (!Array.isArray(arr)) return [];
         const ids = [];
         for (const attachment of arr) {
-            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id);
-            if (normalized) ids.push(normalized);
+            // Skip if attachment is null/undefined or doesn't have valid structure
+            if (!attachment || typeof attachment !== 'object') continue;
+            
+            const rawId = attachment?.documentId ?? attachment?.id;
+            const normalized = normalizeDocumentId(rawId);
+            
+            // Additional validation: ensure it's a valid number or numeric string
+            if (normalized) {
+                const numericId = Number(normalized);
+                if (Number.isFinite(numericId) && numericId > 0) {
+                    ids.push(normalized);
+                }
+            }
         }
         return Array.from(new Set(ids));
     }, []);
@@ -160,10 +171,14 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     .filter(id => Number.isFinite(id) && id > 0)
                 : [];
 
+            // When editing, merge original IDs with new IDs to ensure old files are preserved
+            const finalAttachmentIds = isEdit
+                ? Array.from(new Set([...(originalAttachmentIdsRef.current || []), ...attachmentIds]))
+                : attachmentIds;
+
             // ตรวจสอบรายการปัจจุบัน
-            const currentIds = attachmentIds;
             const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort((a, b) => a - b);
-            const currentIdsSorted = [...currentIds].sort((a, b) => a - b);
+            const currentIdsSorted = [...finalAttachmentIds].sort((a, b) => a - b);
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             // สร้างข้อมูล conference (อาจลบ field attachments ภายหลังหากไม่เปลี่ยนและเป็นการแก้ไข)
@@ -191,7 +206,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 fundName: formData.fundName?.trim?.() || null,
                 keywords: formData.keywords?.trim?.() || null,
                 // เก็บข้อมูล attachments ของ conference
-                attachments: attachmentIds.length ? attachmentIds : [],
+                attachments: finalAttachmentIds.length ? finalAttachmentIds : [],
                 // เชื่อมโยงกับ project ที่เลือก
                 projects: formData.__projectObj?.documentId ? [formData.__projectObj.documentId] : []
             };
@@ -209,10 +224,10 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             } else if (isEdit && attachmentsChanged) {
                 // เมื่อมีการเปลี่ยนแปลง attachments ในการแก้ไข ให้ส่งเฉพาะ ID ที่ valid
                 // และตรวจสอบว่า attachments exist ใน Strapi หรือไม่
-                console.log('Attachments changed. Sending IDs:', attachmentIds);
+                console.log('Attachments changed. Sending IDs:', finalAttachmentIds);
 
                 // กรอง attachments ที่อาจมีปัญหา
-                if (attachmentIds.length === 0) {
+                if (finalAttachmentIds.length === 0) {
                     // ถ้าไม่มี attachments ใหม่ ให้ลบ field นี้ออก
                     delete conferenceData.attachments;
                 }

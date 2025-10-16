@@ -79,8 +79,19 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
         if (!Array.isArray(arr)) return []
         const ids = []
         for (const attachment of arr) {
-            const normalized = normalizeDocumentId(attachment?.documentId ?? attachment?.id)
-            if (normalized) ids.push(normalized)
+            // Skip if attachment is null/undefined or doesn't have valid structure
+            if (!attachment || typeof attachment !== 'object') continue
+            
+            const rawId = attachment?.documentId ?? attachment?.id
+            const normalized = normalizeDocumentId(rawId)
+            
+            // Additional validation: ensure it's a valid number or numeric string
+            if (normalized) {
+                const numericId = Number(normalized)
+                if (Number.isFinite(numericId) && numericId > 0) {
+                    ids.push(normalized)
+                }
+            }
         }
         return Array.from(new Set(ids))
     }, [])
@@ -139,7 +150,13 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             const usersPermissionsUsers = Array.from(new Set(extractInternalUserIds(formData.partners)))
 
             const attachmentIds = extractAttachmentIds(formData.attachments)
-            const currentIdsSorted = [...attachmentIds].sort()
+
+            // When editing, merge original IDs with new IDs to ensure old files are preserved
+            const finalAttachmentIds = initialData
+                ? Array.from(new Set([...originalAttachmentIdsRef.current, ...attachmentIds]))
+                : attachmentIds
+
+            const currentIdsSorted = [...finalAttachmentIds].sort()
             const originalIdsSorted = [...originalAttachmentIdsRef.current].sort()
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted)
 
@@ -161,7 +178,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 references4: formData.references4 || null,
                 period: formData.period || null,
                 partners: formData.partners || [],
-                attachments: attachmentIds,
+                attachments: finalAttachmentIds,
                 users_permissions_users: usersPermissionsUsers
             }
 

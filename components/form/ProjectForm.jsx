@@ -63,9 +63,14 @@ const stripTypenameDeep = (input) => {
 const extractAttachmentIds = (arr) => {
     if (!Array.isArray(arr)) return [];
     return arr
-        .filter(a => a && (a.documentId || a.id))
+        .filter(a => a && typeof a === 'object' && (a.documentId || a.id))
         .map(a => normalizeId(a.documentId ?? a.id))
-        .filter(Boolean);
+        .filter(id => {
+            // Additional validation: ensure it's a valid number or numeric string
+            if (!id) return false;
+            const numericId = Number(id);
+            return Number.isFinite(numericId) && numericId > 0;
+        });
 };
 
 const extractSdgIds = (sdgData) => {
@@ -182,8 +187,13 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
 
             const attachmentIds = Array.from(new Set(extractAttachmentIds(formData.attachments)));
 
+            // When editing, merge original IDs with new IDs to ensure old files are preserved
+            const finalAttachmentIds = isEditing
+                ? Array.from(new Set([...(originalAttachmentIdsRef.current || []), ...attachmentIds]))
+                : attachmentIds;
+
             const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort();
-            const currentIdsSorted = [...attachmentIds].sort();
+            const currentIdsSorted = [...finalAttachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
             const toIdArray = (value) => {
@@ -221,7 +231,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 impacts: toIdArray(formData.impact),
                 sdgs: toSdgIdArray(formData.sdg),
                 partners: Array.isArray(formData.partners) ? stripTypenameDeep(formData.partners) : [],
-                attachments: attachmentIds.length ? attachmentIds : [],
+                attachments: finalAttachmentIds.length ? finalAttachmentIds : [],
                 users_permissions_users: usersPermissionsUsers
             };
 
@@ -242,7 +252,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             if (onSubmit) {
                 await onSubmit(safeProjectData);
                 if (isEditing) {
-                    originalAttachmentIdsRef.current = attachmentIds;
+                    originalAttachmentIdsRef.current = finalAttachmentIds;
                 }
             } else if (isEditing) {
                 const targetId = normalizeId(initialData?.documentId);
@@ -256,7 +266,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     }
                 });
                 toast.success('อัปเดตโครงการสำเร็จแล้ว!');
-                originalAttachmentIdsRef.current = attachmentIds;
+                originalAttachmentIdsRef.current = finalAttachmentIds;
             } else {
                 await createProject({
                     variables: {
