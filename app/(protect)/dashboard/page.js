@@ -62,7 +62,7 @@ function buildResearchStats(projects = [], icTypesMaster = [], impactsMaster = [
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const roleName = session?.user?.role?.name || '';  
+  const roleName = session?.user?.role?.name || '';
   const { data, loading, error } = useQuery(GET_DASHBOARD, { fetchPolicy: 'cache-and-network' });
   const [selectedDeptPersonnel, setSelectedDeptPersonnel] = useState('all');
   const [selectedDept, setSelectedDept] = useState('all');
@@ -82,7 +82,7 @@ export default function DashboardPage() {
   const icTypesMaster = data?.icTypes || [];
   const impactsMaster = data?.impacts || [];
   const sdgsMaster = data?.sdgs || [];
-  const departments = data?.departments || [];
+  const departments = data?.departments.filter(d => d.title !== 'สํานักงานเลขานุการ') || [];
 
   // Stats (apply toggles; you could extend to filter by dept if domain requires)
   const stats = useMemo(() => {
