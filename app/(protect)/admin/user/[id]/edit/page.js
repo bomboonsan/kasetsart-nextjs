@@ -339,9 +339,9 @@ export default function AdminUserEditPage({ params }) {
                         </>
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : formData.departments} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={selectData.departments?.map(d => ({ value: d.documentId, label: d.title })) || []} />
-                        <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : formData.faculties} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties?.map(f => ({ value: f.documentId, label: f.title })) || []} />
-                        <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : formData.organizations} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={selectData.organizations?.map(o => ({ value: o.documentId, label: o.title })) || []} />
+                        <FieldSelect label="เลือกภาควิชา" value={formData.departments[0]?.documentId ? formData.departments[0].documentId : ''} onChange={(value) => handleInputChange('departments', value)} placeholder="เลือกภาควิชา" options={selectData.departments?.map(d => ({ value: d.documentId, label: d.title })) || []} />
+                        <FieldSelect label="คณะ" value={formData.faculties[0]?.documentId ? formData.faculties[0].documentId : ''} onChange={(value) => handleInputChange('faculties', value)} placeholder="เลือกคณะ" options={selectData.faculties?.map(f => ({ value: f.documentId, label: f.title })) || []} />
+                        <FieldSelect label="มหาวิทยาลัย/หน่วยงาน" value={formData.organizations[0]?.documentId ? formData.organizations[0].documentId : ''} onChange={(value) => handleInputChange('organizations', value)} placeholder="เลือกมหาวิทยาลัย/หน่วยงาน" options={selectData.organizations?.map(o => ({ value: o.documentId, label: o.title })) || []} />
                     </div>
                 </div>
             </Block>
