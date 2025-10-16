@@ -102,6 +102,33 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         if (field === 'level' && value === '0') {
             setFormData((prev) => ({ ...prev, country: 'TH' }));
         }
+
+        // Validate date range: ensure durationEnd is not before durationStart
+        if (field === 'durationStart' && value) {
+            setFormData((prev) => {
+                const startDate = new Date(value);
+                const endDate = prev.durationEnd ? new Date(prev.durationEnd) : null;
+
+                // If end date exists and is before start date, set end date to match start date
+                if (endDate && endDate < startDate) {
+                    return { ...prev, durationStart: value, durationEnd: value };
+                }
+                return { ...prev, durationStart: value };
+            });
+        }
+
+        if (field === 'durationEnd' && value) {
+            setFormData((prev) => {
+                const startDate = prev.durationStart ? new Date(prev.durationStart) : null;
+                const endDate = new Date(value);
+
+                // If end date is before start date, don't update (keep current end date)
+                if (startDate && endDate < startDate) {
+                    return prev;
+                }
+                return { ...prev, durationEnd: value };
+            });
+        }
     }, []);
 
     // Memoized submit handler with proper error handling
@@ -114,14 +141,14 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         // Basic validation with null checks
         const titleTH = formData.titleTH?.trim?.() || '';
         const titleEN = formData.titleEN?.trim?.() || '';
-        
+
         if (!titleTH && !titleEN) {
             toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;
         }
 
         setIsSubmitting(true);
-        
+
         try {
             // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว with null safety
             const attachmentIds = Array.isArray(formData.attachments)
@@ -181,7 +208,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 // เมื่อมีการเปลี่ยนแปลง attachments ในการแก้ไข ให้ส่งเฉพาะ ID ที่ valid
                 // และตรวจสอบว่า attachments exist ใน Strapi หรือไม่
                 console.log('Attachments changed. Sending IDs:', attachmentIds);
-                
+
                 // กรอง attachments ที่อาจมีปัญหา
                 if (attachmentIds.length === 0) {
                     // ถ้าไม่มี attachments ใหม่ ให้ลบ field นี้ออก
@@ -219,17 +246,17 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     }
                 });
             }
-            
+
         } catch (error) {
             console.error('Submission error:', error);
-            
+
             // ตรวจสอบว่าเป็น error เกี่ยวกับ attachments หรือไม่
             const errorMessage = error?.message || error?.graphQLErrors?.[0]?.message || 'ไม่ทราบสาเหตุ';
-            
+
             if (errorMessage.includes('plugin::upload.file') && errorMessage.includes('do not exist')) {
                 // ถ้าเป็น error เกี่ยวกับ attachment files ที่หายไป
                 toast.error('เกิดข้อผิดพลาดเกี่ยวกับไฟล์แนบ: บางไฟล์อาจถูกลบไปแล้ว กรุณาอัปโหลดไฟล์ใหม่');
-                
+
                 // ลบ attachments ที่มีปัญหาออกจาก form data
                 setFormData(prev => ({
                     ...prev,
@@ -254,9 +281,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         try {
             const all = Country.getAllCountries();
             if (!Array.isArray(all)) return [];
-            return all.map((c) => ({ 
-                value: c?.isoCode || '', 
-                label: c?.name || 'Unknown Country' 
+            return all.map((c) => ({
+                value: c?.isoCode || '',
+                label: c?.name || 'Unknown Country'
             }));
         } catch (error) {
             console.error('Error fetching countries:', error);
@@ -270,9 +297,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         try {
             const states = State.getStatesOfCountry(String(formData.country));
             if (!Array.isArray(states)) return [];
-            return states.map((s) => ({ 
-                value: s?.isoCode || '', 
-                label: s?.name || 'Unknown State' 
+            return states.map((s) => ({
+                value: s?.isoCode || '',
+                label: s?.name || 'Unknown State'
             }));
         } catch (error) {
             console.error('Error fetching states for country:', formData.country, error);
@@ -289,9 +316,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                 String(formData.state),
             );
             if (!Array.isArray(cities)) return [];
-            return cities.map((c) => ({ 
-                value: c?.name || '', 
-                label: c?.name || 'Unknown City' 
+            return cities.map((c) => ({
+                value: c?.name || '',
+                label: c?.name || 'Unknown City'
             }));
         } catch (error) {
             console.error('Error fetching cities for country/state:', formData.country, formData.state, error);
@@ -305,18 +332,18 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     // Safe useEffect with proper dependency and null checks
     useEffect(() => {
         if (!projectObj) return;
-        
+
         try {
             // Only update if partners array exists and is different
             const newPartners = Array.isArray(projectObj.partners) ? projectObj.partners : [];
             const currentPartners = Array.isArray(formData.partners) ? formData.partners : [];
-            
+
             // Compare arrays to prevent unnecessary updates
             if (JSON.stringify(newPartners) !== JSON.stringify(currentPartners)) {
-                setFormData((prev) => ({ 
-                    ...prev, 
+                setFormData((prev) => ({
+                    ...prev,
                     fundName: projectObj?.fundName || '',
-                    partners: newPartners 
+                    partners: newPartners
                 }));
             }
         } catch (error) {
@@ -352,7 +379,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
     }), [formData]);
     return (
         <>
-            <Block> 
+            <Block>
                 <div className="inputGroup">
                     <FormTextarea id="titleTH" label="ชื่อผลงาน (ไทย)" value={formData.titleTH ?? ""} onChange={(e) => handleInputChange('titleTH', e.target.value)} placeholder="" rows={5} />
                     <FormTextarea id="titleEN" label="ชื่อผลงาน (อังกฤษ)" value={formData.titleEN ?? ""} onChange={(e) => handleInputChange('titleEN', e.target.value)} placeholder="" rows={5} />

@@ -6,8 +6,8 @@ export const CONFERENCE_FORM_INITIAL = {
     journalName: "", // ชื่อการประชุมทางวิชาการ (ใช้ชื่อไทยถ้าไม่มีชื่อไทยให้ใช้ภาษาอื่น)
     doi: "", // DOI (ถ้าไม่มีให้ใส่ “-”) ความหมายของ DOI
     isbn: "", // ISBN (ป้อนอักษร 10 ตัว หรือ 13 ตัว ไม่ต้องใส่ “-”)
-    durationStart: "2025-08-01",
-    durationEnd: "2027-12-31",
+    durationStart: "2025-11-30",
+    durationEnd: "2025-11-30",
     cost: "", // ค่าใช้จ่าย (Int)
     costType: "", // ค่าใช้จ่ายมาจาก  (Int) Value จาก select
     __projectObj: undefined, // สำหรับเก็บ object โครงการวิจัยที่เลือก
