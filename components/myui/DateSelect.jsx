@@ -31,6 +31,7 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
      * แปลงค่า value (YYYY-MM-DD หรือ YYYY-MM, ค.ศ.) -> state เริ่มต้นของ day, month, yearTh
      * ใช้ useMemo เพื่อคำนวณครั้งเดียวต่อ value ที่เปลี่ยน
      * เพิ่ม error handling เพื่อป้องกัน client-side exception
+     * ถ้า noDay=true จะละเลยวันที่จาก value และใช้วันที่ 1 เสมอ
      */
     const initialParts = useMemo(() => {
         try {
@@ -49,8 +50,9 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
                 return Number.isInteger(num) ? num : null
             })
 
-            // ถ้า noDay หรือไม่มี day ใน value ให้ใช้วันที่ 1
-            const dayValue = noDay || !d ? 1 : d
+            // ถ้า noDay=true ให้ใช้วันที่ 1 เสมอ โดยไม่สนใจค่าวันที่ใน value
+            // ถ้าไม่มี day ใน value ก็ให้ใช้วันที่ 1
+            const dayValue = noDay ? 1 : (d || 1)
 
             if (!y || !m) {
                 return null
@@ -58,6 +60,7 @@ export default function DateSelect({ title, value, onChange, noDay = false }) {
             if (m < 1 || m > 12) {
                 return null
             }
+            // เมื่อ noDay=true ไม่ต้องตรวจสอบความถูกต้องของวันที่
             if (!noDay && d && (d < 1 || d > 31)) {
                 return null
             }

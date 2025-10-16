@@ -57,6 +57,17 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
 
     useEffect(() => {
         if (initialData && isHydrated) {
+            // Helper function to normalize date for noDay mode
+            const normalizeDateForNoDay = (dateStr) => {
+                if (!dateStr) return '';
+                // If date is YYYY-MM-DD, convert to YYYY-MM-01 for consistent display
+                const match = dateStr.match(/^(\d{4})-(\d{2})-\d{2}$/);
+                if (match) {
+                    return `${match[1]}-${match[2]}-01`;
+                }
+                return dateStr;
+            };
+
             const hydrated = {
                 ...PUBLICATION_FORM_INITIAL,
                 ...initialData,
@@ -65,6 +76,9 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                     partners: initialData.projects[0].partners || []
                 } : null,
                 partners: initialData.projects?.[0]?.partners || [],
+                // Normalize dates to YYYY-MM-01 format for noDay mode
+                durationStart: normalizeDateForNoDay(initialData.durationStart),
+                durationEnd: normalizeDateForNoDay(initialData.durationEnd),
             };
             setFormData(hydrated);
             originalAttachmentIdsRef.current = extractAttachmentIds(hydrated.attachments);
@@ -108,6 +122,17 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             const currentIdsSorted = [...attachmentIds].sort();
             const attachmentsChanged = JSON.stringify(originalIdsSorted) !== JSON.stringify(currentIdsSorted);
 
+            // Helper function to ensure date format is YYYY-MM-01 for noDay mode
+            const ensureDateFormat = (dateStr) => {
+                if (!dateStr) return null;
+                // Ensure the date is in YYYY-MM-01 format (day is always 01)
+                const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (match) {
+                    return `${match[1]}-${match[2]}-01`;
+                }
+                return dateStr;
+            };
+
             const data = {
                 titleTH: formData.titleTH?.trim() || null,
                 titleEN: formData.titleEN?.trim() || null,
@@ -117,8 +142,8 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                 isbn: formData.isbn || null,
                 volume: formData.volume || null,
                 issue: formData.issue || null,
-                durationStart: formData.durationStart || null,
-                durationEnd: formData.durationEnd || null,
+                durationStart: ensureDateFormat(formData.durationStart),
+                durationEnd: ensureDateFormat(formData.durationEnd),
                 pageStart: formData.pageStart || null,
                 pageEnd: formData.pageEnd || null,
                 level: formData.level || null,
@@ -274,7 +299,6 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     if (!isHydrated) {
         return <div className="p-6">Loading...</div>;
     }
-    console.log('Rendering FormDateSelect:', formData.durationStart, formData.durationEnd);
 
     return (
         <>
