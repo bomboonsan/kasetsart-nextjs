@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import Block from '../layout/Block';
 import FormInput from '../myui/FormInput';
 import FormSelect from '../myui/FormSelect';
 import FormCheckbox from '../myui/FormCheckbox';
@@ -8,6 +7,35 @@ import UserPicker from './UserPicker';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+
+const normalizeOrgLabel = (value) => {
+    if (!value) return '';
+    return String(value).replace(/\s+/g, ' ').trim();
+};
+
+const buildOrganizationName = (user) => {
+    if (!user) return '';
+    const names = [];
+    const primarySources = [
+        user.departments?.[0]?.name,
+        user.faculties?.[0]?.name,
+        user.organizations?.[0]?.name,
+    ];
+    const fallbackSources = [
+        user.department?.name,
+        user.faculty?.name,
+        user.organization?.name,
+    ];
+
+    [...primarySources, ...fallbackSources].forEach((raw) => {
+        const normalized = normalizeOrgLabel(raw);
+        if (normalized && !names.includes(normalized)) {
+            names.push(normalized);
+        }
+    });
+
+    return names.join(' / ');
+};
 
 export default function Partners({ data, onChange }) {
     // state หลักของตาราง
@@ -94,19 +122,8 @@ export default function Partners({ data, onChange }) {
                 ? `${u.firstNameTH} ${u.lastNameTH}`.trim()
                 : u.email || '');
 
-        const orgParts = [];
-        if (u.departments && u.departments[0]?.name) orgParts.push(u.departments[0].name);
-        if (u.faculties && u.faculties[0]?.name) orgParts.push(u.faculties[0].name);
-        if (u.organizations && u.organizations[0]?.name) orgParts.push(u.organizations[0].name);
-        if (orgParts.length === 0) {
-            if (u.department?.name) orgParts.push(u.department.name);
-            if (u.faculty?.name) orgParts.push(u.faculty.name);
-            if (u.organization?.name) orgParts.push(u.organization.name);
-        }
-        const org = orgParts.join(' ');
-
         setModalPartnerFullName(display);
-        setModalOrgName(org);
+        setModalOrgName(buildOrganizationName(u));
     }, []);
 
     // เพิ่มหรือบันทึก partner
@@ -216,18 +233,9 @@ export default function Partners({ data, onChange }) {
     // แสดงหน่วยงานจาก userObj ถ้ามี
     const organizationDisplayName = useMemo(() => {
         if (modalUserObj) {
-            const orgParts = [];
-            if (modalUserObj.departments && modalUserObj.departments[0]?.name) orgParts.push(modalUserObj.departments[0].name);
-            if (modalUserObj.faculties && modalUserObj.faculties[0]?.name) orgParts.push(modalUserObj.faculties[0].name);
-            if (modalUserObj.organizations && modalUserObj.organizations[0]?.name) orgParts.push(modalUserObj.organizations[0].name);
-            if (orgParts.length === 0) {
-                if (modalUserObj.department?.name) orgParts.push(modalUserObj.department.name + ' / ');
-                if (modalUserObj.faculty?.name) orgParts.push(modalUserObj.faculty.name);
-                if (modalUserObj.organization?.name) orgParts.push(modalUserObj.organization.name);
-            }
-            return orgParts.join(' ');
+            return buildOrganizationName(modalUserObj);
         }
-        return modalOrgName || '';
+        return normalizeOrgLabel(modalOrgName);
     }, [modalUserObj, modalOrgName]);
 
     return (

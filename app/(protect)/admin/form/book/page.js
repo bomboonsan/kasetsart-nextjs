@@ -26,7 +26,7 @@ export default function BookTable() {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData, loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
@@ -116,7 +116,6 @@ export default function BookTable() {
                     <TableHeader>
                         <TableRow>
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
-                            <TableHead className={'px-5'}>ผู้แต่ง</TableHead>
                             <TableHead className={'px-5'}>ประเภท</TableHead>
                             <TableHead className={'px-5'}>วันที่ตีพิมพ์</TableHead>
                             <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
@@ -137,21 +136,18 @@ export default function BookTable() {
 
                         {books.map((b) => (
                             <TableRow key={b.documentId}>
-                                <TableCell className={'px-5'}>
-                                    <div className="font-semibold">{b.titleTH || b.titleEN || '—'}</div>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
+                                    <div className="font-semibold ">{b.titleTH || b.titleEN || '—'}</div>
                                     {b.titleEN && b.titleTH && (
                                         <div className="text-xs text-gray-500">{b.titleEN}</div>
                                     )}
-                                </TableCell>
-                                <TableCell className={'px-5'}>
-                                    <div className="text-sm">{b.funds.length > 0 ? getWriters(b) : "-"}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>{b.bookType == '0' ? 'หนังสือ' : "ตำรา"}</TableCell>
                                 <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/book/view/${b.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/form/book/edit/${b.documentId}`}>แก้ไข</a>
+                                    <a className="text-green-600" href={`/admin/form/book/edit/${b.documentId}`}>แก้ไข</a>
                                 </TableCell>
                             </TableRow>
                         ))}

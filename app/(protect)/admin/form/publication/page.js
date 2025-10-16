@@ -23,10 +23,10 @@ export default function PublicationTable() {
     const [debouncedSearch, setDebouncedSearch] = useState(search);
 
     const authContext = {
-            headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
+        headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData, loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
@@ -130,19 +130,19 @@ export default function PublicationTable() {
 
                         {publications.map((p) => (
                             <TableRow key={p.documentId}>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="font-semibold">{p.titleTH || p.titleEN || '—'}</div>
                                     {p.titleEN && p.titleTH && (
                                         <div className="text-xs text-gray-500">{p.titleEN}</div>
                                     )}
                                 </TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="text-sm">{p.journalName || '-'}</div>
                                 </TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     {p.volume || '-'} {p.issue ? `/ ${p.issue}` : ''}
                                 </TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     {p.pageStart && p.pageEnd ? `${p.pageStart} - ${p.pageEnd}` : p.pageStart || p.pageEnd || '-'}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(p.level)}</TableCell>

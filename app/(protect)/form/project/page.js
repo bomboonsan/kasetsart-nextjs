@@ -90,7 +90,7 @@ export default function ProjectTable() {
 
                         {projects.map((p) => (
                             <TableRow key={p.documentId}>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="font-semibold">{p.nameTH || p.nameEN || '—'}</div>
                                     <div className="text-xs text-gray-500">{p.nameEN}</div>
                                 </TableCell>

@@ -137,17 +137,17 @@ export default function ConferenceTable() {
 
                         {conferences.map((c) => (
                             <TableRow key={c.documentId}>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="font-semibold">{c.titleTH || c.titleEN || '—'}</div>
                                     {c.titleEN && c.titleTH && (
                                         <div className="text-xs text-gray-500">{c.titleEN}</div>
                                     )}
                                 </TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="text-sm">{c.journalName || '-'}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(c.level)}</TableCell>
-                                <TableCell className={'px-5'}>{getLocationText(c)}</TableCell>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{getLocationText(c)}</TableCell>
                                 <TableCell className={'px-5'}>
                                     {c.durationStart && c.durationEnd && (c.durationStart !== c.durationEnd)
                                         ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`

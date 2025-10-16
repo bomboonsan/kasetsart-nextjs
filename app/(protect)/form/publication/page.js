@@ -104,13 +104,13 @@ export default function PublicationTable() {
 
                         {publications.map((p) => (
                             <TableRow key={p.documentId}>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="font-semibold">{p.titleTH || p.titleEN || '—'}</div>
                                     {p.titleEN && p.titleTH && (
                                         <div className="text-xs text-gray-500">{p.titleEN}</div>
                                     )}
                                 </TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="text-sm">{p.journalName || '-'}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>

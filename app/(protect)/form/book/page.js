@@ -77,7 +77,6 @@ export default function BookTable() {
                     <TableHeader>
                         <TableRow>
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
-                            <TableHead className={'px-5'}>ผู้แต่ง</TableHead>
                             <TableHead className={'px-5'}>ประเภท</TableHead>
                             <TableHead className={'px-5'}>วันที่ตีพิมพ์</TableHead>
                             <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
@@ -98,16 +97,13 @@ export default function BookTable() {
 
                         {books.map((b) => (
                             <TableRow key={b.documentId}>
-                                <TableCell className={'px-5'}>
-                                    <div className="font-semibold">{b.titleTH || b.titleEN || '—'}</div>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
+                                    <div className="font-semibold ">{b.titleTH || b.titleEN || '—'}</div>
                                     {b.titleEN && b.titleTH && (
                                         <div className="text-xs text-gray-500">{b.titleEN}</div>
                                     )}
                                 </TableCell>
-                                <TableCell className={'px-5'}>
-                                    <div className="text-sm">{(b.writers || []).join(', ') || '-'}</div>
-                                </TableCell>
-                                <TableCell className={'px-5'}>{b.bookType ?? '-'}</TableCell>
+                                <TableCell className={'px-5'}>{b.bookType == '0' ? 'หนังสือ' : "ตำรา"}</TableCell>
                                 <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
