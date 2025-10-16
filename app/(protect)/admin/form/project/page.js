@@ -56,18 +56,18 @@ export default function ProjectTable() {
     });
 
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData, loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
     let projects = data?.projects || [];
-    
+
     // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
     const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
     const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    
-    if (loading && meDataLoading) { return } 
-    
+
+    if (loading && meDataLoading) { return }
+
     // if (roleName === 'Admin' && myDeptId) {
     //     projects = projects.filter(p =>
     //         p.partners?.some(partner =>
@@ -109,6 +109,9 @@ export default function ProjectTable() {
                         )}
                         {error && (
                             <TableRow><TableCell colSpan={7} className="p-6 text-center text-red-600">Error loading projects</TableCell></TableRow>
+                        )}
+                        {projects.length === 0 && !loading && !error && (
+                            <TableRow><TableCell colSpan={7} className="p-6 text-center text-gray-500">ไม่พบข้อมูล</TableCell></TableRow>
                         )}
 
                         {projects.map((p) => (

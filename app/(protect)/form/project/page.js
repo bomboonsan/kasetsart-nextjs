@@ -84,6 +84,9 @@ export default function ProjectTable() {
                         {error && (
                             <TableRow><TableCell colSpan={7} className="p-6 text-center text-red-600">Error loading projects</TableCell></TableRow>
                         )}
+                        {projects.length === 0 && !loading && !error && (
+                            <TableRow><TableCell colSpan={7} className="p-6 text-center text-gray-500">ไม่พบข้อมูล</TableCell></TableRow>
+                        )}
 
                         {projects.map((p) => (
                             <TableRow key={p.documentId}>

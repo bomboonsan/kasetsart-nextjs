@@ -26,7 +26,7 @@ export default function FundTable() {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
     };
     // โหลดข้อมูลตัวเอง (เพื่อดูว่าตัวเองอยู่แผนกไหน)
-    let { data: meData , loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
+    let { data: meData, loading: meDataLoading } = useQuery(GET_USER_DEPARTMENTS, {
         variables: { documentId: session?.user?.documentId },
         context: authContext,
     });
@@ -104,6 +104,9 @@ export default function FundTable() {
                         )}
                         {error && (
                             <TableRow><TableCell colSpan={7} className="p-6 text-center text-red-600">Error loading funds</TableCell></TableRow>
+                        )}
+                        {funds.length === 0 && !loading && !error && (
+                            <TableRow><TableCell colSpan={7} className="p-6 text-center text-gray-500">ไม่พบข้อมูล</TableCell></TableRow>
                         )}
 
                         {funds.map((f) => (
