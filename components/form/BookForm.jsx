@@ -33,7 +33,7 @@ const extractAttachmentIds = (arr) => {
 	if (!Array.isArray(arr)) return [];
 	const ids = [];
 	const skipped = [];
-	
+
 	for (const attachment of arr) {
 		// Skip if attachment is null/undefined or doesn't have valid structure
 		if (!attachment || typeof attachment !== 'object') {
@@ -50,7 +50,7 @@ const extractAttachmentIds = (arr) => {
 			const numericId = Number(normalized);
 			const isNumeric = Number.isFinite(numericId) && numericId > 0;
 			const isUUID = typeof normalized === 'string' && normalized.length > 5; // UUID or similar
-			
+
 			if (isNumeric || isUUID) {
 				ids.push(normalized);
 			} else {
@@ -60,11 +60,11 @@ const extractAttachmentIds = (arr) => {
 			skipped.push({ reason: 'no_normalized_id', rawId, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
 		}
 	}
-	
+
 	if (skipped.length > 0) {
 		console.warn('⚠️ extractAttachmentIds skipped items:', skipped);
 	}
-	
+
 	return Array.from(new Set(ids));
 };
 
@@ -266,14 +266,22 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				// Update originalAttachmentIdsRef to reflect the new state after save
 				originalAttachmentIdsRef.current = finalAttachmentIds;
 				
-				// Refetch data to sync UI with backend
-				if (refetchBook && documentId) {
-					try {
-						await refetchBook();
-					} catch (refetchError) {
-						console.warn('Failed to refetch book data:', refetchError);
-					}
-				}
+				// Update formData.attachments to reflect saved attachments
+				// Convert IDs back to attachment objects to maintain UI consistency
+				const savedAttachments = finalAttachmentIds.map(id => {
+					// Find the attachment object from current formData
+					const existing = formData.attachments?.find(a => 
+						(a.documentId === id || a.id === id)
+					);
+					return existing || { documentId: id, id: id };
+				}).filter(Boolean);
+				
+				setFormData(prev => ({
+					...prev,
+					attachments: savedAttachments
+				}));
+				
+				console.log('✅ Updated formData.attachments after save:', savedAttachments);
 			} else {
 				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
 				setFormData(BOOK_FORM_INITIAL);
@@ -284,7 +292,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId, refetchBook]);
+	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId]);
 
 	// Memoize partners update to prevent infinite loop
 	const updatePartnersFromFunding = useCallback(() => {
@@ -351,7 +359,13 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 	const handleLevelChange = useCallback((e) => handleInputChange('level', e.target.value), [handleInputChange]);
 	const handlePublicationDateChange = useCallback((e) => handleInputChange('publicationDate', e.target.value), [handleInputChange]);
 	const handleFundChange = useCallback((fund) => handleInputChange('__fundingObj', fund), [handleInputChange]);
-	const handleAttachmentsChange = useCallback((files) => handleInputChange('attachments', files), [handleInputChange]);
+	const handleAttachmentsChange = useCallback((files) => {
+		console.log('📎 handleAttachmentsChange called:', {
+			filesCount: files?.length,
+			files: files?.map(f => ({ id: f.id, documentId: f.documentId, name: f.name }))
+		});
+		handleInputChange('attachments', files);
+	}, [handleInputChange]);
 	const handleWritersChange = useCallback((writers) => handleInputChange('writers', writers), [handleInputChange]);
 	const handlePartnersChange = useCallback((partners) => handleInputChange('partners', partners), [handleInputChange]);
 
