@@ -73,8 +73,20 @@ export default function FileUploadField({
                 console.log('📎 FileUploadField syncing from parent:', {
                     previous: lastAppliedRef.current?.length,
                     incoming: incoming?.length,
-                    count: normalizedIncomingValue.length
+                    count: normalizedIncomingValue.length,
+                    currentLocal: attachments.length
                 })
+                
+                // Prevent overwriting if we have more files locally than parent is sending
+                // This can happen when files are uploaded but parent hasn't received the update yet
+                if (attachments.length > normalizedIncomingValue.length) {
+                    console.warn('⚠️ Skipping sync: Local has more files. Likely waiting for parent to catch up.', {
+                        local: attachments.length,
+                        incoming: normalizedIncomingValue.length
+                    });
+                    return;
+                }
+                
                 lastAppliedRef.current = incoming
                 setAttachments(normalizedIncomingValue)
             }
@@ -83,7 +95,7 @@ export default function FileUploadField({
             // Fallback to direct assignment without stringification
             setAttachments(normalizedIncomingValue)
         }
-    }, [normalizedIncomingValue])
+    }, [normalizedIncomingValue, attachments.length])
 
     const normalize = useCallback((file) => {
         if (!file) return null
@@ -176,7 +188,11 @@ export default function FileUploadField({
             // แจ้ง parent ด้วยรายการรวม (normalized) - เรียกหลัง setState เพื่อหลีกเลี่ยง warning
             try {
                 if (mergedAttachments) {
-                    console.log('📤 Calling onFilesChange with:', mergedAttachments.length, 'files');
+                    console.log('📤 Calling onFilesChange with:', {
+                        count: mergedAttachments.length,
+                        hasCallback: !!onFilesChange,
+                        files: mergedAttachments
+                    });
                     onFilesChange?.(mergedAttachments)
                     console.log('✅ onFilesChange completed');
                 } else {
