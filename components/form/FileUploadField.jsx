@@ -28,6 +28,14 @@ export default function FileUploadField({
     // ป้องกันการเรียก setAttachments ซ้ำๆ เมื่อ prop `value` มี reference ใหม่แต่ข้อมูลเดิม
     const lastAppliedRef = useRef(JSON.stringify(value || []))
 
+    // Helper function to parse ID
+    const parseId = useCallback((v) => {
+        if (v === undefined || v === null) return null
+        if (typeof v === 'bigint') return v.toString()
+        const n = Number(v)
+        return Number.isFinite(n) ? String(n) : null
+    }, [])
+
     // Memoize the normalization of incoming value to prevent unnecessary recalculations
     const normalizedIncomingValue = useMemo(() => {
         try {
@@ -40,9 +48,12 @@ export default function FileUploadField({
                 const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
                 const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || '')
 
+                const idStr = parseId(file.id ?? file.documentId ?? file.document_id)
+                const docIdStr = parseId(file.documentId ?? file.document_id ?? file.id)
+
                 return {
-                    id: file.id ?? file.documentId ?? file.document_id, // รองรับ field ต่างรูปแบบ
-                    documentId: file.documentId ?? file.document_id ?? file.id,
+                    id: idStr,
+                    documentId: docIdStr,
                     name: file.name || file.filename || 'unnamed-file',
                     url: url,
                     size: file.size,
@@ -53,7 +64,7 @@ export default function FileUploadField({
             console.warn('Error normalizing incoming value:', error)
             return []
         }
-    }, [value])
+    }, [value, parseId])
 
     useEffect(() => {
         try {
@@ -69,24 +80,17 @@ export default function FileUploadField({
         }
     }, [normalizedIncomingValue])
 
-    // helper: normalize attachment object shape to consistent minimal representation
-    const parseId = useCallback((v) => {
-        if (v === undefined || v === null) return null
-        const n = Number(v)
-        return Number.isFinite(n) ? n : null
-    }, [])
-
     const normalize = useCallback((file) => {
         if (!file) return null
         try {
             const needsUrlNormalization = file.url && typeof file.url === 'string' && !file.url.startsWith('http')
             const url = needsUrlNormalization ? `${API_BASE}${file.url}` : (file.url || file.preview || '')
             const name = file.name || file.filename || file.alternativeText || file.caption || 'unnamed-file'
-            const idNum = parseId(file.id ?? file.documentId ?? file.document_id)
-            const docIdNum = parseId(file.documentId ?? file.document_id ?? file.id)
+            const idStr = parseId(file.id ?? file.documentId ?? file.document_id)
+            const docIdStr = parseId(file.documentId ?? file.document_id ?? file.id)
             return {
-                id: idNum,
-                documentId: docIdNum,
+                id: idStr,
+                documentId: docIdStr,
                 name,
                 url,
                 size: file.size,
