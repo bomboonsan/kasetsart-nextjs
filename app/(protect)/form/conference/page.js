@@ -125,7 +125,7 @@ export default function ConferenceTable() {
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(c.level)}</TableCell>
                                 <TableCell className={'px-5'}>{getLocationText(c)}</TableCell>
-                                <TableCell className={'px-5'}>
+                                <TableCell className={'px-5 text-center'}>
                                     {c.durationStart && c.durationEnd && (c.durationStart !== c.durationEnd)
                                         ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`
                                         : `${formatDateToDDMMYYYY(c.durationStart)}` || '-'
