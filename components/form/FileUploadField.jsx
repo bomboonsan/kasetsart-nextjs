@@ -159,17 +159,31 @@ export default function FileUploadField({
             // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
             let mergedAttachments;
             setAttachments(prevAttachments => {
+                console.log('🔄 Merging attachments:', {
+                    previous: prevAttachments.length,
+                    new: newAttachments.length,
+                    previousFiles: prevAttachments.map(a => a.documentId || a.id),
+                    newFiles: newAttachments.map(a => a.documentId || a.id)
+                });
                 mergedAttachments = dedupe([...prevAttachments, ...newAttachments])
+                console.log('✅ Merged result:', {
+                    count: mergedAttachments.length,
+                    files: mergedAttachments.map(a => a.documentId || a.id)
+                });
                 return mergedAttachments
             })
 
             // แจ้ง parent ด้วยรายการรวม (normalized) - เรียกหลัง setState เพื่อหลีกเลี่ยง warning
             try {
                 if (mergedAttachments) {
+                    console.log('📤 Calling onFilesChange with:', mergedAttachments.length, 'files');
                     onFilesChange?.(mergedAttachments)
+                    console.log('✅ onFilesChange completed');
+                } else {
+                    console.warn('⚠️ mergedAttachments is undefined, not calling onFilesChange');
                 }
             } catch (e) {
-                console.warn('onFilesChange threw', e)
+                console.error('❌ onFilesChange threw error:', e)
             }
 
             // success toast
