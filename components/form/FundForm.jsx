@@ -81,14 +81,17 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
         for (const attachment of arr) {
             // Skip if attachment is null/undefined or doesn't have valid structure
             if (!attachment || typeof attachment !== 'object') continue
-
+            
             const rawId = attachment?.documentId ?? attachment?.id
             const normalized = normalizeDocumentId(rawId)
-
-            // Additional validation: ensure it's a valid number or numeric string
-            if (normalized) {
+            
+            // Accept both numeric IDs and string UUIDs (Strapi v5 uses UUID strings)
+            if (normalized && normalized.length > 0) {
                 const numericId = Number(normalized)
-                if (Number.isFinite(numericId) && numericId > 0) {
+                const isNumeric = Number.isFinite(numericId) && numericId > 0
+                const isUUID = typeof normalized === 'string' && normalized.length > 5
+                
+                if (isNumeric || isUUID) {
                     ids.push(normalized)
                 }
             }

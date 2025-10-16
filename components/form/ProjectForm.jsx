@@ -66,10 +66,12 @@ const extractAttachmentIds = (arr) => {
         .filter(a => a && typeof a === 'object' && (a.documentId || a.id))
         .map(a => normalizeId(a.documentId ?? a.id))
         .filter(id => {
-            // Additional validation: ensure it's a valid number or numeric string
-            if (!id) return false;
+            // Accept both numeric IDs and string UUIDs (Strapi v5 uses UUID strings)
+            if (!id || id.length === 0) return false;
             const numericId = Number(id);
-            return Number.isFinite(numericId) && numericId > 0;
+            const isNumeric = Number.isFinite(numericId) && numericId > 0;
+            const isUUID = typeof id === 'string' && id.length > 5;
+            return isNumeric || isUUID;
         });
 };
 

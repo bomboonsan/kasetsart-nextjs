@@ -44,13 +44,17 @@ const extractAttachmentIds = (arr) => {
 		const rawId = attachment?.documentId ?? attachment?.id;
 		const normalized = normalizeDocumentId(rawId);
 
-		// Additional validation: ensure it's a valid number or numeric string
-		if (normalized) {
+		// Accept both numeric IDs and string UUIDs (Strapi v5 uses UUID strings)
+		if (normalized && normalized.length > 0) {
+			// Check if it's a valid numeric ID OR a valid string UUID
 			const numericId = Number(normalized);
-			if (Number.isFinite(numericId) && numericId > 0) {
+			const isNumeric = Number.isFinite(numericId) && numericId > 0;
+			const isUUID = typeof normalized === 'string' && normalized.length > 5; // UUID or similar
+			
+			if (isNumeric || isUUID) {
 				ids.push(normalized);
 			} else {
-				skipped.push({ reason: 'invalid_numeric', rawId, normalized, numericId, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
+				skipped.push({ reason: 'invalid_id_format', rawId, normalized, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
 			}
 		} else {
 			skipped.push({ reason: 'no_normalized_id', rawId, attachment: { id: attachment?.id, documentId: attachment?.documentId } });
