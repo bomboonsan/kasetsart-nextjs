@@ -59,10 +59,12 @@ export const GET_BOOKS = gql`
       publicationDate
       updatedAt
       writers
+      level
       funds {
         writers
         documentId
         partners
+        publishedAt
       }
       attachments {
         documentId

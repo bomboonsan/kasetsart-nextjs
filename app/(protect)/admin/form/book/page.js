@@ -118,6 +118,7 @@ export default function BookTable() {
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
                             <TableHead className={'px-5'}>ประเภท</TableHead>
                             <TableHead className={'px-5'}>วันที่ตีพิมพ์</TableHead>
+                            <TableHead className={'px-5'}>ระดับผลงาน</TableHead>
                             <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
@@ -143,7 +144,8 @@ export default function BookTable() {
                                     )}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{b.bookType == '0' ? 'หนังสือ' : "ตำรา"}</TableCell>
-                                <TableCell className={'px-5'}>{b.publicationDate ? new Date(b.publicationDate).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{b.funds.publishedAt ? new Date(b.funds.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{b.level == '0' ? 'ระดับชาติ' : "ระดับนานาชาติ"}</TableCell>
                                 <TableCell className={'px-5'}>{b.updatedAt ? new Date(b.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/book/view/${b.documentId}`}>ดู</a>

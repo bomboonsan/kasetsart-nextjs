@@ -8,6 +8,8 @@ export const GET_PROJECTS = gql`
       nameEN
       fiscalYear
       isEnvironmentallySustainable
+      durationStart
+      durationEnd
       keywords
       fundName
       budget

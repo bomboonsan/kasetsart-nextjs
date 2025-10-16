@@ -8,6 +8,8 @@ export const MY_PROJECTS = gql`
             nameEN
             fiscalYear
             isEnvironmentallySustainable
+            durationStart
+            durationEnd
             keywords
             fundName
             budget
@@ -33,6 +35,8 @@ export const MY_PROJECTS_EXTENDED = gql`
             nameEN
             fiscalYear
             isEnvironmentallySustainable
+            durationStart
+            durationEnd
             keywords
             fundName
             budget
@@ -108,6 +112,7 @@ export const MY_PUBLICATIONS = gql`
 export const MY_FUNDS = gql`
     query GetFunds($pagination: PaginationArg, $sort: [String], $userId: ID!) {
         funds(pagination: $pagination, sort: $sort, filters: { users_permissions_users: { documentId: { eq: $userId } } }) {
+            fundName
             documentId
             contentDesc
             fundType
@@ -134,12 +139,16 @@ export const MY_BOOKS = gql`
       publicationDate
       updatedAt
       writers
+      level
       attachments {
         documentId
         name
         url
         size
         mime
+      }
+      funds {
+        publishedAt
       }
     }
   }

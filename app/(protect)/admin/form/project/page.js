@@ -98,7 +98,7 @@ export default function ProjectTable() {
                             <TableHead className={'px-5'}>ชื่อโครงการ</TableHead>
                             <TableHead className={'px-5'}>ปีงบประมาณ</TableHead>
                             <TableHead className={'px-5'}>งบประมาณ</TableHead>
-                            <TableHead className={'px-5'}>วันที่เผยแพร่</TableHead>
+                            <TableHead className={'px-5'}>ระยะเวลา</TableHead>
                             <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
@@ -122,7 +122,7 @@ export default function ProjectTable() {
                                 </TableCell>
                                 <TableCell className={'px-5'}>{p.fiscalYear || '-'}</TableCell>
                                 <TableCell className={'px-5'}>{p.budget ? `${p.budget} บาท` : '-'}</TableCell>
-                                <TableCell className={'px-5'}>{p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{p.durationStart ? new Date(p.durationStart).toLocaleDateString('th-TH') + ' - ' + (p.durationEnd ? new Date(p.durationEnd).toLocaleDateString('th-TH') : '-') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/project/view/${p.documentId}`}>ดู</a>

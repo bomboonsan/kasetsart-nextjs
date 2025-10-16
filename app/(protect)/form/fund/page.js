@@ -69,6 +69,7 @@ export default function FundTable() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead className={'px-5'}>ชื่อทุน</TableHead>
                             <TableHead className={'px-5'}>ประเภททุน</TableHead>
                             <TableHead className={'px-5'}>คำอธิบาย</TableHead>
                             <TableHead className={'px-5'}>จำนวนผู้เขียน</TableHead>
@@ -89,11 +90,12 @@ export default function FundTable() {
 
                         {funds.map((f) => (
                             <TableRow key={f.documentId}>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{f.fundName ? f.fundName : '-'}</TableCell>
                                 <TableCell className={'px-5'}>
                                     <div className="font-semibold">{f.fundType == "0" ? "ตำรา" : "หนังสือ"}</div>
                                 </TableCell>
-                                <TableCell className={'px-5'}>{f.contentDesc ? (f.contentDesc.length > 120 ? f.contentDesc.slice(0, 120) + '...' : f.contentDesc) : '-'}</TableCell>
-                                <TableCell className={'px-5'}>{f.writers ? f.writers.length : '-'}</TableCell>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{f.contentDesc ? (f.contentDesc.length > 120 ? f.contentDesc.slice(0, 120) + '...' : f.contentDesc) : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{f.partners ? f.partners.length + ' ท่าน' : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{f.updatedAt ? new Date(f.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/fund/view/${f.documentId}`}>ดู</a>

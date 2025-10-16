@@ -316,7 +316,7 @@ export default function ProfileEditPage() {
                         accept="image/png, image/jpeg, image/gif"
                     />
                     <Button type="button" onClick={() => fileInputRef.current.click()}>
-                        Change Image
+                        Upload Image
                     </Button>
                 </div>
                 <div className="flex-1 space-y-6">
@@ -342,10 +342,10 @@ export default function ProfileEditPage() {
                                 <FieldSelect label="ประเภทอาจารย์" value={formData.academic_types || ''} onChange={(value) => handleInputChange('academic_types', value)} placeholder="เลือกประเภทอาจารย์" options={options.academicTypes} />
 
                                 <FieldSelect
-                                    label="ประเภทการเข้าร่วม"
+                                    label="participating/supporting"
                                     value={formData.participation || ''}
                                     onChange={(value) => handleInputChange('participation', value)}
-                                    placeholder="เลือกประเภทการเข้าร่วม"
+                                    placeholder="participating/supporting"
                                     options={[
                                         { value: "0", label: 'participating' },
                                         { value: "1", label: 'supporting' }

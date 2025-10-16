@@ -6,10 +6,10 @@ import PublicationItem from './PortfolioItem';
 import Block from '../layout/Block';
 
 const TYPE_TABS = [
-    { key: 'PROJECT', label: 'โครงการวิจัย' },
+    { key: 'PROJECT', label: 'ทุนโครงการวิจัย' },
     { key: 'CONFERENCE', label: 'ประชุมวิชาการ' },
     { key: 'PUBLICATION', label: 'ตีพิมพ์ทางวิชาการ' },
-    { key: 'FUNDING', label: 'ขอรับทุนเขียนตำรา' },
+    { key: 'FUNDING', label: 'ทุนตำราหรือหนังสือ' },
     { key: 'BOOK', label: 'หนังสือและตำรา' },
 ]
 
@@ -19,7 +19,7 @@ export default function ProfilePortfolio({ data }) {
     const [conferences, setConferences] = useState([]);
     const [publications, setPublications] = useState([]);
     const [books, setBooks] = useState([]);
-    
+
     useEffect(() => {
         let conferences = [];
         let publications = [];
@@ -44,17 +44,17 @@ export default function ProfilePortfolio({ data }) {
         setConferences(conferences);
         setPublications(publications);
         setBooks(books);
-    } , [data]);
-    
+    }, [data]);
+
     if (!data) return;
 
-    
+
 
 
     const [activeType, setActiveType] = useState('PROJECT')
     return (
         <Block className="mt-6">
-            <h2 className="text-2xl font-semibold mb-4">ผลงานวิชาการ</h2>
+            <h2 className="text-2xl font-semibold mb-4">ทุนงานวิจัย/ผลงานวิชาการ</h2>
             <div className="flex gap-2 border-b">
                 {TYPE_TABS.map(t => (
                     <button
@@ -87,7 +87,7 @@ export default function ProfilePortfolio({ data }) {
                             return conferences.length === 0 ? (
                                 <div className="text-sm text-gray-500">ยังไม่มีข้อมูลประชุมวิชาการ</div>
                             ) : (
-                                    conferences.map(c => (
+                                conferences.map(c => (
                                     <PublicationItem
                                         key={c.documentId || c.id}
                                         title={c.titleTH}
@@ -142,7 +142,7 @@ export default function ProfilePortfolio({ data }) {
                             return null;
                     }
                 })()}
-                                    
+
             </div>
         </Block>
     );
