@@ -30,24 +30,31 @@ export default function ProjectEdit() {
         }
     })
 
-        
+
     const project = data?.project
     if (!project) { return <div className="p-6">{loading ? 'Loading...' : 'ไม่พบข้อมูลโครงการ'}</div> }
+
+    // ค้นหา subFundTypeLabel จากค่า fundSubType
     let subFundTypeLabel = ''
-    const sub1 = subFundType1.find(option => option.value === project.fundSubType)?.label + subFundType1.find(option => option.value === project.fundSubType)?.label
-    const sub2 = subFundType2.find(option => option.value === project.fundSubType)?.label + subFundType2.find(option => option.value === project.fundSubType)?.label
-    const sub3 = subFundType3.find(option => option.value === project.fundSubType)?.label + subFundType3.find(option => option.value === project.fundSubType)?.label
-    const sub4 = subFundType4.find(option => option.value === project.fundSubType)?.label + subFundType4.find(option => option.value === project.fundSubType)?.label
-    if (sub1 !== 'undefined') {
+
+    const sub1 = subFundType1.find(option => option.value == project.fundSubType)?.label
+    if (sub1) {
         subFundTypeLabel = sub1
-    } else if (sub2 !== 'undefined') {
-        subFundTypeLabel = sub2
-    } else if (sub3 !== 'undefined') {
-        subFundTypeLabel = sub3
-    } else if (sub4 !== 'undefined') {
-        subFundTypeLabel = sub4
     } else {
-        subFundTypeLabel = ''
+        const sub2 = subFundType2.find(option => option.value == project.fundSubType)?.label
+        if (sub2) {
+            subFundTypeLabel = sub2
+        } else {
+            const sub3 = subFundType3.find(option => option.value == project.fundSubType)?.label
+            if (sub3) {
+                subFundTypeLabel = sub3
+            } else {
+                const sub4 = subFundType4.find(option => option.value == project.fundSubType)?.label
+                if (sub4) {
+                    subFundTypeLabel = sub4
+                }
+            }
+        }
     }
 
     return (
@@ -94,7 +101,7 @@ export default function ProjectEdit() {
                             ) : (
                                 <div>ไม่มีไฟล์แนบ</div>
                             )}
-                        </div>  
+                        </div>
                     </Block>
                     <Block>
                         <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
