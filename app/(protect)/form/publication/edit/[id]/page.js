@@ -44,8 +44,6 @@ export default function PublicationEdit() {
         }
     }
 
-    console.log('publication', publication)
-
     return (
         <div>
             <Pageheader title="แก้ไขผลงานตีพิมพ์" />

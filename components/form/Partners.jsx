@@ -221,7 +221,7 @@ export default function Partners({ data, onChange }) {
             if (modalUserObj.faculties && modalUserObj.faculties[0]?.name) orgParts.push(modalUserObj.faculties[0].name);
             if (modalUserObj.organizations && modalUserObj.organizations[0]?.name) orgParts.push(modalUserObj.organizations[0].name);
             if (orgParts.length === 0) {
-                if (modalUserObj.department?.name) orgParts.push(modalUserObj.department.name);
+                if (modalUserObj.department?.name) orgParts.push(modalUserObj.department.name + ' / ');
                 if (modalUserObj.faculty?.name) orgParts.push(modalUserObj.faculty.name);
                 if (modalUserObj.organization?.name) orgParts.push(modalUserObj.organization.name);
             }
