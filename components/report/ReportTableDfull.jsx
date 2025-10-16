@@ -63,7 +63,7 @@ export default function ReportTableDfull() {
   const { reportData, totalRow, csvData } = useMemo(() => {
     if (!data) return { reportData: [], totalRow: {}, csvData: [] };
     const secretariatNames = new Set(['สำนักงานเลขานุการ', 'สํานักงานเลขานุการ']);
-    const departments = (data.departments || []).filter(d => !secretariatNames.has(d.title));
+    const departments = (data.departments || []).filter(d => !secretariatNames.has(d.title)).filter(d => d.title !== 'สํานักงานเลขานุการ');
     const allPublications = data.publications || [];
 
     // Filter publications by year range

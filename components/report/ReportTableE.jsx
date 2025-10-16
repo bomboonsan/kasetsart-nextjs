@@ -106,7 +106,7 @@ export default function ReportTableE_Publications() {
 
     // Get unique departments for filter
     const departments = useMemo(() => {
-        return data?.departments ?? []
+        return data?.departments.filter(d => d.title !== 'สํานักงานเลขานุการ') ?? []
     }, [data])
 
     // flatten: ทุก project → ทุก publication (with filters)

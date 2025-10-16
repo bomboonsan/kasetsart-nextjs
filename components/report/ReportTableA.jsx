@@ -24,7 +24,7 @@ export default function ReportTableA() {
   const { rows: reportData, total: totalRow, csvData } = useMemo(() => {
     if (!data) return { rows: [], total: {}, csvData: [] }
 
-    const departments = data.departments || []
+    const departments = data.departments.filter(d => d.title !== 'สํานักงานเลขานุการ') || []
     const users = data.usersPermissionsUsers || []
     const allPublications = data.publications || []
     const allConferences = data.conferences || []
@@ -294,7 +294,7 @@ export default function ReportTableA() {
       const typesTotal = prj + aprEr + allOther
 
       return {
-        discipline: dep.title,
+        discipline: dep.title || '',
         totalMembers,
         membersWithoutICs,
         membersWithICs,

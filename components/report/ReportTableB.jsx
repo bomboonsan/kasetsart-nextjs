@@ -59,7 +59,7 @@ export default function ReportTableB() {
     const deptAcc = new Map() // disciplineName -> { teaching, research, practice, societal }
 
     // Initialize all departments with zero values
-    const allDepartments = data.departments || []
+    const allDepartments = data.departments.filter(d => d.title !== 'สํานักงานเลขานุการ') || []
     for (const dept of allDepartments) {
       const deptTitle = dept.title || 'Unknown Department'
       deptAcc.set(deptTitle, { teaching: 0, research: 0, practice: 0, societal: 0 })
