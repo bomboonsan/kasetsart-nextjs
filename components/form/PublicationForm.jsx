@@ -274,6 +274,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
     if (!isHydrated) {
         return <div className="p-6">Loading...</div>;
     }
+    console.log('Rendering FormDateSelect:', formData.durationStart, formData.durationEnd);
 
     return (
         <>
