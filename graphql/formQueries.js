@@ -38,6 +38,7 @@ export const GET_PUBLICATIONS = gql`
       pageEnd
       level
       updatedAt
+      isJournalDatabase
       durationStart
       projects {
         documentId

@@ -30,13 +30,14 @@ export default function PublicationView() {
   })
 
   const publication = data?.publication
-    
+
   const toSelectOptions = useCallback((arr) => (arr || []).map(o => ({ value: String(o.value), label: o.label })), []);
   const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), []);
   const scopusSubjectOptions = useMemo(() => toSelectOptions(listsStandardScopusSubset), []);
   const abdcOptions = useMemo(() => toSelectOptions(listsStandardABDC), []);
   const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), []);
   const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), []);
+
 
   return (
     <div>
@@ -63,28 +64,35 @@ export default function PublicationView() {
               <FieldView label="หน้าเริ่มต้น" value={publication.pageStart || '-'} />
               <FieldView label="หน้าสิ้นสุด" value={publication.pageEnd || '-'} />
               <FieldView label="ระดับ" value={publication.level === '0' ? 'ระดับชาติ' : publication.level === '1' ? 'ระดับนานาชาติ' : '-'} />
-              <FieldView label="ฐานข้อมูลวารสาร" value={publication.isJournalDatabase ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'} />
-              {publication.isScopus && (
-                <FieldView label="Scopus" value={`${scopusQuartileOptions.find(option => option.value === publication.scopusValue)?.label || '-'} , ${scopusSubjectOptions.find(option => option.value === publication.scopusType)?.label || '-'}`} />
-              )}
-              {publication.isACI && (
-                <FieldView label="ACI" value="ใช่" />
-              )}
-              {publication.isTCI1 && (
-                <FieldView label="TCI1" value="ใช่" />
-              )}
-              {publication.isTCI2 && (
-                <FieldView label="TCI2" value="ใช่" />
-              )}
-              {publication.isABDC && (
-                <FieldView label="ABDC" value={`${abdcOptions.find(option => option.value === publication.abdcType)?.label || '-'}`} />
-              )}
-              {publication.isAJG && (
-                <FieldView label="AJG" value={`${ajgOptions.find(option => option.value === publication.ajgType)?.label || '-'}`} />
-              )}
-              {publication.isWOS && (
-                <FieldView label="WOS" value={`${wosOptions.find(option => option.value === publication.wosType)?.label || '-'}`} />
-              )}
+              <FieldView label="ฐานข้อมูลวารสาร" value={publication.isJournalDatabase == '0' ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'} />
+
+              <div className='bg-gray-100/60 p-4 rounded-2xl mb-3 inputGroup'>
+                <h2 className='text-lg font-bold'>
+                  ดัชนี / มาตรฐานวารสาร
+                </h2>
+
+                {publication.isScopus && publication.isJournalDatabase == '0' && (
+                  <FieldView label="Scopus" value={`${scopusQuartileOptions.find(option => option.value === publication.scopusValue)?.label || '-'} , ${scopusSubjectOptions.find(option => option.value === publication.scopusType)?.label || '-'}`} />
+                )}
+                {publication.isACI && publication.isJournalDatabase == '0' && (
+                  <FieldView label="ACI" value="ใช่" />
+                )}
+                {publication.isTCI1 && publication.isJournalDatabase == '0' && (
+                  <FieldView label="TCI1" value="ใช่" />
+                )}
+                {publication.isTCI2 && publication.isJournalDatabase == '0' && (
+                  <FieldView label="TCI2" value="ใช่" />
+                )}
+                {publication.isABDC && publication.isJournalDatabase == '0' && (
+                  <FieldView label="ABDC" value={`${abdcOptions.find(option => option.value === publication.abdcType)?.label || '-'}`} />
+                )}
+                {publication.isAJG && publication.isJournalDatabase == '0' && (
+                  <FieldView label="AJG" value={`${ajgOptions.find(option => option.value === publication.ajgType)?.label || '-'}`} />
+                )}
+                {publication.isWOS && publication.isJournalDatabase == '0' && (
+                  <FieldView label="WOS" value={`${wosOptions.find(option => option.value === publication.wosType)?.label || '-'}`} />
+                )}
+              </div>
 
               <FieldView label="ชื่อแหล่งทุน" value={publication.fundName || '-'} />
               <FieldView label="คำสำคัญ" value={publication.keywords || '-'} />
@@ -106,7 +114,7 @@ export default function PublicationView() {
               ) : (
                 <div>ไม่มีไฟล์แนบ</div>
               )}
-            </div>  
+            </div>
           </Block>
           {publication.projects && (
             <Block>
