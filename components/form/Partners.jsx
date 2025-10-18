@@ -29,12 +29,12 @@ const buildOrganizationName = (user) => {
 
     [...primarySources, ...fallbackSources].forEach((raw) => {
         const normalized = normalizeOrgLabel(raw);
-        if (normalized && !names.includes(normalized)) {
+        if (normalized && !names.includes(normalized) && normalized !== undefined) {
             names.push(normalized);
         }
     });
 
-    return names.join(' / ');
+    return names.join(', ');
 };
 
 export default function Partners({ data, onChange }) {
