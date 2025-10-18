@@ -85,8 +85,8 @@ export default function ConferenceView() {
     const conference = data?.conference
 
     const getEnvironmentalText = (value) => {
-        if (value === 0) return 'เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืน';
-        if (value === 1) return 'ไม่เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืน';
+        if (value == '0') return 'เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืน';
+        if (value == '1') return 'ไม่เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืน';
         return '-';
     };
 
