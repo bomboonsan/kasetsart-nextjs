@@ -17,6 +17,8 @@ import {
     TableCell,
 } from '@/components/ui/table'
 import { formatDateToDDMMYYYY } from '@/utils/formatters';
+import { Country, State, City } from 'country-state-city'
+
 
 export default function ConferenceTable() {
     const { data: session, status } = useSession();
@@ -84,6 +86,59 @@ export default function ConferenceTable() {
         return '-';
     };
 
+    const toUpperSafe = (value) => typeof value === 'string' ? value.trim().toUpperCase() : '';
+
+    const getCountryLabel = (countryCode) => {
+        const normalizedCountry = toUpperSafe(countryCode);
+        if (!normalizedCountry) return '';
+        const country = Country.getCountryByCode(normalizedCountry);
+        return country?.name || normalizedCountry;
+    };
+
+    const getStateLabel = (stateCode, countryCode) => {
+        const normalizedState = toUpperSafe(stateCode);
+        if (!normalizedState) return '';
+        const normalizedCountry = toUpperSafe(countryCode);
+        if (normalizedCountry) {
+            const directMatch = typeof State.getStateByCodeAndCountry === 'function'
+                ? State.getStateByCodeAndCountry(normalizedState, normalizedCountry)
+                : null;
+            if (directMatch?.name) return directMatch.name;
+            const states = State.getStatesOfCountry(normalizedCountry);
+            const fallback = states.find((state) => state?.isoCode?.toUpperCase() === normalizedState);
+            if (fallback?.name) return fallback.name;
+        }
+        return stateCode || normalizedState;
+    };
+
+    const getCityLabel = (cityValue, stateCode, countryCode) => {
+        if (typeof cityValue === 'string') {
+            const trimmed = cityValue.trim();
+            if (trimmed) return trimmed;
+        }
+
+        if (cityValue === null || cityValue === undefined) return '';
+
+        const normalizedCountry = toUpperSafe(countryCode);
+        const normalizedState = toUpperSafe(stateCode);
+        if (!normalizedCountry || !normalizedState) return '';
+
+        const cities = City.getCitiesOfState(normalizedCountry, normalizedState);
+        const match = cities.find((city) => String(city?.id) === String(cityValue));
+        return match?.name || '';
+    };
+
+    const getLocationLabel = (city, stateCode, countryCode) => {
+        const parts = [];
+        const cityLabel = getCityLabel(city, stateCode, countryCode);
+        if (cityLabel) parts.push(cityLabel);
+        const stateLabel = getStateLabel(stateCode, countryCode);
+        if (stateLabel) parts.push(stateLabel);
+        const countryLabel = getCountryLabel(countryCode);
+        if (countryLabel) parts.push(countryLabel);
+        return parts.length ? parts.join(', ') : '-';
+    };
+
     const getLocationText = (conference) => {
         const parts = [];
         if (conference.city) parts.push(conference.city);
@@ -147,7 +202,7 @@ export default function ConferenceTable() {
                                     <div className="text-sm">{c.journalName || '-'}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(c.level)}</TableCell>
-                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{getLocationText(c)}</TableCell>
+                                <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{getLocationLabel(c.city, c.state, c.country)}</TableCell>
                                 <TableCell className={'px-5'}>
                                     {c.durationStart && c.durationEnd && (c.durationStart !== c.durationEnd)
                                         ? `${formatDateToDDMMYYYY(c.durationStart)} - ${formatDateToDDMMYYYY(c.durationEnd)}`
