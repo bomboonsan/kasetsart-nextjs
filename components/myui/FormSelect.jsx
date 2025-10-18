@@ -45,9 +45,9 @@ export default function FormSelect({
     }, [onChange, value])
 
     return (
-        <div className="space-y-1 flex items-center forminput">
+        <div className="space-y-2 sm:space-y-1 flex flex-col sm:flex-row sm:items-center forminput">
             {label && (
-                <div className="w-1/3">
+                <div className="sm:w-1/3">
                     <Label htmlFor={fieldId}>{label}</Label>
                 </div>
             )}

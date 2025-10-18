@@ -63,23 +63,23 @@ export default function ScholarshipTable({
 
 
   return (
-    <div className="p-6 border border-gray-50 rounded-lg shadow-sm bg-white">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-4 sm:p-6 border border-gray-50 rounded-lg shadow-sm bg-white">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <div>
-          <h2 className="text-lg text-gray-900 font-medium">{title}</h2>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          <h2 className="text-base sm:text-lg text-gray-900 font-medium">{title}</h2>
+          {subtitle && <p className="text-xs sm:text-sm text-gray-500">{subtitle}</p>}
         </div>
         <div />
       </div>
 
       <div className="overflow-hidden">
-        {/* Tabs */}
-        <div className="flex gap-2 border-b mb-4">
+        {/* Tabs - responsive */}
+        <div className="flex gap-2 border-b mb-4 overflow-x-auto">
           {TYPE_TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setActiveType(t.key)}
-              className={`px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors ${activeType === t.key
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium -mb-px border-b-2 transition-colors whitespace-nowrap ${activeType === t.key
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-600 hover:text-gray-800"
                 }`}
@@ -88,7 +88,7 @@ export default function ScholarshipTable({
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-4 mb-0 px-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 px-2 sm:px-4">
           {/* Checkbox toggle check all / unchecked all */}
           <div className="flex items-center gap-3">
             <input
@@ -120,12 +120,12 @@ export default function ScholarshipTable({
             />
             <label
               htmlFor="select-all-toggle"
-              className="text-sm text-gray-600 font-bold"
+              className="text-xs sm:text-sm text-gray-600 font-bold"
             >
               เลือกทั้งหมด
             </label>
           </div>
-          <div className="ml-6 flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <label className="text-xs text-gray-500">เลือกภาควิชา</label>
             <select
               value={selectedDeptId}
@@ -138,7 +138,7 @@ export default function ScholarshipTable({
                   }, 250)
                 })
               }}
-              className="px-3 py-1 bg-white border border-gray-200 text-sm rounded-md text-gray-900"
+              className="px-2 sm:px-3 py-1 bg-white border border-gray-200 text-xs sm:text-sm rounded-md text-gray-900"
               disabled={!Array.isArray(departments) || departments.length === 0}
             >
               <option value="all">ทั้งหมด</option>
@@ -153,27 +153,27 @@ export default function ScholarshipTable({
             {isPending && (
               <div className="ml-2 flex items-center text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2" />
-                <span>กำลังอัปเดต...</span>
+                <span className="hidden sm:inline">กำลังอัปเดต...</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Table Content */}
+        {/* Table Content - horizontal scroll on mobile */}
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[500px]">
             <thead>
               <tr className="border-b border-b-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
+                <th className="text-left py-2 sm:py-3 px-2 sm:px-4 font-medium text-xs sm:text-sm text-gray-700">
                   ประเภท
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-gray-700">
+                <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-xs sm:text-sm text-gray-700">
                   จำนวน
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-gray-700">
+                <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-xs sm:text-sm text-gray-700">
                   เปอร์เซ็นต์
                 </th>
-                <th className="text-right py-3 px-4 font-medium text-gray-700">
+                <th className="text-right py-2 sm:py-3 px-2 sm:px-4 font-medium text-xs sm:text-sm text-gray-700">
                   แสดงผล
                 </th>
               </tr>
@@ -181,7 +181,7 @@ export default function ScholarshipTable({
             <tbody>
               {activeData.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-8 text-gray-500">
+                  <td colSpan={4} className="text-center py-8 text-xs sm:text-sm text-gray-500">
                     ไม่พบข้อมูล
                   </td>
                 </tr>
@@ -207,8 +207,8 @@ export default function ScholarshipTable({
                       key={item.name || index}
                       className={`border-b border-b-gray-200 hover:bg-gray-50`}
                     >
-                      <td className="py-3 px-4">
-                        <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4">
+                        <div className="text-xs sm:text-sm font-medium text-gray-900 flex items-center gap-2">
                           <input
                             type="checkbox"
                             value={index}
@@ -218,19 +218,19 @@ export default function ScholarshipTable({
                           {item.name}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-sm font-semibold text-gray-900">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                        <span className="text-xs sm:text-sm font-semibold text-gray-900">
                           {(count || 0).toLocaleString()}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-sm text-gray-600">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
+                        <span className="text-xs sm:text-sm text-gray-600">
                           {percentage}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right">
                         <div className="flex items-center justify-end">
-                          <div className="w-12 bg-gray-200 rounded-full h-2 mr-2">
+                          <div className="w-8 sm:w-12 bg-gray-200 rounded-full h-2 mr-2">
                             <div
                               className="h-2 rounded-full"
                               style={{
@@ -240,7 +240,7 @@ export default function ScholarshipTable({
                             ></div>
                           </div>
                           <div
-                            className="w-3 h-3 rounded-full"
+                            className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: color }}
                           ></div>
                         </div>
@@ -255,8 +255,8 @@ export default function ScholarshipTable({
 
         {/* Summary */}
         {activeData.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-t-gray-300 px-4">
-            <div className="text-sm text-gray-600">
+          <div className="mt-4 pt-4 border-t border-t-gray-300 px-2 sm:px-4">
+            <div className="text-xs sm:text-sm text-gray-600">
               รวม{" "}
               {activeType === "icTypes"
                 ? "IC Types"

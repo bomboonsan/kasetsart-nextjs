@@ -4,6 +4,7 @@ import React, { useMemo, useState, useCallback, memo, createElement } from "reac
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { signOut } from "@/utils/auth";
 import { useSession } from "next-auth/react";
 import { API_BASE } from "@/lib/api-base";
@@ -16,6 +17,7 @@ import {
 	File,
 	FileUser,
 	ChevronRight,
+	Menu,
 } from "lucide-react";
 
 /** ---------- เมนูพื้นฐานเป็น “ข้อมูล” ไม่สร้าง element ล่วงหน้า ---------- */
@@ -164,57 +166,89 @@ export default function Sidebar() {
 		await signOut();
 	}, []);
 
-	return (
-		<aside className="w-64 p-4 border-r md:h-screen bg-white sticky top-0 flex flex-col justify-between">
-			<section className="space-y-6">
-				<div className="py-4 border-b border-gray-200">
-					<div className="flex items-center space-x-2">
-						<Image src="/Logo.png" alt="KU Logo" width={32} height={32} className="rounded" unoptimized />
-						<span className="font-bold text-2xl text-gray-800">Kasetsart</span>
-					</div>
-				</div>
-
-				{/* เมนูหลัก */}
-				{showUser && (
-					<nav className="mt-4 desktop-nav">
-						<MenuList items={MAIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
-					</nav>
-				)}
-
-				{showSuperAdmin && (<div className="px-6">
-					<hr className="my-4 border-gray-200" />
-				</div>)}
-
-				{/* เมนูแอดมิน */}
-				{showAdmin && (
-					<nav className="mt-4 desktop-nav">
-						<MenuList items={ADMIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
-					</nav>
-				)}
-			</section>
-
-			<section className="border-t border-gray-200 pt-4 space-y-4">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						{avatarUrl ? (
-							<Image src={avatarUrl} alt={displayName || "avatar"} width={40} height={40} className="rounded-full" unoptimized />
-						) : (
-							<div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
-								{(displayName || "?").slice(0, 1).toUpperCase()}
-							</div>
-						)}
-						<div>
-							<div className="text-sm font-medium text-gray-900">{displayName}</div>
-							{roleName ? <div className="text-xs text-gray-500">{roleName}</div> : null}
+	// Sidebar Content Component (reusable for both desktop and mobile)
+	const SidebarContent = memo(function SidebarContent() {
+		return (
+			<>
+				<section className="space-y-6">
+					<div className="py-4 border-b border-gray-200">
+						<div className="flex items-center space-x-2">
+							<Image src="/Logo.png" alt="KU Logo" width={32} height={32} className="rounded" unoptimized />
+							<span className="font-bold text-2xl text-gray-800">Kasetsart</span>
 						</div>
 					</div>
+
+					{/* เมนูหลัก */}
+					{showUser && (
+						<nav className="mt-4">
+							<MenuList items={MAIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
+						</nav>
+					)}
+
+					{showSuperAdmin && (<div className="px-6">
+						<hr className="my-4 border-gray-200" />
+					</div>)}
+
+					{/* เมนูแอดมิน */}
+					{showAdmin && (
+						<nav className="mt-4">
+							<MenuList items={ADMIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
+						</nav>
+					)}
+				</section>
+
+				<section className="border-t border-gray-200 pt-4 space-y-4">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-3">
+							{avatarUrl ? (
+								<Image src={avatarUrl} alt={displayName || "avatar"} width={40} height={40} className="rounded-full" unoptimized />
+							) : (
+								<div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
+									{(displayName || "?").slice(0, 1).toUpperCase()}
+								</div>
+							)}
+							<div>
+								<div className="text-sm font-medium text-gray-900">{displayName}</div>
+								{roleName ? <div className="text-xs text-gray-500">{roleName}</div> : null}
+							</div>
+						</div>
+					</div>
+					<div className="mt-4">
+						<Button className="w-full" variant="destructive" onClick={handleLogout}>
+							ออกจากระบบ
+						</Button>
+					</div>
+				</section>
+			</>
+		);
+	});
+
+	return (
+		<>
+			{/* Desktop Sidebar - ซ่อนใน mobile และ tablet */}
+			<aside className="hidden lg:flex w-64 p-4 border-r md:h-screen bg-white sticky top-0 flex-col justify-between">
+				<SidebarContent />
+			</aside>
+
+			{/* Mobile & Tablet Menu Button - แสดงเฉพาะใน mobile และ tablet */}
+			<div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+				<div className="flex items-center space-x-2">
+					<Image src="/Logo.png" alt="KU Logo" width={28} height={28} className="rounded" unoptimized />
+					<span className="font-bold text-xl text-gray-800">Kasetsart</span>
 				</div>
-				<div className="mt-4">
-					<Button className="w-full" variant="destructive" onClick={handleLogout}>
-						ออกจากระบบ
-					</Button>
-				</div>
-			</section>
-		</aside>
+				
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button variant="ghost" size="icon" className="lg:hidden">
+							<Menu className="h-6 w-6" />
+							<span className="sr-only">เปิดเมนู</span>
+						</Button>
+					</SheetTrigger>
+					<SheetContent side="left" className="w-64 p-4 flex flex-col justify-between">
+						<SidebarContent />
+					</SheetContent>
+				</Sheet>
+			</div>
+		</>
 	);
 }

@@ -254,10 +254,10 @@ export default function ReportTableB() {
       </div>
       <div className="bg-white rounded-lg border overflow-hidden">
         <div className="p-4 border-b bg-blue-100">
-          <h3 className="text-center text-lg font-bold text-gray-800">Impacts</h3>
+          <h3 className="text-center text-base sm:text-lg font-bold text-gray-800">Impacts</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr>
                 <th className="bg-blue-100 px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider border-r">

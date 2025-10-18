@@ -116,10 +116,10 @@ export default function DonutChart({
   }
 
   return (
-    <div className="p-6 border border-gray-50 rounded-lg shadow-sm bg-white">
+    <div className="p-4 sm:p-6 border border-gray-50 rounded-lg shadow-sm bg-white">
       <div className="mb-4">
-        <h2 className='text-lg text-gray-900 font-medium'>{title}</h2>
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+        <h2 className='text-base sm:text-lg text-gray-900 font-medium'>{title}</h2>
+        {subtitle && <p className="text-xs sm:text-sm text-gray-500">{subtitle}</p>}
       </div>
       <Chart
         options={options}

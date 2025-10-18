@@ -112,11 +112,11 @@ export default function PersonnelChart({
   }
 
   return (
-    <div className="p-6 border border-gray-50 rounded-lg shadow-sm bg-white h-full">
-      <div className="flex items-center justify-between mb-4">
+    <div className="p-4 sm:p-6 border border-gray-50 rounded-lg shadow-sm bg-white h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
         <div>
-          <h2 className='text-lg text-gray-900 font-medium'>{title}</h2>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}{selectedDeptLabel ? ` (${selectedDeptLabel})` : ''}</p>}
+          <h2 className='text-base sm:text-lg text-gray-900 font-medium'>{title}</h2>
+          {subtitle && <p className="text-xs sm:text-sm text-gray-500">{subtitle}{selectedDeptLabel ? ` (${selectedDeptLabel})` : ''}</p>}
         </div>
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500">เลือกภาควิชา</label>
@@ -131,7 +131,7 @@ export default function PersonnelChart({
                 }, 250)
               })
             }}
-            className="px-3 py-1 bg-white border border-gray-200 text-sm rounded-md text-gray-900"
+            className="px-2 sm:px-3 py-1 bg-white border border-gray-200 text-xs sm:text-sm rounded-md text-gray-900"
             disabled={!Array.isArray(departments) || departments.length === 0}
           >
             <option value="all">ทั้งหมด</option>
@@ -148,7 +148,7 @@ export default function PersonnelChart({
           {isPending && (
             <div className="ml-2 flex items-center text-xs text-gray-500">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2" />
-              <span>กำลังอัปเดต...</span>
+              <span className="hidden sm:inline">กำลังอัปเดต...</span>
             </div>
           )}
         </div>
@@ -157,8 +157,8 @@ export default function PersonnelChart({
         <div className="flex justify-center items-center h-32 text-sm text-gray-500">ไม่มีข้อมูล</div>
       ) : (
         <>
-            {/* Custom legend with percentages */}
-          <div className="flex flex-wrap gap-4 mb-4">
+            {/* Custom legend with percentages - responsive grid */}
+          <div className="flex flex-wrap gap-3 sm:gap-4 mb-4">
             {displayData.map((item, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <div 
@@ -178,7 +178,6 @@ export default function PersonnelChart({
             height={height}
           />
 
-          {/* subtle overlay while fetching new data */}
           {/* Personnel details table */}
           <div className="mt-6 space-y-2">
             {displayData.map((item, index) => (
@@ -188,11 +187,11 @@ export default function PersonnelChart({
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: colors[index % colors.length] }}
                   />
-                  <span className="text-sm text-gray-600">{item.category}</span>
+                  <span className="text-xs sm:text-sm text-gray-600">{item.category}</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-gray-900">{item.personnel} คน</span>
-                  <span className="text-sm text-gray-500">{item.percentage}%</span>
+                <div className="flex items-center space-x-2 sm:space-x-4">
+                  <span className="text-xs sm:text-sm font-medium text-gray-900">{item.personnel} คน</span>
+                  <span className="text-xs sm:text-sm text-gray-500">{item.percentage}%</span>
                 </div>
               </div>
             ))}

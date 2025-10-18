@@ -48,15 +48,15 @@ export default function FormInputSelect({
     }, [onChange, value])
 
     return (
-        <div className="space-y-1 flex items-center forminput">
+        <div className="space-y-2 sm:space-y-1 flex flex-col sm:flex-row sm:items-center forminput">
             {label && (
-                <div className="w-1/3">
+                <div className="sm:w-1/3">
                     <Label htmlFor={fieldId}>{label}</Label>
                 </div>
             )}
 
-            <div className="flex-1 space-x-3 flex gap-4 items-center">
-                <div>
+            <div className="flex-1 space-x-3 flex gap-4 items-center flex-wrap sm:flex-nowrap">
+                <div className="flex-1">
                     <Input value={valueInput} onChange={(e) => onInputChange?.(e.target.value)} />
                 </div>
                 <div>

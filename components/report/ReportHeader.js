@@ -31,8 +31,8 @@ export default function ReportHeader({ selectedReport, onChange }) {
 
   return (
     <div className="mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-900">Reports</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Reports</h1>
         <div className="flex items-center space-x-3">
           <div className="relative">
           </div>
@@ -47,7 +47,7 @@ export default function ReportHeader({ selectedReport, onChange }) {
           value={selectedReport || 'table-a'}
           onChange={onChange}
           options={reportOptions}
-          className="max-w-2xl"
+          className="w-full sm:max-w-2xl"
         />
       </div>
     </div>

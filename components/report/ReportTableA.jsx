@@ -418,8 +418,8 @@ export default function ReportTableA() {
   return (
     <>
       <ReportFilters />
-      <div className="mb-4 flex flex-wrap gap-4 items-end justify-between bg-white p-4 rounded-lg shadow">
-        <div className='flex flex-wrap gap-4 '>
+      <div className="mb-4 flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-end justify-between bg-white p-4 rounded-lg shadow">
+        <div className='flex flex-wrap gap-4'>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Start Year</label>
             <select
@@ -433,7 +433,7 @@ export default function ReportTableA() {
                   setStartYear(val)
                 }
               }}
-              className="border rounded px-2 py-1 text-sm"
+              className="border rounded px-2 py-1 text-sm w-full sm:w-auto"
             >
               {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -452,7 +452,7 @@ export default function ReportTableA() {
                   setEndYear(val)
                 }
               }}
-              className="border rounded px-2 py-1 text-sm"
+              className="border rounded px-2 py-1 text-sm w-full sm:w-auto"
             >
               {Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => MIN_YEAR + i).map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -462,7 +462,7 @@ export default function ReportTableA() {
         </div>
         <CSVLink filename={"Report1.xlsx"} data={csvData}><Button
           variant="success"
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 w-full sm:w-auto"
         >
           <span>Export</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,9 +470,10 @@ export default function ReportTableA() {
           </svg>
         </Button></CSVLink>
       </div>
+      {/* Responsive table with horizontal scroll on mobile */}
       <div className="bg-white rounded-lg border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr>
                 <th
