@@ -11,6 +11,60 @@ import Block from '@/components/layout/Block'
 import FieldView from '@/components/myui/FieldView'
 import PartnersView from '@/components/form/PartnersView'
 import { formatDateToDDMMYYYY } from '@/utils/formatters'
+import { Country, State, City } from 'country-state-city'
+
+const toUpperSafe = (value) => typeof value === 'string' ? value.trim().toUpperCase() : '';
+
+const getCountryLabel = (countryCode) => {
+    const normalizedCountry = toUpperSafe(countryCode);
+    if (!normalizedCountry) return '';
+    const country = Country.getCountryByCode(normalizedCountry);
+    return country?.name || normalizedCountry;
+};
+
+const getStateLabel = (stateCode, countryCode) => {
+    const normalizedState = toUpperSafe(stateCode);
+    if (!normalizedState) return '';
+    const normalizedCountry = toUpperSafe(countryCode);
+    if (normalizedCountry) {
+        const directMatch = typeof State.getStateByCodeAndCountry === 'function'
+            ? State.getStateByCodeAndCountry(normalizedState, normalizedCountry)
+            : null;
+        if (directMatch?.name) return directMatch.name;
+        const states = State.getStatesOfCountry(normalizedCountry);
+        const fallback = states.find((state) => state?.isoCode?.toUpperCase() === normalizedState);
+        if (fallback?.name) return fallback.name;
+    }
+    return stateCode || normalizedState;
+};
+
+const getCityLabel = (cityValue, stateCode, countryCode) => {
+    if (typeof cityValue === 'string') {
+        const trimmed = cityValue.trim();
+        if (trimmed) return trimmed;
+    }
+
+    if (cityValue === null || cityValue === undefined) return '';
+
+    const normalizedCountry = toUpperSafe(countryCode);
+    const normalizedState = toUpperSafe(stateCode);
+    if (!normalizedCountry || !normalizedState) return '';
+
+    const cities = City.getCitiesOfState(normalizedCountry, normalizedState);
+    const match = cities.find((city) => String(city?.id) === String(cityValue));
+    return match?.name || '';
+};
+
+const getLocationLabel = (city, stateCode, countryCode) => {
+    const parts = [];
+    const cityLabel = getCityLabel(city, stateCode, countryCode);
+    if (cityLabel) parts.push(cityLabel);
+    const stateLabel = getStateLabel(stateCode, countryCode);
+    if (stateLabel) parts.push(stateLabel);
+    const countryLabel = getCountryLabel(countryCode);
+    if (countryLabel) parts.push(countryLabel);
+    return parts.length ? parts.join(', ') : '-';
+};
 
 export default function ConferenceView() {
     const params = useParams()
@@ -106,12 +160,12 @@ export default function ConferenceView() {
                             <FieldView label="บทคัดย่อ (อังกฤษ)" value={conference.abstractEN || '-'} />
                             <FieldView label="สรุปเนื้อหา" value={conference.summary || '-'} />
                             <FieldView label="ระดับการนำเสนอ" value={getLevelText(conference.level)} />
-                            <FieldView label="สถานที่" value={[conference.city, conference.state, conference.country].filter(Boolean).join(', ') || '-'} />
+                            <FieldView label="สถานที่" value={getLocationLabel(conference.city, conference.state, conference.country)} />
                             <FieldView label="ชื่อแหล่งทุน" value={conference.fundName || '-'} />
                             <FieldView label="คำสำคัญ" value={conference.keywords || '-'} />
                         </div>
                     </Block>
-                    
+
                     <Block>
                         <h2 className="text-lg font-medium mb-3">ไฟล์แนบ</h2>
                         <div className="space-y-2">
@@ -126,7 +180,7 @@ export default function ConferenceView() {
                             ) : (
                                 <div>ไม่มีไฟล์แนบ</div>
                             )}
-                        </div>  
+                        </div>
                     </Block>
 
                     {conference.projects?.[0]?.partners && conference.projects[0].partners.length > 0 && (
