@@ -84,7 +84,8 @@ export default function PublicationTable() {
                         <TableRow>
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
                             <TableHead className={'px-5'}>วารสาร / แหล่งตีพิมพ์</TableHead>
-                            <TableHead className={'px-5'}>หน้า</TableHead>
+                            <TableHead className={'px-5'}>วัน/เดือน/ปี ที่ตีพิมพ์</TableHead>
+                            <TableHead className={'px-5'}>ฐานข้อมูลวารสาร</TableHead>
                             <TableHead className={'px-5'}>ระดับ</TableHead>
                             <TableHead className={'px-5'}>วันที่เพิ่มเข้าสู่ระบบ</TableHead>
                             <TableHead className="text-right"></TableHead>
@@ -114,9 +115,10 @@ export default function PublicationTable() {
                                     <div className="text-sm">{p.journalName || '-'}</div>
                                 </TableCell>
                                 <TableCell className={'px-5'}>
-                                    {formatDateToMMYYYY(p.durationStart) || '-'}
+                                    {formatDateToMMYYYY(p.durationStart) || '-'} - {formatDateToMMYYYY(p.durationEnd) || '-'}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(p.level)}</TableCell>
+                                <TableCell className={'px-5'}>{p.isJournalDatabase == '0' ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'}</TableCell>
                                 <TableCell className={'px-5'}>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/publication/view/${p.documentId}`}>ดู</a>

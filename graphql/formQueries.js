@@ -15,6 +15,7 @@ export const GET_CONFERENCES = gql`
       city
       publishedAt
       updatedAt
+      createdAt
       projects {
         documentId
         nameTH
@@ -38,8 +39,10 @@ export const GET_PUBLICATIONS = gql`
       pageEnd
       level
       updatedAt
-      isJournalDatabase
+      createdAt
       durationStart
+      durationEnd
+      isJournalDatabase
       projects {
         documentId
         nameTH
@@ -59,6 +62,7 @@ export const GET_BOOKS = gql`
       titleEN
       publicationDate
       updatedAt
+      createdAt
       writers
       level
       funds {
@@ -169,6 +173,7 @@ export const GET_CONFERENCE = gql`
       city
       fundName
       keywords
+      createdAt
       attachments {
         documentId
         name
@@ -307,6 +312,7 @@ export const GET_PUBLICATION = gql`
       keywords
       abstractTH
       abstractEN
+      createdAt
       attachments { documentId name url size mime }
       projects { documentId nameTH nameEN partners }
     }
@@ -358,6 +364,7 @@ export const GET_FUNDS = gql`
       period
       pages
       updatedAt
+      createdAt
       partners
     }
   }
@@ -380,6 +387,7 @@ export const GET_MY_FUNDS = gql`
       period
       pages
       updatedAt
+      createdAt
       partners
     }
   }
@@ -406,6 +414,7 @@ export const GET_FUND = gql`
       references3
       references4
       partners
+      createdAt
       attachments { documentId name url size mime }
       users_permissions_users { documentId username email }
     }
@@ -460,7 +469,7 @@ export const GET_BOOK = gql`
       refereed
       researchType
       numberPages
-
+      createdAt
       funds { documentId fundName contentDesc fundType fundTypeText partners }
     }
   }

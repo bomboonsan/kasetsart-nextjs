@@ -15,6 +15,7 @@ export const MY_PROJECTS = gql`
             budget
             publishedAt
             updatedAt
+            createdAt
             departments { documentId title }
             projectType
             partners
@@ -42,6 +43,7 @@ export const MY_PROJECTS_EXTENDED = gql`
             budget
             publishedAt
             updatedAt
+            createdAt
             departments { documentId title }
             projectType
             partners
@@ -71,6 +73,7 @@ export const MY_CONFERENCES = gql`
       city
       publishedAt
       updatedAt
+      createdAt
       projects {
         documentId
         nameTH
@@ -99,7 +102,10 @@ export const MY_PUBLICATIONS = gql`
       pageEnd
       level
       updatedAt
+      createdAt
       durationStart
+      durationEnd
+      isJournalDatabase
       projects {
         documentId
         nameTH
@@ -120,6 +126,7 @@ export const MY_FUNDS = gql`
             duration
             pages
             updatedAt
+            createdAt
             partners
         }
     }
@@ -138,6 +145,7 @@ export const MY_BOOKS = gql`
       titleEN
       publicationDate
       updatedAt
+      createdAt
       writers
       level
       attachments {
