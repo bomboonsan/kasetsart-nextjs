@@ -90,6 +90,13 @@ function formatYear(volume) {
     return `${mm}/${yyyy}`
 }
 
+/** แปลงวันที่เป็น timestamp สำหรับการ sort */
+function toTimestamp(value) {
+    if (!value) return Number.NEGATIVE_INFINITY
+    const ms = Date.parse(value)
+    return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY
+}
+
 
 export default function ReportTableE_Publications() {
     const currentYear = new Date().getFullYear()
@@ -146,13 +153,14 @@ export default function ReportTableE_Publications() {
                 }
 
                 flat.push({
-                    title: p?.abstractTH || p?.abstractEN || '',
+                    title: p?.titleTH || p?.titleEN || '',
                     meeting: p?.journalName || '',              // ชื่อวารสาร
                     authors,
                     level: mapLevelToLabel(p?.level),           // ประเภท
                     date: formatYear(p?.durationStart),                // ปี
                     dateEnd: formatYear(p?.durationEnd),              // ปี (ถ้ามี)
-                    yearSort: p?.durationStart ?? -Infinity,
+                    sortCreatedAt: toTimestamp(p?.createdAt),
+                    sortDuration: toTimestamp(p?.durationStart),
                     dbFlag: p?.isJournalDatabase ?? null,       // เก็บไว้ใช้ต่อ ถ้าต้องโชว์ภายหลัง
                 })
             }
@@ -160,12 +168,16 @@ export default function ReportTableE_Publications() {
 
         // เรียงปีใหม่→เก่า ถ้าไม่มีปีไปท้าย
         flat.sort((a, b) => {
-            const ta = a.yearSort ?? -Infinity
-            const tb = b.yearSort ?? -Infinity
-            return Number(tb) - Number(ta)
+            if (b.sortCreatedAt !== a.sortCreatedAt) {
+                return b.sortCreatedAt - a.sortCreatedAt
+            }
+            return b.sortDuration - a.sortDuration
         })
 
-        return flat.map((r, i) => ({ no: i + 1, ...r }))
+        return flat.map((r, i) => {
+            const { sortCreatedAt, sortDuration, ...rest } = r
+            return { no: i + 1, ...rest }
+        })
     }, [data, startYear, endYear, selectedDepartment])
 
     const csvData = useMemo(

@@ -57,7 +57,7 @@ export default function FormInputSelect({
 
             <div className="flex-1 space-x-3 flex gap-4 items-center flex-wrap sm:flex-nowrap">
                 <div className="flex-1">
-                    <Input value={valueInput} onChange={(e) => onInputChange?.(e.target.value)} />
+                    <Input className={'min-w-40'} value={valueInput} onChange={(e) => onInputChange?.(e.target.value)} />
                 </div>
                 <div>
                     {after}

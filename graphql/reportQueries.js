@@ -199,11 +199,14 @@ export const GET_REPORT_E = gql`
                 abstractEN
                 abstractTH
                 journalName
+                createdAt
                 isJournalDatabase
                 volume
                 level
                 durationStart
                 durationEnd
+                titleTH
+                titleEN
             }
             users_permissions_users {
                 departments {
@@ -227,9 +230,12 @@ export const GET_REPORT_F = gql`
                 abstractTH
                 abstractEN
                 journalName
+                createdAt
                 level
                 durationStart
                 durationEnd
+                titleTH
+                titleEN
             }
             users_permissions_users {
                 departments {

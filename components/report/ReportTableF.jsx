@@ -17,6 +17,13 @@ function formatDate(d) {
     return `${dd}/${mm}/${yyyy}`
 }
 
+/** แปลงวันที่เป็น timestamp สำหรับการ sort */
+function toTimestamp(value) {
+    if (!value) return Number.NEGATIVE_INFINITY
+    const ms = Date.parse(value)
+    return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY
+}
+
 /** map level -> ป้ายไทย */
 function mapLevelToLabel(level) {
     const v = typeof level == 'string' ? level.trim() : level
@@ -157,27 +164,32 @@ export default function ReportTableE() {
                 }
 
                 flat.push({
-                    title: c?.abstractTH || c?.abstractEN || '',
+                    title: c?.titleTH || c?.titleEN || '',
                     meeting: c?.journalName || '',
                     authors,
                     // level: mapLevelToLabel(c?.level),
                     level: c?.level == 0 ? "ระดับชาติ" : "นานาชาติ",
-                    rawDate: c?.durationStart || null,
                     date: formatDate(c?.durationStart),
                     dateEnd: formatDate(c?.durationEnd),
+                    sortCreatedAt: toTimestamp(c?.createdAt),
+                    sortStart: toTimestamp(c?.durationStart),
                 })
             }
         }
 
         // เรียงจากวันที่ใหม่ไปเก่า ถ้าไม่มีวันที่ให้ไปท้าย
         flat.sort((a, b) => {
-            const ta = a.rawDate ? new Date(a.rawDate).getTime() : -Infinity
-            const tb = b.rawDate ? new Date(b.rawDate).getTime() : -Infinity
-            return tb - ta
+            if (b.sortCreatedAt !== a.sortCreatedAt) {
+                return b.sortCreatedAt - a.sortCreatedAt
+            }
+            return b.sortStart - a.sortStart
         })
 
         // ใส่ running number
-        return flat.map((r, i) => ({ no: i + 1, ...r }))
+        return flat.map((r, i) => {
+            const { sortCreatedAt, sortStart, ...rest } = r
+            return { no: i + 1, ...rest }
+        })
     }, [data, startYear, endYear, selectedDepartment])
 
     /** ข้อมูลสำหรับ CSV */
