@@ -111,8 +111,8 @@ export default function PublicationTable() {
                             <TableHead className={'px-5'}>ชื่อผลงาน</TableHead>
                             <TableHead className={'px-5'}>วารสาร / แหล่งตีพิมพ์</TableHead>
                             <TableHead className={'px-5'}>วัน/เดือน/ปี ที่ตีพิมพ์</TableHead>
-                            <TableHead className={'px-5'}>ฐานข้อมูลวารสาร</TableHead>
                             <TableHead className={'px-5'}>ระดับ</TableHead>
+                            <TableHead className={'px-5'}>ฐานข้อมูลวารสาร</TableHead>
                             <TableHead className={'px-5'}>วันที่เพิ่มเข้าสู่ระบบ</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>

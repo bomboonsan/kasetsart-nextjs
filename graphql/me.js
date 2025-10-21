@@ -147,6 +147,7 @@ export const MY_BOOKS = gql`
       updatedAt
       createdAt
       writers
+      yearContracted
       level
       attachments {
         documentId

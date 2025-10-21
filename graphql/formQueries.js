@@ -64,6 +64,7 @@ export const GET_BOOKS = gql`
       updatedAt
       createdAt
       writers
+      yearContracted
       level
       funds {
         writers
