@@ -66,7 +66,7 @@ export default function PublicationView() {
               <FieldView label="ระดับ" value={publication.level === '0' ? 'ระดับชาติ' : publication.level === '1' ? 'ระดับนานาชาติ' : '-'} />
               <FieldView label="ฐานข้อมูลวารสาร" value={publication.isJournalDatabase == '0' ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'} />
 
-              <div className='bg-gray-100/60 p-4 rounded-2xl mb-5 inputGroup shadow shadow-gray-400/50'>
+              <div className={publication.isJournalDatabase == '0' ? "bg-gray-100/60 p-4 rounded-2xl mb-5 inputGroup shadow shadow-gray-400/50" : "hidden"}>
                 <h2 className='text-lg font-bold'>
                   ดัชนี / มาตรฐานวารสาร
                 </h2>
