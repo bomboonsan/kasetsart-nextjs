@@ -65,7 +65,7 @@ export default function BookTable() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="bg-white"
-                    placeholder="ค้นหาจากชื่อผลงาน หรือผู้แต่ง..."
+                    placeholder="ค้นหาจากชื่อผลงาน..."
                 />
             </div>
             {/* /filter */}

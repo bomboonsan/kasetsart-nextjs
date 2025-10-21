@@ -83,7 +83,7 @@ export default function FundTable() {
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
-                <Input value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white" placeholder="ค้นหาจากประเภททุนหรือคำอธิบาย..." />
+                <Input value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white" placeholder="ค้นหาจากชื่อทุน..." />
             </div>
             {/* /filter */}
 
