@@ -280,7 +280,7 @@ export default function ReportTableE_Publications() {
                         </select>
                     </div>
                 </div>
-                <CSVLink filename="Report5.csv" data={csvData}>
+                <CSVLink filename="Report5.xls" data={csvData}>
                     <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
                         <span>Export</span>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -239,12 +239,12 @@ export default function ReportTableB() {
           </div>
         </div>
         {!loading && !error && rows.length > 0 && (
-          <CSVLink filename={"ImpactsReport.csv"} data={csvData}>
+          <CSVLink filename={"ImpactsReport.xls"} data={csvData}>
             <Button
               variant="success"
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 mt-4"
             >
-              <span>Export CSV</span>
+              <span>Export</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-3 3-3-3M12 12v9M5 20h14" />
               </svg>

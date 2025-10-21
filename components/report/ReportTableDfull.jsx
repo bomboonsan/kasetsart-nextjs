@@ -323,7 +323,7 @@ export default function ReportTableDfull() {
             </select>
           </div>
         </div>
-        <CSVLink filename={"Report1.xlsx"} data={csvData}><Button
+        <CSVLink filename={"Report1.xls"} data={csvData}><Button
           variant="success"
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
         >
