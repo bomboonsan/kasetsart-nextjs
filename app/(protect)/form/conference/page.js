@@ -148,9 +148,8 @@ export default function ConferenceTable() {
                             <TableHead className={'px-5'}>ชื่อการประชุม</TableHead>
                             <TableHead className={'px-5'}>ระดับ</TableHead>
                             <TableHead className={'px-5'}>สถานที่</TableHead>
-                            <TableHead className={'px-5'}>ระยะเวลา</TableHead>
-                            <TableHead className={'px-5'}>วันที่เผยแพร่</TableHead>
-                            <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
+                            <TableHead className={'px-5'}>วัน/เดือน/ปี ที่นำเสนอ</TableHead>
+                            <TableHead className={'px-5'}>วันที่เพิ่มเข้าสู่ระบบ</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -185,8 +184,7 @@ export default function ConferenceTable() {
                                         : `${formatDateToDDMMYYYY(c.durationStart)}` || '-'
                                     }
                                 </TableCell>
-                                <TableCell className={'px-5'}>{c.publishedAt ? new Date(c.publishedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
-                                <TableCell className={'px-5'}>{c.updatedAt ? new Date(c.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/conference/view/${c.documentId}`}>ดู</a>
                                     <a className="text-green-600" href={`/form/conference/edit/${c.documentId}`}>แก้ไข</a>

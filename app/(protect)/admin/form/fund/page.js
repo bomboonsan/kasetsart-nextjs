@@ -97,7 +97,7 @@ export default function FundTable() {
                             <TableHead className={'px-5'}>ประเภททุน</TableHead>
                             <TableHead className={'px-5'}>คำอธิบาย</TableHead>
                             <TableHead className={'px-5'}>จำนวนผู้เขียน</TableHead>
-                            <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
+                            <TableHead className={'px-5'}>วันที่เพิ่มเข้าสู่ระบบ</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -120,7 +120,7 @@ export default function FundTable() {
                                 </TableCell>
                                 <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>{f.contentDesc ? (f.contentDesc.length > 120 ? f.contentDesc.slice(0, 120) + '...' : f.contentDesc) : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{f.partners ? f.partners.length + ' ท่าน' : '-'}</TableCell>
-                                <TableCell className={'px-5'}>{f.updatedAt ? new Date(f.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{f.createdAt ? new Date(f.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/fund/view/${f.documentId}`}>ดู</a>
                                     <a className="text-green-600" href={`/admin/form/fund/edit/${f.documentId}`}>แก้ไข</a>

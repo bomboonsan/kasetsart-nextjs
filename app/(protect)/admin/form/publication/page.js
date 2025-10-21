@@ -112,7 +112,7 @@ export default function PublicationTable() {
                             <TableHead className={'px-5'}>ฉบับ / เล่ม</TableHead>
                             <TableHead className={'px-5'}>หน้า</TableHead>
                             <TableHead className={'px-5'}>ระดับ</TableHead>
-                            <TableHead className={'px-5'}>วันที่แก้ไข</TableHead>
+                            <TableHead className={'px-5'}>วันที่เพิ่มเข้าสู่ระบบ</TableHead>
                             <TableHead className="text-right"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -146,7 +146,7 @@ export default function PublicationTable() {
                                     {p.pageStart && p.pageEnd ? `${p.pageStart} - ${p.pageEnd}` : p.pageStart || p.pageEnd || '-'}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{getLevelText(p.level)}</TableCell>
-                                <TableCell className={'px-5'}>{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('th-TH') : '-'}</TableCell>
+                                <TableCell className={'px-5'}>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
                                     <a className="text-blue-600 mr-3" href={`/form/publication/view/${p.documentId}`}>ดู</a>
                                     <a className="text-green-600" href={`/form/publication/edit/${p.documentId}`}>แก้ไข</a>
