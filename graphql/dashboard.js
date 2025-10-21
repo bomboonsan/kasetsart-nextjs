@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 export const GET_DASHBOARD = gql`
 query Dashboard {
-    projects {
+    projects(pagination: { limit: -1 }) {
         documentId
 
         departments {
@@ -18,42 +18,42 @@ query Dashboard {
             documentId
         }
     }
-    funds {
+    funds(pagination: { limit: -1 }) {
         documentId
     }
-    conferences {
+    conferences(pagination: { limit: -1 }) {
         documentId
     }
-    publications {
-        documentId
-    }  
-    books {
+    publications(pagination: { limit: -1 }) {
         documentId
     }
-        usersPermissionsUsers {
-                documentId
-                academic_types {
-                    name
-                    documentId
-                }
-                departments {
-                    documentId
-                    title
-                }
+    books(pagination: { limit: -1 }) {
+        documentId
+    }
+    usersPermissionsUsers(pagination: { limit: -1 }) {
+        documentId
+        academic_types {
+            name
+            documentId
         }
-    icTypes {
+        departments {
+            documentId
+            title
+        }
+    }
+    icTypes(pagination: { limit: -1 }) {
         documentId
         name
     }
-    impacts {
+    impacts(pagination: { limit: -1 }) {
         documentId
         name
     }
-    sdgs {
+    sdgs(pagination: { limit: -1 }) {
         documentId
         name
     }
-    departments {
+    departments(pagination: { limit: -1 }) {
         documentId
         title
     }
