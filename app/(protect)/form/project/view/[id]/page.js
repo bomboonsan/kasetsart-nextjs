@@ -80,7 +80,7 @@ export default function ProjectEdit() {
                             <FieldView label="ประเภทงานวิจัย" value={researchKindOptions.find(option => option.value === project.researchKind)?.label} />
                             <FieldView label="ประเภทแหล่งทุน" value={fundTypeOptions.find(option => option.value === project.fundType)?.label + ' - ' + subFundTypeLabel} />
                             <FieldView label="ชื่อแหล่งทุน" value={project.fundName} />
-                            <FieldView label="งบวิจัย" value={`฿${project.budget.toLocaleString()}`} />
+                            <FieldView label="งบวิจัย" value={project.budget ? `฿${project.budget.toLocaleString()}` : '-'} />
                             <FieldView label="คำสำคัญ" value={project.keywords} />
                             <FieldView label="IC Types" value={project.ic_types?.map(ic => ic.name).join(', ') || '-'} />
                             <FieldView label="Impact" value={project.impacts?.map(impact => impact.name).join(', ') || '-'} />

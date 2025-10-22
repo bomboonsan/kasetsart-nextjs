@@ -55,7 +55,7 @@ export default function FundTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการคำขอรับทุน (ตำรา/หนังสือ)" btnName="เพิ่มคำขอรับทุน" btnLink="/form/create/fund" />
+            <Pageheader title="จัดการทุนหนังสือหรือตำรา" btnName="เพิ่มทุนหนังสือหรือตำรา" btnLink="/form/create/fund" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">

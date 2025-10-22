@@ -15,6 +15,7 @@ export const GET_PROJECTS = gql`
       budget
       publishedAt
       updatedAt
+      createdAt
       departments { documentId title }
       projectType
       partners
