@@ -52,7 +52,7 @@ export default function PublicationTable() {
     const { data, loading, error } = useQuery(GET_PUBLICATIONS, {
         variables: {
             pagination: { limit: 50 },
-            sort: ["publishedAt:desc"],
+            sort: ["updatedAt:desc"],
             filters,
         },
         context: {

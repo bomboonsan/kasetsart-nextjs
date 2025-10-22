@@ -51,7 +51,7 @@ export default function BookTable() {
     const { data, loading, error } = useQuery(GET_BOOKS, {
         variables: {
             pagination: { limit: 50 },
-            sort: ["publicationDate:desc"],
+            sort: ["updatedAt:desc"],
             filters,
         },
         context: {
