@@ -56,6 +56,22 @@ const ADMIN_ITEMS = [
 	},
 ];
 
+const ADMIN_ONLY_ITEMS = [
+	{ id: "profile", url: "/profile", icon: UserPen, label: "โปรไฟล์ของฉัน" },
+	// { id: "dashboard", url: "/dashboard", icon: LayoutDashboard, label: "แดชบอร์ด" },
+	// { id: "reports", url: "/report", icon: ChartArea, label: "ดูรายงาน" },
+	{ id: "admin/form/all", url: "/admin/form/all", icon: FileUser, label: "โครงการทั้งหมด" },
+	{
+		id: "dashboard/user/manage",
+		url: "#",
+		icon: UsersRound,
+		label: "จัดการผู้ใช้",
+		children: [
+			{ id: "admin/user", url: "/admin/user", icon: UsersRound, label: "รายชื่อผู้ใช้" },
+		],
+	},
+];
+
 /** ---------- Utilities ---------- */
 function resolveAvatarUrl(raw) {
 	if (!raw) return null;
@@ -190,9 +206,14 @@ export default function Sidebar() {
 					</div>)}
 
 					{/* เมนูแอดมิน */}
-					{showAdmin && (
+					{showSuperAdmin && (
 						<nav className="mt-4">
 							<MenuList items={ADMIN_ITEMS} open={openGroups} onToggle={toggleGroup} />
+						</nav>
+					)}
+					{showAdmin && !showSuperAdmin && (
+						<nav className="mt-4">
+							<MenuList items={ADMIN_ONLY_ITEMS} open={openGroups} onToggle={toggleGroup} />
 						</nav>
 					)}
 				</section>
