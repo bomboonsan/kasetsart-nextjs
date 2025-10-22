@@ -215,7 +215,9 @@ export default function AdminUsersPage() {
                                 <TableHead className="px-5">คณะ</TableHead>
                                 <TableHead className="px-5">อีเมล</TableHead>
                                 <TableHead className="px-5">บทบาท</TableHead>
+                                {!showAdmin && <>
                                 <TableHead className="text-right"></TableHead>
+                                </>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -260,6 +262,8 @@ export default function AdminUsersPage() {
                                     <TableCell className="px-5 text-sm">
                                         {u.role?.name || "-"}
                                     </TableCell>
+                                    {!showAdmin && <>
+                                    
                                     <TableCell className="text-right text-sm">
                                         <div className="flex items-center justify-end gap-2">
                                             <select
@@ -284,6 +288,7 @@ export default function AdminUsersPage() {
                                             </Button>
                                         </div>
                                     </TableCell>
+                                    </>}
                                 </TableRow>
                             ))}
                         </TableBody>
