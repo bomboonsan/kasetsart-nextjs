@@ -149,7 +149,7 @@ export default function ConferenceTable() {
 
     return (
         <div>
-            <Pageheader title="จัดการข้อมูลการประชุม" btnName="เพิ่มข้อมูลการประชุม" btnLink="/form/create/conference" />
+            <Pageheader title="จัดการข้อมูลการประชุมวิชาการ" btnName="เพิ่มข้อมูลการประชุมวิชาการ" btnLink="/form/create/conference" />
 
             {/* filter */}
             <div className="mb-4 flex items-center gap-2">
