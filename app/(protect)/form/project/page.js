@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from "next-auth/react";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
 import { MY_PROJECTS } from '@/graphql/me'
+import { DELETE_PROJECT } from '@/graphql/projectQueries'
 import {
     Table,
     TableHeader,
@@ -20,6 +21,13 @@ export default function ProjectTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [deletingId, setDeletingId] = useState(null);
+
+    const authContext = useMemo(() => ({
+        headers: {
+            Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+        },
+    }), [session?.jwt]);
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -37,19 +45,36 @@ export default function ProjectTable() {
         };
     }, [debouncedSearch]);
 
-    const { data, loading, error } = useQuery(MY_PROJECTS, {
+    const { data, loading, error, refetch } = useQuery(MY_PROJECTS, {
         variables: {
             pagination: { limit: 50 },
             sort: ["updatedAt:desc"],
             filters,
             userId: session?.user?.documentId,
         },
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        }
+        context: authContext
     });
+
+    const [deleteProject, { loading: deleteLoading }] = useMutation(DELETE_PROJECT);
+
+    const handleDelete = async (documentId) => {
+        if (!documentId || deleteLoading) return;
+        const confirmed = window.confirm('ยืนยันการลบโครงการนี้หรือไม่?');
+        if (!confirmed) return;
+        try {
+            setDeletingId(documentId);
+            await deleteProject({
+                variables: { documentId },
+                context: authContext,
+            });
+            await refetch();
+        } catch (err) {
+            console.error('Failed to delete project', err);
+            window.alert(err?.message ? `ลบข้อมูลไม่สำเร็จ: ${err.message}` : 'ลบข้อมูลไม่สำเร็จ');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const projects = data?.projects || [];
 
@@ -99,8 +124,19 @@ export default function ProjectTable() {
                                 <TableCell className={'px-5'}>{p.durationStart ? new Date(p.durationStart).toLocaleDateString('th-TH') + ' - ' + (p.durationEnd ? new Date(p.durationEnd).toLocaleDateString('th-TH') : '-') : '-'}</TableCell>
                                 <TableCell className={'px-5'}>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/form/project/view/${p.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/form/project/edit/${p.documentId}`}>แก้ไข</a>
+                                    <div className="flex justify-end gap-3">
+                                        <a className="text-blue-600" href={`/form/project/view/${p.documentId}`}>ดู</a>
+                                        <a className="text-green-600" href={`/form/project/edit/${p.documentId}`}>แก้ไข</a>
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="px-0 text-red-600"
+                                            onClick={() => handleDelete(p.documentId)}
+                                            disabled={deletingId === p.documentId || deleteLoading}
+                                        >
+                                            {deletingId === p.documentId ? 'กำลังลบ...' : 'ลบ'}
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

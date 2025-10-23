@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from "next-auth/react";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
 import { MY_CONFERENCES } from '@/graphql/me'
+import { DELETE_CONFERENCE } from '@/graphql/formQueries'
 import {
     Table,
     TableHeader,
@@ -75,6 +76,13 @@ export default function ConferenceTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [deletingId, setDeletingId] = useState(null);
+
+    const authContext = useMemo(() => ({
+        headers: {
+            Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
+        },
+    }), [session?.jwt]);
 
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -93,21 +101,38 @@ export default function ConferenceTable() {
         };
     }, [debouncedSearch]);
 
-    const { data, loading, error } = useQuery(MY_CONFERENCES, {
+    const { data, loading, error, refetch } = useQuery(MY_CONFERENCES, {
         variables: {
             pagination: { limit: 50 },
             sort: ["updatedAt:desc"],
             filters,
             userId: session?.user?.documentId,
         },
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        }
+        context: authContext
     });
 
     const conferences = data?.conferences || [];
+
+    const [deleteConference, { loading: deleteLoading }] = useMutation(DELETE_CONFERENCE);
+
+    const handleDelete = async (documentId) => {
+        if (!documentId || deleteLoading) return;
+        const confirmed = window.confirm('ยืนยันการลบข้อมูลการประชุมนี้หรือไม่?');
+        if (!confirmed) return;
+        try {
+            setDeletingId(documentId);
+            await deleteConference({
+                variables: { documentId },
+                context: authContext,
+            });
+            await refetch();
+        } catch (err) {
+            console.error('Failed to delete conference', err);
+            window.alert(err?.message ? `ลบข้อมูลไม่สำเร็จ: ${err.message}` : 'ลบข้อมูลไม่สำเร็จ');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const getLevelText = (level) => {
         if (level == '0') return 'ระดับชาติ';
@@ -186,8 +211,19 @@ export default function ConferenceTable() {
                                 </TableCell>
                                 <TableCell className={'px-5'}>{c.createdAt ? new Date(c.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/form/conference/view/${c.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/form/conference/edit/${c.documentId}`}>แก้ไข</a>
+                                    <div className="flex justify-end gap-3">
+                                        <a className="text-blue-600" href={`/form/conference/view/${c.documentId}`}>ดู</a>
+                                        <a className="text-green-600" href={`/form/conference/edit/${c.documentId}`}>แก้ไข</a>
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="px-0 text-red-600"
+                                            onClick={() => handleDelete(c.documentId)}
+                                            disabled={deletingId === c.documentId || deleteLoading}
+                                        >
+                                            {deletingId === c.documentId ? 'กำลังลบ...' : 'ลบ'}
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
