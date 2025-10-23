@@ -38,6 +38,7 @@ export default function PublicationView() {
   const ajgOptions = useMemo(() => toSelectOptions(listsStandardAJG), []);
   const wosOptions = useMemo(() => toSelectOptions(listsStandardWebOfScience), []);
 
+  console.log('publication view data:', publication);
 
   return (
     <div>
@@ -89,7 +90,7 @@ export default function PublicationView() {
                 {publication.isAJG && publication.isJournalDatabase == '0' && (
                   <FieldView label="AJG" value={`${ajgOptions.find(option => option.value === publication.ajgType)?.label || '-'}`} />
                 )}
-                {publication.isSSRN && publication.isSSRN == '0' && (
+                {publication.isSSRN && publication.isJournalDatabase == '0' && (
                   <FieldView label="Social Science Research Network" value="ใช่" />
                 )}
                 {publication.isWOS && publication.isJournalDatabase == '0' && (
