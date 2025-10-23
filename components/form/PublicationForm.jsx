@@ -373,7 +373,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                                 <span>Scopus</span>
                                 <div className='w-full'>
                                     {formData.isScopus && formData.isJournalDatabase == '0' ? (
-                                        <div className="grid md:grid-cols-2 gap-4">
+                                        <div className="grid md:grid-cols-1 gap-2">
                                             <FormSelect id="scopusValue" label="" value={formData.scopusValue || ''} placeholder="เลือก Quartile" onChange={handleScopusValueChange} options={scopusQuartileOptions} />
                                             <FormSelect id="scopusType" label="" value={formData.scopusType || ''} placeholder="เลือกสาขา" onChange={handleScopusTypeChange} options={scopusSubjectOptions} />
                                         </div>
@@ -412,7 +412,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                             </label>
                             <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
                                 <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isSSRN && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isSSRN', e.target.checked)} />
-                                <span>SSRN</span>
+                                <span>Social Science Research Network</span>
                             </label>
                             <label className={formData.level == "0" ? "hidden" : "flex flex-wrap items-center gap-2"}>
                                 <input type="checkbox" disabled={formData.isJournalDatabase == '1'} checked={!!formData.isWOS && formData.isJournalDatabase == '0'} onChange={e => handleStandardToggle('isWOS', e.target.checked)} />

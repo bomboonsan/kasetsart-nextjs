@@ -89,8 +89,11 @@ export default function PublicationView() {
                 {publication.isAJG && publication.isJournalDatabase == '0' && (
                   <FieldView label="AJG" value={`${ajgOptions.find(option => option.value === publication.ajgType)?.label || '-'}`} />
                 )}
+                {publication.isSSRN && publication.isSSRN == '0' && (
+                  <FieldView label="Social Science Research Network" value="ใช่" />
+                )}
                 {publication.isWOS && publication.isJournalDatabase == '0' && (
-                  <FieldView label="WOS" value={`${wosOptions.find(option => option.value === publication.wosType)?.label || '-'}`} />
+                  <FieldView label="Web of Science" value={`${wosOptions.find(option => option.value === publication.wosType)?.label || '-'}`} />
                 )}
               </div>
 
