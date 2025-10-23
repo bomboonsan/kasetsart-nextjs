@@ -207,15 +207,11 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                 originalAttachmentIdsRef.current = finalAttachmentIds
             }
 
-            const fallbackId = submissionResult === undefined
-                ? null
-                : (initialData?.documentId ?? initialData?.id)
-
             const resolvedId = normalizeDocumentId(
                 submissionResult?.documentId ??
                 submissionResult?.id ??
                 submissionResult ??
-                fallbackId
+                (initialData?.documentId ?? initialData?.id)
             )
 
             if (resolvedId) {
@@ -325,7 +321,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
                         </div>
                     </div>
                     <FormTextarea id='contentDesc' label='คำอธิบายเนื้อหาของตำราหรือหนังสือ' value={formData.contentDesc || ''} onChange={(e) => handleInputChange('contentDesc', e.target.value)} rows={5} />
-                    <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว (ถ้ามีโปรดระบุ)' value={formData.pastPublications || ''} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
+                    <FormTextarea id='pastPublications' label='เอกสารทางวิชาการ ตำรา หรือ หนังสือ ที่ผู้ขอทุนเคยมีประสบการณ์แต่งมาแล้ว' value={formData.pastPublications || ''} onChange={(e) => handleInputChange('pastPublications', e.target.value)} rows={5} />
                     <FormTextarea id='purpose' label='วัตถุประสงค์ของตำราหรือหนังสือ' value={formData.purpose || ''} onChange={(e) => handleInputChange('purpose', e.target.value)} rows={5} />
                     <FormTextarea id='targetGroup' label='กลุ่มเป้าหมายของตำราหรือหนังสือ' value={formData.targetGroup || ''} onChange={(e) => handleInputChange('targetGroup', e.target.value)} rows={5} />
                     <FormTextarea id='chapterDetails' label='การแบ่งบทและรายละเอียดในแต่ละบทของตำรา/หนังสือ' value={formData.chapterDetails || ''} onChange={(e) => handleInputChange('chapterDetails', e.target.value)} rows={5} />
