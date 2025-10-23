@@ -236,8 +236,10 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
 
 
             // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
+            let submissionResult;
+
             if (isEdit && onSubmit) {
-                await onSubmit(conferenceData);
+                submissionResult = await onSubmit(conferenceData);
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else {
@@ -247,9 +249,8 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                         data: conferenceData
                     }
                 });
+                submissionResult = conferenceResult?.data?.createConference;
                 toast.success('บันทึกข้อมูลการประชุมสำเร็จแล้ว!');
-                // Reset form only for create
-                setFormData(CONFERENCE_FORM_INITIAL);
             }
 
             // อัปเดต partners ใน project ถ้ามีและถ้า partners มีการเปลี่ยนแปลง
@@ -265,6 +266,23 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                         }
                     }
                 });
+            }
+
+            const fallbackId = submissionResult === undefined
+                ? null
+                : (initialData?.documentId ?? initialData?.id ?? formData?.documentId ?? formData?.id);
+
+            const resolvedId = normalizeDocumentId(
+                submissionResult?.documentId ??
+                submissionResult?.id ??
+                submissionResult ??
+                fallbackId
+            );
+
+            if (resolvedId) {
+                router.push(`/form/conference/view/${resolvedId}`);
+            } else {
+                console.warn('ConferenceForm: Missing documentId from submission result, skipping redirect.');
             }
 
         } catch (error) {
@@ -283,7 +301,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     attachments: []
                 }));
             } else {
-                toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
+                if (!(isEdit && onSubmit)) {
+                    toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
+                }
             }
         } finally {
             setIsSubmitting(false);
@@ -294,7 +314,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
         isEdit,
         onSubmit,
         createConference,
-        updateProjectPartners
+        updateProjectPartners,
+        initialData,
+        router
     ]);
     // Memoized country options with error handling
     const countryOptions = useMemo(() => {

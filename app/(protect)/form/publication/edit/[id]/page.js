@@ -8,6 +8,7 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import Pageheader from '@/components/layout/Pageheader'
 import PublicationForm from '@/components/form/PublicationForm'
 import { GET_PUBLICATION, UPDATE_PUBLICATION } from '@/graphql/formQueries'
+import { normalizeDocumentId } from '@/utils/partners'
 
 export default function PublicationEdit() {
     const params = useParams()
@@ -36,11 +37,14 @@ export default function PublicationEdit() {
 
     const handleUpdate = async (publicationData) => {
         try {
-            await updatePublication({ variables: { documentId, data: publicationData } })
+            const res = await updatePublication({ variables: { documentId, data: publicationData } })
+            const updatedId = normalizeDocumentId(res?.data?.updatePublication?.documentId ?? documentId)
             toast.success('บันทึกข้อมูลสำเร็จ!');
+            return updatedId
         } catch (error) {
             console.error('Update error:', error);
             toast.error('เกิดข้อผิดพลาดในการบันทึก');
+            throw error
         }
     }
 

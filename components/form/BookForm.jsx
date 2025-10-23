@@ -239,14 +239,16 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 			const partnersForRelation = Array.isArray(formData.partners) ? formData.partners : [];
 			const usersPermissionsUsers = fundDocumentId ? Array.from(new Set(extractInternalUserIds(partnersForRelation))) : [];
 
+			let submissionResult;
+
 			if (isEdit) {
 				if (onSubmit) {
-					await onSubmit(bookData);
+					submissionResult = await onSubmit(bookData);
 				} else {
-					await updateBook({ variables: { documentId, data: bookData } });
+					submissionResult = await updateBook({ variables: { documentId, data: bookData } });
 				}
 			} else {
-				await createBook({ variables: { data: bookData } });
+				submissionResult = await createBook({ variables: { data: bookData } });
 			}
 
 			if (fundDocumentId) {
@@ -262,7 +264,9 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 			}
 
 			if (isEdit) {
-				toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
+				if (!onSubmit) {
+					toast.success('อัปเดตข้อมูลหนังสือสำเร็จ');
+				}
 				// Update originalAttachmentIdsRef to reflect the new state after save
 				originalAttachmentIdsRef.current = finalAttachmentIds;
 
@@ -286,13 +290,34 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				toast.success('สร้างข้อมูลหนังสือสำเร็จ');
 				setFormData(BOOK_FORM_INITIAL);
 			}
+
+			const submissionPayload = submissionResult?.data?.createBook ?? submissionResult?.data?.updateBook ?? submissionResult;
+
+			const fallbackId = submissionResult === undefined
+				? null
+				: (documentId ?? initialData?.documentId ?? initialData?.id);
+
+			const resolvedId = normalizeDocumentId(
+				submissionPayload?.documentId ??
+				submissionPayload?.id ??
+				(typeof submissionResult === 'string' ? submissionResult : null) ??
+				fallbackId
+			);
+
+			if (resolvedId) {
+				router.push(`/form/book/view/${resolvedId}`);
+			} else {
+				console.warn('BookForm: Missing documentId from submission result, skipping redirect.');
+			}
 		} catch (e) {
 			console.error(e);
-			toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+			if (!onSubmit) {
+				toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+			}
 		} finally {
 			setIsSubmitting(false);
 		}
-	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId]);
+	}, [session?.jwt, formData, isEdit, onSubmit, updateBook, createBook, updateFundPartners, documentId, initialData, router]);
 
 	// Memoize partners update to prevent infinite loop
 	const updatePartnersFromFunding = useCallback(() => {

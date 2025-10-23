@@ -8,6 +8,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import Pageheader from '@/components/layout/Pageheader'
 import FundForm from '@/components/form/FundForm'
 import { GET_FUND, UPDATE_FUND, UPDATE_FUND_PARTNERS } from '@/graphql/formQueries'
+import { normalizeDocumentId } from '@/utils/partners'
 
 export default function FundEditPage() {
   const params = useParams()
@@ -30,19 +31,22 @@ export default function FundEditPage() {
   const handleUpdate = async (fundData) => {
     try {
       const { partners = [], ...baseData } = fundData
-      await updateFund({ variables: { documentId, data: baseData } })
+      const res = await updateFund({ variables: { documentId, data: baseData } })
+      const updatedId = normalizeDocumentId(res?.data?.updateFund?.documentId ?? documentId)
       // update partners แยก เพื่อลดโอกาส relation conflict ถ้า schema มีเงื่อนไขเฉพาะ
       try {
         await updateFundPartners({ variables: { documentId, data: { partners } } })
       } catch (pe) {
         console.error('Update partners failed:', pe)
         toast.error('บันทึกหลักสำเร็จ แต่ partners ผิดพลาด')
-        return
+        throw pe
       }
       toast.success('บันทึกข้อมูลสำเร็จ!')
+      return updatedId
     } catch (e) {
       console.error('Update fund error:', e)
       toast.error('บันทึกไม่สำเร็จ')
+      throw e
     }
   }
 

@@ -195,20 +195,43 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             }
 
             const safe = sanitize(payload)
-            if (onSubmit) {
-                await onSubmit(safe)
-                // Update originalAttachmentIdsRef to reflect the new state after save
-                if (initialData) {
-                    originalAttachmentIdsRef.current = finalAttachmentIds
-                }
+            if (!onSubmit) {
+                console.error('FundForm: onSubmit handler is required for saving data.')
+                toast.error('ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง')
+                return
+            }
+
+            const submissionResult = await onSubmit(safe)
+
+            if (initialData) {
+                originalAttachmentIdsRef.current = finalAttachmentIds
+            }
+
+            const fallbackId = submissionResult === undefined
+                ? null
+                : (initialData?.documentId ?? initialData?.id)
+
+            const resolvedId = normalizeDocumentId(
+                submissionResult?.documentId ??
+                submissionResult?.id ??
+                submissionResult ??
+                fallbackId
+            )
+
+            if (resolvedId) {
+                router.push(`/form/fund/view/${resolvedId}`)
+            } else {
+                console.warn('FundForm: Missing documentId from submission result, skipping redirect.')
             }
         } catch (err) {
             console.error('Fund submit error:', err)
-            toast.error('เกิดข้อผิดพลาด: ' + (err?.message || 'Unknown error'))
+            if (!onSubmit) {
+                toast.error('เกิดข้อผิดพลาด: ' + (err?.message || 'Unknown error'))
+            }
         } finally {
             setIsSubmitting(false)
         }
-    }, [session?.jwt, formData, extractAttachmentIds, sanitize, initialData, onSubmit])
+    }, [session?.jwt, formData, extractAttachmentIds, sanitize, initialData, onSubmit, router])
 
     // hydrate edit data
     useEffect(() => {

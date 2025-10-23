@@ -8,6 +8,7 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import Pageheader from '@/components/layout/Pageheader'
 import BookForm from '@/components/form/BookForm'
 import { GET_BOOK, UPDATE_BOOK } from '@/graphql/formQueries'
+import { normalizeDocumentId } from '@/utils/partners'
 
 export default function BookEdit() {
     const params = useParams()
@@ -37,11 +38,14 @@ export default function BookEdit() {
 
     const handleUpdate = async (bookData) => {
         try {
-            await updateBook({ variables: { documentId, data: bookData } })
+            const res = await updateBook({ variables: { documentId, data: bookData } })
+            const updatedId = normalizeDocumentId(res?.data?.updateBook?.documentId ?? documentId)
             toast.success('บันทึกข้อมูลสำเร็จ!');
+            return updatedId
         } catch (error) {
             console.error('Update error:', error);
             toast.error('เกิดข้อผิดพลาดในการบันทึก');
+            throw error
         }
     }
 

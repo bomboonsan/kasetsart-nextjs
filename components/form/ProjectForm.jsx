@@ -121,11 +121,6 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
             }
         },
-        onCompleted: () => {
-            toast.success('บันทึกโครงการสำเร็จแล้ว!');
-            // Reset form or redirect as needed
-            setFormData(PROJECT_FORM_INITIAL);
-        },
         onError: (error) => {
             console.error('Create project error:', error);
             toast.error('เกิดข้อผิดพลาดในการสร้างโครงการ: ' + (error?.message || 'ไม่ทราบสาเหตุ'));
@@ -261,20 +256,30 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 if (!targetId) {
                     throw new Error('ไม่พบรหัสโครงการสำหรับการแก้ไข');
                 }
-                await updateProject({
+                const updateResult = await updateProject({
                     variables: {
                         documentId: targetId,
                         data: safeProjectData
                     }
                 });
+                if (!updateResult?.data?.updateProject?.documentId) {
+                    throw new Error('ไม่สามารถอัปเดตโครงการได้ กรุณาลองอีกครั้ง');
+                }
                 toast.success('อัปเดตโครงการสำเร็จแล้ว!');
                 originalAttachmentIdsRef.current = finalAttachmentIds;
+                router.push(`/form/project/view/${targetId}`);
             } else {
-                await createProject({
+                const createResult = await createProject({
                     variables: {
                         data: safeProjectData
                     }
                 });
+                const createdId = normalizeId(createResult?.data?.createProject?.documentId);
+                if (!createdId) {
+                    throw new Error('ไม่สามารถสร้างโครงการได้ กรุณาลองอีกครั้ง');
+                }
+                toast.success('บันทึกโครงการสำเร็จแล้ว!');
+                router.push(`/form/project/view/${createdId}`);
             }
         } catch (error) {
             console.error('Submission error:', error);

@@ -154,7 +154,7 @@ export default function FundTable() {
                                         <Button
                                             type="button"
                                             variant="link"
-                                            className="px-0 text-red-600"
+                                            className="px-0 py-0 leading-0 h-5 text-red-600"
                                             onClick={() => handleDelete(f.documentId)}
                                             disabled={deletingId === f.documentId || deleteLoading}
                                         >

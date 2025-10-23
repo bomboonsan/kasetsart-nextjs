@@ -139,7 +139,7 @@ export default function BookTable() {
                                         <Button
                                             type="button"
                                             variant="link"
-                                            className="px-0 text-red-600"
+                                            className="px-0 py-0 leading-0 h-5 text-red-600"
                                             onClick={() => handleDelete(b.documentId)}
                                             disabled={deletingId === b.documentId || deleteLoading}
                                         >

@@ -130,6 +130,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             return;
         }
         setIsSubmitting(true);
+        let submissionResult;
         try {
             const attachmentIds = extractAttachmentIds(formData.attachments);
 
@@ -193,17 +194,17 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
 
 
             if (isEdit && onSubmit) {
-                await onSubmit(data);
+                submissionResult = await onSubmit(data);
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (isEdit) {
-                await updatePublication({ variables: { documentId: initialData.documentId, data } });
+                submissionResult = await updatePublication({ variables: { documentId: initialData.documentId, data } });
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (onSubmit) {
-                await onSubmit(data);
+                submissionResult = await onSubmit(data);
             } else {
-                await createPublication({ variables: { data } });
+                submissionResult = await createPublication({ variables: { data } });
                 toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
                 setFormData(PUBLICATION_FORM_INITIAL);
             }
@@ -227,13 +228,34 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                 // Log but don't block main flow
                 console.error('Failed to update project partners from PublicationForm:', err);
             }
+
+            const submissionPayload = submissionResult?.data?.createPublication ?? submissionResult?.data?.updatePublication ?? submissionResult;
+
+            const fallbackId = submissionResult === undefined
+                ? null
+                : (initialData?.documentId ?? initialData?.id);
+
+            const resolvedId = normalizeDocumentId(
+                submissionPayload?.documentId ??
+                submissionPayload?.id ??
+                (typeof submissionResult === 'string' ? submissionResult : null) ??
+                fallbackId
+            );
+
+            if (resolvedId) {
+                router.push(`/form/publication/view/${resolvedId}`);
+            } else {
+                console.warn('PublicationForm: Missing documentId from submission result, skipping redirect.');
+            }
         } catch (e) {
             console.error('Publication submit error:', e);
-            toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+            if (!(isEdit && onSubmit)) {
+                toast.error('เกิดข้อผิดพลาด: ' + (e.message || 'ไม่ทราบสาเหตุ'));
+            }
         } finally {
             setIsSubmitting(false);
         }
-    }, [session?.jwt, formData, isEdit, onSubmit, initialData?.documentId, extractAttachmentIds, booleanToString, coerceBoolean, updatePublication, createPublication, updateProjectPartners]);
+    }, [session?.jwt, formData, isEdit, onSubmit, initialData?.documentId, extractAttachmentIds, booleanToString, coerceBoolean, updatePublication, createPublication, updateProjectPartners, initialData, router]);
 
     // Helpers - Memoized select options
     const scopusQuartileOptions = useMemo(() => toSelectOptions(listsStandardScopus), [toSelectOptions]);

@@ -8,6 +8,7 @@ import { useQuery, useMutation } from '@apollo/client/react'
 import Pageheader from '@/components/layout/Pageheader'
 import ConferenceForm from '@/components/form/ConferenceForm'
 import { GET_CONFERENCE, UPDATE_CONFERENCE } from '@/graphql/formQueries'
+import { normalizeDocumentId } from '@/utils/partners'
 
 export default function ConferenceEdit() {
     const params = useParams()
@@ -38,8 +39,10 @@ export default function ConferenceEdit() {
 
     const handleUpdate = async (conferenceData) => {
         try {
-            await updateConference({ variables: { documentId, data: conferenceData } })
+            const res = await updateConference({ variables: { documentId, data: conferenceData } })
+            const updatedId = normalizeDocumentId(res?.data?.updateConference?.documentId ?? documentId)
             toast.success('บันทึกข้อมูลสำเร็จ!');
+            return updatedId
         } catch (error) {
             console.error('Update error:', error);
             
@@ -51,6 +54,7 @@ export default function ConferenceEdit() {
             } else {
                 toast.error('เกิดข้อผิดพลาดในการบันทึก: ' + errorMessage);
             }
+            throw error
         }
     }
 

@@ -152,7 +152,7 @@ export default function PublicationTable() {
                                         <Button
                                             type="button"
                                             variant="link"
-                                            className="px-0 text-red-600"
+                                            className="px-0 py-0 leading-0 h-5 text-red-600"
                                             onClick={() => handleDelete(p.documentId)}
                                             disabled={deletingId === p.documentId || deleteLoading}
                                         >

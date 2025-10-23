@@ -6,6 +6,7 @@ import Pageheader from '@/components/layout/Pageheader'
 import FundForm from '@/components/form/FundForm'
 import { CREATE_FUND, UPDATE_FUND_PARTNERS } from '@/graphql/formQueries'
 import toast, { Toaster } from 'react-hot-toast'
+import { normalizeDocumentId } from '@/utils/partners'
 
 export default function FundCreatePage() {
 	const { data: session } = useSession()
@@ -29,7 +30,7 @@ export default function FundCreatePage() {
 				const { partners = [], ...baseData } = data
 				// ไม่ส่ง partners ในการสร้างครั้งแรก (ลดขนาด payload)
 				const res = await createFund({ variables: { data: baseData } })
-				const newId = res?.data?.createFund?.documentId
+				const newId = normalizeDocumentId(res?.data?.createFund?.documentId)
 				if (newId && partners.length) {
 					try {
 						await updateFundPartners({ variables: { documentId: newId, data: { partners } } })
@@ -40,9 +41,11 @@ export default function FundCreatePage() {
 					}
 				}
 				toast.success('สร้างข้อมูลทุนสำเร็จ')
+				return newId
 			} catch (e) {
 				console.error(e)
 				toast.error('บันทึกไม่สำเร็จ')
+				throw e
 			}
 		}
 
