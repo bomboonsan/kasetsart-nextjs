@@ -61,3 +61,11 @@ export const GET_PROJECT = gql`
     }
   }
 `;
+
+export const DELETE_PROJECT = gql`
+  mutation DeleteProject($documentId: ID!) {
+    deleteProject(documentId: $documentId) {
+      documentId
+    }
+  }
+`;

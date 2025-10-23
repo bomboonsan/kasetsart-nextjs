@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from "next-auth/react";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
-import { GET_PUBLICATIONS } from '@/graphql/formQueries'
+import { GET_PUBLICATIONS, DELETE_PUBLICATION } from '@/graphql/formQueries'
 import { formatDateToMMYYYY } from '@/utils/formatters'
 import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
@@ -22,6 +22,7 @@ export default function PublicationTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [deletingId, setDeletingId] = useState(null);
 
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
@@ -49,7 +50,7 @@ export default function PublicationTable() {
         };
     }, [debouncedSearch]);
 
-    const { data, loading, error } = useQuery(GET_PUBLICATIONS, {
+    const { data, loading, error, refetch } = useQuery(GET_PUBLICATIONS, {
         variables: {
             pagination: { limit: 50 },
             sort: ["updatedAt:desc"],
@@ -61,6 +62,27 @@ export default function PublicationTable() {
             }
         }
     });
+
+    const [deletePublication, { loading: deleteLoading }] = useMutation(DELETE_PUBLICATION);
+
+    const handleDelete = async (documentId) => {
+        if (!documentId || deleteLoading) return;
+        const confirmed = window.confirm('ยืนยันการลบข้อมูลการตีพิมพ์นี้หรือไม่?');
+        if (!confirmed) return;
+        try {
+            setDeletingId(documentId);
+            await deletePublication({
+                variables: { documentId },
+                context: authContext,
+            });
+            await refetch();
+        } catch (err) {
+            console.error('Failed to delete publication', err);
+            window.alert(err?.message ? `ลบข้อมูลไม่สำเร็จ: ${err.message}` : 'ลบข้อมูลไม่สำเร็จ');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     let publications = data?.publications || [];
 
@@ -147,8 +169,19 @@ export default function PublicationTable() {
                                 <TableCell className={'px-5'}>{p.isJournalDatabase == '0' ? 'อยู่ในฐานข้อมูล' : 'ไม่อยู่ในฐานข้อมูล'}</TableCell>
                                 <TableCell className={'px-5'}>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/form/publication/view/${p.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/form/publication/edit/${p.documentId}`}>แก้ไข</a>
+                                    <div className="flex justify-end gap-3">
+                                        <a className="text-blue-600" href={`/form/publication/view/${p.documentId}`}>ดู</a>
+                                        <a className="text-green-600" href={`/form/publication/edit/${p.documentId}`}>แก้ไข</a>
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="px-0 text-red-600"
+                                            onClick={() => handleDelete(p.documentId)}
+                                            disabled={deletingId === p.documentId || deleteLoading}
+                                        >
+                                            {deletingId === p.documentId ? 'กำลังลบ...' : 'ลบ'}
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

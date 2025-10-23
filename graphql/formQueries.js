@@ -277,6 +277,14 @@ export const CREATE_CONFERENCE = gql`
   }
 `;
 
+export const DELETE_CONFERENCE = gql`
+  mutation DeleteConference($documentId: ID!) {
+    deleteConference(documentId: $documentId) {
+      documentId
+    }
+  }
+`;
+
 // Publication operations
 export const GET_PUBLICATION = gql`
   query GetPublication($documentId: ID!) {
@@ -347,6 +355,14 @@ export const CREATE_PUBLICATION = gql`
 export const UPDATE_PUBLICATION = gql`
   mutation UpdatePublication($documentId: ID!, $data: PublicationInput!) {
     updatePublication(documentId: $documentId, data: $data) {
+      documentId
+    }
+  }
+`;
+
+export const DELETE_PUBLICATION = gql`
+  mutation DeletePublication($documentId: ID!) {
+    deletePublication(documentId: $documentId) {
       documentId
     }
   }
@@ -449,6 +465,14 @@ export const UPDATE_FUND_PARTNERS = gql`
   }
 `;
 
+export const DELETE_FUND = gql`
+  mutation DeleteFund($documentId: ID!) {
+    deleteFund(documentId: $documentId) {
+      documentId
+    }
+  }
+`;
+
 // Book (Work Book) operations
 export const GET_BOOK = gql`
   query GetBook($documentId: ID!) {
@@ -496,6 +520,14 @@ export const CREATE_BOOK = gql`
 export const UPDATE_BOOK = gql`
   mutation UpdateBook($documentId: ID!, $data: BookInput!) {
     updateBook(documentId: $documentId, data: $data) {
+      documentId
+    }
+  }
+`;
+
+export const DELETE_BOOK = gql`
+  mutation DeleteBook($documentId: ID!) {
+    deleteBook(documentId: $documentId) {
       documentId
     }
   }

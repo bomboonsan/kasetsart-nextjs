@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from "next-auth/react";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
-import { GET_BOOKS } from '@/graphql/formQueries'
+import { GET_BOOKS, DELETE_BOOK } from '@/graphql/formQueries'
 import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
     Table,
@@ -21,6 +21,7 @@ export default function BookTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [deletingId, setDeletingId] = useState(null);
 
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
@@ -48,7 +49,7 @@ export default function BookTable() {
         };
     }, [debouncedSearch]);
 
-    const { data, loading, error } = useQuery(GET_BOOKS, {
+    const { data, loading, error, refetch } = useQuery(GET_BOOKS, {
         variables: {
             pagination: { limit: 50 },
             sort: ["updatedAt:desc"],
@@ -60,6 +61,27 @@ export default function BookTable() {
             }
         }
     });
+
+    const [deleteBookMutation, { loading: deleteLoading }] = useMutation(DELETE_BOOK);
+
+    const handleDelete = async (documentId) => {
+        if (!documentId || deleteLoading) return;
+        const confirmed = window.confirm('ยืนยันการลบข้อมูลหนังสือนี้หรือไม่?');
+        if (!confirmed) return;
+        try {
+            setDeletingId(documentId);
+            await deleteBookMutation({
+                variables: { documentId },
+                context: authContext,
+            });
+            await refetch();
+        } catch (err) {
+            console.error('Failed to delete book', err);
+            window.alert(err?.message ? `ลบข้อมูลไม่สำเร็จ: ${err.message}` : 'ลบข้อมูลไม่สำเร็จ');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
 
     let books = data?.books || [];
@@ -148,8 +170,19 @@ export default function BookTable() {
                                 <TableCell className={'px-5'}>{b.level == '0' ? 'ระดับชาติ' : "ระดับนานาชาติ"}</TableCell>
                                 <TableCell className={'px-5'}>{b.createdAt ? new Date(b.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/form/book/view/${b.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/book/edit/${b.documentId}`}>แก้ไข</a>
+                                    <div className="flex justify-end gap-3">
+                                        <a className="text-blue-600" href={`/form/book/view/${b.documentId}`}>ดู</a>
+                                        <a className="text-green-600" href={`/admin/form/book/edit/${b.documentId}`}>แก้ไข</a>
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="px-0 text-red-600"
+                                            onClick={() => handleDelete(b.documentId)}
+                                            disabled={deletingId === b.documentId || deleteLoading}
+                                        >
+                                            {deletingId === b.documentId ? 'กำลังลบ...' : 'ลบ'}
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

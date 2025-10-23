@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from "next-auth/react";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import Pageheader from '@/components/layout/Pageheader'
 import { Button } from '@/components/ui/button'
 import { Input } from "@/components/ui/input"
-import { GET_FUNDS } from '@/graphql/formQueries'
+import { GET_FUNDS, DELETE_FUND } from '@/graphql/formQueries'
 import { GET_USER_DEPARTMENTS } from "@/graphql/userQueries";
 import {
     Table,
@@ -21,6 +21,7 @@ export default function FundTable() {
     const { data: session, status } = useSession();
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [deletingId, setDeletingId] = useState(null);
 
     const authContext = {
         headers: { Authorization: session?.jwt ? `Bearer ${session.jwt}` : "" },
@@ -47,7 +48,7 @@ export default function FundTable() {
         };
     }, [debouncedSearch]);
 
-    const { data, loading, error } = useQuery(GET_FUNDS, {
+    const { data, loading, error, refetch } = useQuery(GET_FUNDS, {
         variables: {
             pagination: { limit: 50 },
             sort: ["updatedAt:desc"],
@@ -59,6 +60,27 @@ export default function FundTable() {
             }
         }
     });
+
+    const [deleteFund, { loading: deleteLoading }] = useMutation(DELETE_FUND);
+
+    const handleDelete = async (documentId) => {
+        if (!documentId || deleteLoading) return;
+        const confirmed = window.confirm('ยืนยันการลบทุนนี้หรือไม่?');
+        if (!confirmed) return;
+        try {
+            setDeletingId(documentId);
+            await deleteFund({
+                variables: { documentId },
+                context: authContext,
+            });
+            await refetch();
+        } catch (err) {
+            console.error('Failed to delete fund', err);
+            window.alert(err?.message ? `ลบข้อมูลไม่สำเร็จ: ${err.message}` : 'ลบข้อมูลไม่สำเร็จ');
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     let funds = data?.funds || [];
 
@@ -126,8 +148,19 @@ export default function FundTable() {
                                 <TableCell className={'px-5'}>{f.period}</TableCell>
                                 <TableCell className={'px-5'}>{f.createdAt ? new Date(f.createdAt).toLocaleDateString('th-TH') : '-'}</TableCell>
                                 <TableCell className="text-right px-5">
-                                    <a className="text-blue-600 mr-3" href={`/form/fund/view/${f.documentId}`}>ดู</a>
-                                    <a className="text-green-600" href={`/admin/form/fund/edit/${f.documentId}`}>แก้ไข</a>
+                                    <div className="flex justify-end gap-3">
+                                        <a className="text-blue-600" href={`/form/fund/view/${f.documentId}`}>ดู</a>
+                                        <a className="text-green-600" href={`/admin/form/fund/edit/${f.documentId}`}>แก้ไข</a>
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="px-0 text-red-600"
+                                            onClick={() => handleDelete(f.documentId)}
+                                            disabled={deletingId === f.documentId || deleteLoading}
+                                        >
+                                            {deletingId === f.documentId ? 'กำลังลบ...' : 'ลบ'}
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
