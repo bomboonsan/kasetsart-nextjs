@@ -3,7 +3,7 @@ import ProjectForm from '@/components/form/ProjectForm';
 export default function CreateProjectPage() {
     return (
         <div>
-            <Pageheader title="หัวข้อโครงการวิจัย" />
+            <Pageheader title="ทุนโครงการวิจัย" />
             <ProjectForm />
         </div>
     );

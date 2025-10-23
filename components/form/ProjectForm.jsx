@@ -348,7 +348,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 value: String(sdg.documentId),
                 label: sdg.name
             })),
-            departments: (projectOptions.departments ?? []).map(dep => ({
+            departments: (projectOptions.departments ?? []).filter(d => d.title !== 'สํานักงานเลขานุการ').map(dep => ({
                 value: String(dep.documentId),
                 label: dep.title
             }))
