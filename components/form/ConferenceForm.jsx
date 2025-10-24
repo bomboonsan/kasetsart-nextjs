@@ -280,8 +280,11 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             );
 
             if (resolvedId) {
-                router.refresh();
-                router.push(`/form/conference/view/${resolvedId}`);
+                // router.refresh();
+                // router.push(`/form/conference/view/${resolvedId}`);
+                setTimeout(() => {
+                    window.location.href = `/form/conference/view/${resolvedId}`;
+                }, 1000);
             } else {
                 console.warn('ConferenceForm: Missing documentId from submission result, skipping redirect.');
             }

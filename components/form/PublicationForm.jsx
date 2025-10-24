@@ -243,8 +243,11 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             );
 
             if (resolvedId) {
-                router.refresh();
-                router.push(`/form/publication/view/${resolvedId}`);
+                // router.refresh();
+                // router.push(`/form/publication/view/${resolvedId}`);
+                setTimeout(() => {
+                    window.location.href = `/form/book/view/${resolvedId}`;
+                }, 1000);
             } else {
                 console.warn('PublicationForm: Missing documentId from submission result, skipping redirect.');
             }

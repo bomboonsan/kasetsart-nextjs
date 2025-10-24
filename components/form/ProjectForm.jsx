@@ -280,8 +280,11 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     throw new Error('ไม่สามารถสร้างโครงการได้ กรุณาลองอีกครั้ง');
                 }
                 toast.success('บันทึกโครงการสำเร็จแล้ว!');
-                router.refresh();
-                router.push(`/form/project/view/${createdId}`);
+                // router.refresh();
+                // router.push(`/form/project/view/${createdId}`);
+                setTimeout(() => {
+                    window.location.href = `/form/project/view/${createdId}`;
+                }, 1000);
             }
         } catch (error) {
             console.error('Submission error:', error);
