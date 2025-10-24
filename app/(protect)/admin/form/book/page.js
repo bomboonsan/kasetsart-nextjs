@@ -85,21 +85,41 @@ export default function BookTable() {
 
 
     let books = data?.books || [];
-    // // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
-    // const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    // const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    // if (roleName === 'Admin' && myDeptId) {
-    //     books = books.filter(book =>
-    //         book?.funds?.some(fund =>
-    //             fund?.partners?.some(partner =>
-    //                 partner?.User?.departments?.some(dep =>
-    //                     dep?.id === myDeptId || dep?.documentId === myDeptId
-    //                 )
-    //             )
-    //         )
-    //     );
-    // }
 
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
+
+    if (loading && meDataLoading) { return <div className="p-6">Loading...</div> }
+
+    // Filter สำหรับ Admin ให้แสดงเฉพาะ book ที่มี fund ที่มี partner ในแผนกเดียวกัน
+    if (roleName === 'Admin' && myDeptId) {
+        books = books.filter(book => {
+            // ตรวจสอบว่า book มี funds หรือไม่
+            if (!book?.funds || book.funds.length === 0) return false;
+
+            // ตรวจสอบว่ามี fund ใดที่มี partner ในแผนกเดียวกันหรือไม่
+            return book.funds.some(fund => {
+                if (!fund.partners) return false;
+
+                try {
+                    const partnersArray = typeof fund.partners === 'string'
+                        ? JSON.parse(fund.partners)
+                        : fund.partners;
+
+                    return partnersArray?.some(partner => {
+                        const userDepts = partner?.User?.departments || [];
+                        return userDepts.some(dept =>
+                            dept?.id === myDeptId || dept?.documentId === myDeptId
+                        );
+                    });
+                } catch (err) {
+                    console.error('Error parsing partners:', err);
+                    return false;
+                }
+            });
+        });
+    }
 
 
     const getWriters = (book) => {
