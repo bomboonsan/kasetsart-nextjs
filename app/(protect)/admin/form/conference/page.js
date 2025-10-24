@@ -87,20 +87,41 @@ export default function ConferenceTable() {
     };
 
     let conferences = data?.conferences || [];
-    // // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
-    // const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    // const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    // if (roleName === 'Admin' && myDeptId) {
-    //     conferences = conferences.filter(conference =>
-    //         conference?.projects?.some(proj =>
-    //             proj?.partners?.some(partner =>
-    //                 partner?.User?.departments?.some(dep =>
-    //                     dep?.id === myDeptId || dep?.documentId === myDeptId
-    //                 )
-    //             )
-    //         )
-    //     );
-    // }
+
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
+
+    if (loading && meDataLoading) { return }
+
+    // Filter สำหรับ Admin ให้แสดงเฉพาะ conference ที่มี project ที่มี partner ในแผนกเดียวกัน
+    if (roleName === 'Admin' && myDeptId) {
+        conferences = conferences.filter(conference => {
+            // ตรวจสอบว่า conference มี projects หรือไม่
+            if (!conference?.projects || conference.projects.length === 0) return false;
+
+            // ตรวจสอบว่ามี project ใดที่มี partner ในแผนกเดียวกันหรือไม่
+            return conference.projects.some(proj => {
+                if (!proj.partners) return false;
+
+                try {
+                    const partnersArray = typeof proj.partners === 'string'
+                        ? JSON.parse(proj.partners)
+                        : proj.partners;
+
+                    return partnersArray?.some(partner => {
+                        const userDepts = partner?.User?.departments || [];
+                        return userDepts.some(dept =>
+                            dept?.id === myDeptId || dept?.documentId === myDeptId
+                        );
+                    });
+                } catch (err) {
+                    console.error('Error parsing partners:', err);
+                    return false;
+                }
+            });
+        });
+    }
 
     const getLevelText = (level) => {
         if (level == '0') return 'ระดับชาติ';

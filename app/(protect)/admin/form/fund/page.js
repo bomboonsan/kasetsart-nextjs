@@ -84,20 +84,33 @@ export default function FundTable() {
 
     let funds = data?.funds || [];
 
-    // // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
-    // const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    // const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
-    // if (roleName === 'Admin' && myDeptId) {
-    //     funds = funds.filter(p =>
-    //         p.partners?.some(partner =>
-    //             partner?.User?.departments?.some(dep =>
-    //                 dep?.id === myDeptId || dep?.documentId === myDeptId
-    //             )
-    //         )
-    //     );
-    // }
+    // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
+    const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
 
-    console.log('funds', funds);
+    if (loading && meDataLoading) { return }
+
+    // Filter สำหรับ Admin ให้แสดงเฉพาะทุนที่มี partner ในแผนกเดียวกัน
+    if (roleName === 'Admin' && myDeptId) {
+        funds = funds.filter(f => {
+            if (!f.partners) return false;
+            try {
+                const partnersArray = typeof f.partners === 'string'
+                    ? JSON.parse(f.partners)
+                    : f.partners;
+
+                return partnersArray?.some(partner => {
+                    const userDepts = partner?.User?.departments || [];
+                    return userDepts.some(dept =>
+                        dept?.id === myDeptId || dept?.documentId === myDeptId
+                    );
+                });
+            } catch (err) {
+                console.error('Error parsing partners:', err);
+                return false;
+            }
+        });
+    }
 
     return (
         <div>

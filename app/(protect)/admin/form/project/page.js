@@ -86,19 +86,31 @@ export default function ProjectTable() {
 
     // เตรียมข้อมูลสำหรับ Filter แผนกสำหรับ Role = Admin
     const roleName = session?.user?.role?.name || session?.user?.academicPosition || "";
-    const myDeptId = meData?.usersPermissionsUser?.departments?.[0].documentId;
+    const myDeptId = meData?.usersPermissionsUser?.departments?.[0]?.documentId;
 
     if (loading && meDataLoading) { return }
 
-    // if (roleName === 'Admin' && myDeptId) {
-    //     projects = projects.filter(p =>
-    //         p.partners?.some(partner =>
-    //             partner?.User?.departments?.some(dep =>
-    //                 dep?.id === myDeptId || dep?.documentId === myDeptId
-    //             )
-    //         )
-    //     );
-    // }
+    // Filter สำหรับ Admin ให้แสดงเฉพาะโครงการที่มี partner ในแผนกเดียวกัน
+    if (roleName === 'Admin' && myDeptId) {
+        projects = projects.filter(p => {
+            if (!p.partners) return false;
+            try {
+                const partnersArray = typeof p.partners === 'string'
+                    ? JSON.parse(p.partners)
+                    : p.partners;
+
+                return partnersArray?.some(partner => {
+                    const userDepts = partner?.User?.departments || [];
+                    return userDepts.some(dept =>
+                        dept?.id === myDeptId || dept?.documentId === myDeptId
+                    );
+                });
+            } catch (err) {
+                console.error('Error parsing partners:', err);
+                return false;
+            }
+        });
+    }
 
 
     return (
