@@ -267,6 +267,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                 }
                 toast.success('อัปเดตโครงการสำเร็จแล้ว!');
                 originalAttachmentIdsRef.current = finalAttachmentIds;
+                router.refresh();
                 router.push(`/form/project/view/${targetId}`);
             } else {
                 const createResult = await createProject({
@@ -279,6 +280,7 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
                     throw new Error('ไม่สามารถสร้างโครงการได้ กรุณาลองอีกครั้ง');
                 }
                 toast.success('บันทึกโครงการสำเร็จแล้ว!');
+                router.refresh();
                 router.push(`/form/project/view/${createdId}`);
             }
         } catch (error) {

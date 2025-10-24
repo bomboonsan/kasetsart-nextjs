@@ -215,6 +215,7 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             )
 
             if (resolvedId) {
+                router.refresh();
                 router.push(`/form/fund/view/${resolvedId}`)
             } else {
                 console.warn('FundForm: Missing documentId from submission result, skipping redirect.')

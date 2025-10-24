@@ -305,6 +305,7 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 			);
 
 			if (resolvedId) {
+				router.refresh();
 				router.push(`/form/book/view/${resolvedId}`);
 			} else {
 				console.warn('BookForm: Missing documentId from submission result, skipping redirect.');

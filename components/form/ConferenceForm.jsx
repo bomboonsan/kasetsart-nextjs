@@ -280,6 +280,7 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             );
 
             if (resolvedId) {
+                router.refresh();
                 router.push(`/form/conference/view/${resolvedId}`);
             } else {
                 console.warn('ConferenceForm: Missing documentId from submission result, skipping redirect.');
