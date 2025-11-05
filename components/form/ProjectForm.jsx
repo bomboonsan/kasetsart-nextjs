@@ -167,10 +167,10 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         }
 
         // Basic validation
-        if (!formData.nameTH?.trim()) {
-            toast.error('กรุณากรอกชื่อโครงการภาษาไทย');
-            return;
-        }
+        // if (!formData.nameTH?.trim()) {
+        //     toast.error('กรุณากรอกชื่อโครงการภาษาไทย');
+        //     return;
+        // }
 
         if (!formData.fiscalYear) {
             toast.error('กรุณากรอกปีงบประมาณ');
