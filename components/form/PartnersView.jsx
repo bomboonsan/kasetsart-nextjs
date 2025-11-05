@@ -74,7 +74,7 @@ export default function PartnersView({ data }) {
                                     <td className="px-4 py-4 whitespace-nowrap">
                                         {p.partnerProportion && (
                                             <div className="text-sm text-gray-900">
-                                                {(Number(p.partnerProportion).toFixed(1))}
+                                                {(Number(p.partnerProportion).toFixed(2))}
                                             </div>
                                         )}
                                     </td>
