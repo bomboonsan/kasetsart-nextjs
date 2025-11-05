@@ -125,11 +125,17 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกข้อมูล');
             return;
         }
-        if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
+        // if (!formData.titleTH.trim() && !formData.titleEN.trim()) {
+        //     toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
+        //     return;
+        // }
+        const titleTHTrim = (formData.titleTH ?? '').toString().trim();
+        const titleENTrim = (formData.titleEN ?? '').toString().trim();
+        if (!titleTHTrim && !titleENTrim) {
             toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;
         }
-        setIsSubmitting(true);
+            setIsSubmitting(true);
         let submissionResult;
         try {
             const attachmentIds = extractAttachmentIds(formData.attachments);
@@ -155,10 +161,10 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             };
 
             const data = {
-                titleTH: formData.titleTH?.trim() || null,
-                titleEN: formData.titleEN?.trim() || null,
+                titleTH: formData.titleTH?.trim() || '',
+                titleEN: formData.titleEN?.trim() || '',
                 isEnvironmentallySustainable: booleanToString(formData.isEnvironmentallySustainable),
-                journalName: formData.journalName || null,
+                journalName: formData.journalName || '',
                 doi: formData.doi || null,
                 isbn: formData.isbn || null,
                 volume: formData.volume || null,
@@ -189,7 +195,7 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
                 projects: formData.__projectObj?.documentId ? [formData.__projectObj.documentId] : [],
                 attachments: finalAttachmentIds.length ? finalAttachmentIds : [],
             };
-            Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
+            // Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
             if (isEdit && !attachmentsChanged) delete data.attachments;
 
 
