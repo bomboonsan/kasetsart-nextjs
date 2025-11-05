@@ -152,7 +152,7 @@ export default function ProjectTable() {
                             <TableRow key={p.documentId}>
                                 <TableCell className={'px-5 md:max-w-64 whitespace-normal'}>
                                     <div className="font-semibold">{p.nameTH || p.nameEN || '—'}</div>
-                                    <div className="text-xs text-gray-500">{p.nameEN}</div>
+                                    {p.nameEN && p.nameTH && <div className="text-xs text-gray-500">{p.nameEN}</div>}
                                 </TableCell>
                                 <TableCell className={'px-5'}>{p.fiscalYear || '-'}</TableCell>
                                 <TableCell className={'px-5'}>{p.budget ? `${p.budget} บาท` : '-'}</TableCell>
