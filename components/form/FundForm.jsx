@@ -186,9 +186,9 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
             }
 
             // Remove null/empty string to reduce noise
-            Object.keys(payload).forEach(k => {
-                if (payload[k] === null || payload[k] === '') delete payload[k]
-            })
+            // Object.keys(payload).forEach(k => {
+            //     if (payload[k] === null || payload[k] === '') delete payload[k]
+            // })
 
             if (initialData && !attachmentsChanged) {
                 delete payload.attachments

@@ -233,11 +233,11 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
             };
 
             // Remove null/undefined values to avoid issues
-            Object.keys(projectData).forEach(key => {
-                if (projectData[key] === undefined || projectData[key] === null || projectData[key] === "") {
-                    delete projectData[key];
-                }
-            });
+            // Object.keys(projectData).forEach(key => {
+            //     if (projectData[key] === undefined || projectData[key] === null || projectData[key] === "") {
+            //         delete projectData[key];
+            //     }
+            // });
 
             // Sanitize projectData to avoid sending BigInt values (GraphQL cannot serialize BigInt)
             if (isEditing && !attachmentsChanged) {

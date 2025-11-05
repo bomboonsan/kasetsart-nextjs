@@ -222,9 +222,9 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 				numberPages: formData.numberPages || null,
 				researchType: formData.researchType || null,
 			};
-			Object.keys(bookData).forEach(k => {
-				if (bookData[k] === null || bookData[k] === '') delete bookData[k];
-			});
+			// Object.keys(bookData).forEach(k => {
+			// 	if (bookData[k] === null || bookData[k] === '') delete bookData[k];
+			// });
 			if (isEdit && !attachmentsChanged) {
 				console.warn('⚠️ Deleting attachments field because no changes detected');
 				delete bookData.attachments;

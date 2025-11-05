@@ -129,8 +129,8 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
         //     toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
         //     return;
         // }
-        const titleTHTrim = (formData.titleTH ?? '').toString().trim();
-        const titleENTrim = (formData.titleEN ?? '').toString().trim();
+        const titleTHTrim = (formData.titleTH ?? '')?.toString()?.trim();
+        const titleENTrim = (formData.titleEN ?? '')?.toString()?.trim();
         if (!titleTHTrim && !titleENTrim) {
             toast.error('กรุณากรอกชื่อผลงานอย่างน้อย 1 ภาษา');
             return;

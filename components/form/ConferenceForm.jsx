@@ -213,11 +213,11 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             };
 
             // ลบค่า null ออกเพื่อไม่ให้เกิดปัญหา
-            Object.keys(conferenceData).forEach(key => {
-                if (conferenceData[key] === null || conferenceData[key] === "") {
-                    delete conferenceData[key];
-                }
-            });
+            // Object.keys(conferenceData).forEach(key => {
+            //     if (conferenceData[key] === null || conferenceData[key] === "") {
+            //         delete conferenceData[key];
+            //     }
+            // });
 
             // ถ้าเป็นการแก้ไข และ attachments ไม่ได้เปลี่ยน -> ลบ field ทิ้งเพื่อหลีกเลี่ยง error ของ Strapi
             if (isEdit && !attachmentsChanged) {
