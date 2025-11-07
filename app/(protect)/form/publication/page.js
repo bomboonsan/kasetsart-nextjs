@@ -120,8 +120,8 @@ export default function PublicationTable() {
   return (
     <div>
       <Pageheader
-        title="จัดการข้อมูลตีพิมพ์"
-        btnName="เพิ่มข้อมูลตีพิมพ์"
+        title="จัดการข้อมูลตีพิมพ์ทางวิชาการ"
+        btnName="เพิ่มข้อมูลตีพิมพ์ทางวิชาการ"
         btnLink="/form/create/publication"
       />
 

@@ -175,8 +175,8 @@ export default function BookTable() {
   return (
     <div>
       <Pageheader
-        title="จัดการข้อมูลหนังสือ"
-        btnName="เพิ่มข้อมูลหนังสือ"
+        title="จัดการข้อมูลหนังสือหรือตำรา"
+        btnName="เพิ่มข้อมูลหนังสือหรือตำรา"
         btnLink="/form/create/book"
       />
 
