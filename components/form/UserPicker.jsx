@@ -139,7 +139,7 @@ export default function UserPicker({ label, selectedUser, onSelect }) {
               variant="outline"
               className="w-full justify-start text-gray-500"
             >
-              <Search className="w-4 h-4 mr-2" />
+              <Search className="w-4 h-4 mr-2 cursor-pointer" />
               เลือกผู้ใช้งาน...
             </Button>
           </DialogTrigger>

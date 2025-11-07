@@ -417,10 +417,8 @@ export default function ReportTableE() {
                       </td> */}
                     <td className="px-3 py-2 text-sm text-gray-900 border text-center">
                       {r.date && r.dateEnd && r.date !== r.dateEnd
-                        ? `${formatDateToDDMMYYYY(
-                            r.date
-                          )} - ${formatDateToDDMMYYYY(r.dateEnd)}`
-                        : `${formatDateToDDMMYYYY(r.date)}` || "-"}
+                        ? `${r.date} - ${r.dateEnd}`
+                        : `${r.date}` || "-"}
                     </td>
                   </tr>
                 ))
