@@ -21,6 +21,12 @@ import { CREATE_PROJECT, UPDATE_PROJECT } from '@/graphql/formQueries';
 
 import { extractInternalUserIds } from '@/utils/partners';
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== 'undefined') {
+    // @ts-ignore
+    BigInt.prototype.toJSON = function() { return this.toString(); };
+}
+
 // Move utility functions outside component to prevent re-creation
 const normalizeId = (value) => {
     if (value === undefined || value === null || value === '') return null;
@@ -39,24 +45,37 @@ const parseIntegerOrNull = (value) => {
 };
 
 const stripTypenameDeep = (input) => {
+    // Handle null explicitly
+    if (input === null) {
+        return null;
+    }
+    // Handle undefined
+    if (input === undefined) {
+        return undefined;
+    }
+    // Handle BigInt - convert to string
     if (typeof input === 'bigint') {
         return input.toString();
     }
+    // Handle arrays
     if (Array.isArray(input)) {
         return input
             .map(stripTypenameDeep)
             .filter((item) => item !== undefined);
     }
-    if (input && typeof input === 'object') {
+    // Handle objects
+    if (typeof input === 'object') {
         return Object.entries(input).reduce((acc, [key, val]) => {
             if (key === '__typename') return acc;
             const sanitized = stripTypenameDeep(val);
+            // Keep null values but remove undefined
             if (sanitized !== undefined) {
                 acc[key] = sanitized;
             }
             return acc;
         }, {});
     }
+    // Handle primitives (string, number, boolean)
     return input;
 };
 
@@ -297,14 +316,25 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
     // hydrate when editing - memoize to prevent unnecessary re-renders
     useEffect(() => {
         if (initialData) {
-            const normalizedIcType = normalizeId(initialData.ic_types?.[0]?.documentId ?? initialData.icTypes);
-            const normalizedImpact = normalizeId(initialData.impacts?.[0]?.documentId ?? initialData.impact);
+            // Clean initialData from BigInt values before processing
+            const cleanedData = stripTypenameDeep(initialData);
+
+            const normalizedIcType = normalizeId(cleanedData.ic_types?.[0]?.documentId ?? cleanedData.icTypes);
+            const normalizedImpact = normalizeId(cleanedData.impacts?.[0]?.documentId ?? cleanedData.impact);
             // Handle SDG as array - extract all SDG IDs
-            const normalizedSdgArray = extractSdgIds(initialData.sdgs ?? initialData.sdg);
-            const normalizedDepartment = normalizeId(initialData.departments?.[0]?.documentId ?? initialData.departments);
+            const normalizedSdgArray = extractSdgIds(cleanedData.sdgs ?? cleanedData.sdg);
+
+            // Properly handle departments - check if it's an array and has items
+            let normalizedDepartment = "";
+            if (Array.isArray(cleanedData.departments) && cleanedData.departments.length > 0) {
+                normalizedDepartment = normalizeId(cleanedData.departments[0]?.documentId);
+            } else if (cleanedData.departments && !Array.isArray(cleanedData.departments)) {
+                normalizedDepartment = normalizeId(cleanedData.departments.documentId ?? cleanedData.departments);
+            }
+
             const hydrated = {
                 ...PROJECT_FORM_INITIAL,
-                ...initialData,
+                ...cleanedData,
                 // map relations to expected values
                 icTypes: normalizedIcType ?? "",
                 impact: normalizedImpact ?? "",
