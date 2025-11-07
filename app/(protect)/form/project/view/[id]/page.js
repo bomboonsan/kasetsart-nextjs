@@ -1,114 +1,231 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { useQuery, useMutation } from '@apollo/client/react'
-import Pageheader from '@/components/layout/Pageheader'
-import ProjectForm from '@/components/form/ProjectForm'
-import { GET_PROJECT } from '@/graphql/projectQueries'
-import { researchKindOptions, fundTypeOptions, subFundType1, subFundType2, subFundType3, subFundType4, fundNameOptions } from '@/data/project';
+import React from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useQuery, useMutation } from "@apollo/client/react";
+import Pageheader from "@/components/layout/Pageheader";
+import ProjectForm from "@/components/form/ProjectForm";
+import { GET_PROJECT } from "@/graphql/projectQueries";
+import {
+  researchKindOptions,
+  fundTypeOptions,
+  subFundType1,
+  subFundType2,
+  subFundType3,
+  subFundType4,
+  fundNameOptions,
+} from "@/data/project";
 
-import { Button } from '@/components/ui/button';
-import Block from '@/components/layout/Block'
-import FieldView from '@/components/myui/FieldView'
-import PartnersView from '@/components/form/PartnersView'
+import { Button } from "@/components/ui/button";
+import Block from "@/components/layout/Block";
+import FieldView from "@/components/myui/FieldView";
+import PartnersView from "@/components/form/PartnersView";
 
 export default function ProjectEdit() {
-    const params = useParams()
-    const router = useRouter()
-    const { data: session } = useSession()
-    const documentId = Array.isArray(params?.id) ? params.id[0] : params?.id
+  const params = useParams();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const documentId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-    const { data, loading, error } = useQuery(GET_PROJECT, {
-        variables: { documentId },
-        skip: !documentId,
-        context: {
-            headers: {
-                Authorization: session?.jwt ? `Bearer ${session?.jwt}` : ""
-            }
-        }
-    })
+  const { data, loading, error } = useQuery(GET_PROJECT, {
+    variables: { documentId },
+    skip: !documentId,
+    context: {
+      headers: {
+        Authorization: session?.jwt ? `Bearer ${session?.jwt}` : "",
+      },
+    },
+  });
 
-
-    const project = data?.project
-    if (!project) { return <div className="p-6">{loading ? 'Loading...' : 'ไม่พบข้อมูลโครงการ'}</div> }
-
-    // ค้นหา subFundTypeLabel จากค่า fundSubType
-    let subFundTypeLabel = ''
-
-    const sub1 = subFundType1.find(option => option.value == project.fundSubType)?.label
-    if (sub1) {
-        subFundTypeLabel = sub1
-    } else {
-        const sub2 = subFundType2.find(option => option.value == project.fundSubType)?.label
-        if (sub2) {
-            subFundTypeLabel = sub2
-        } else {
-            const sub3 = subFundType3.find(option => option.value == project.fundSubType)?.label
-            if (sub3) {
-                subFundTypeLabel = sub3
-            } else {
-                const sub4 = subFundType4.find(option => option.value == project.fundSubType)?.label
-                if (sub4) {
-                    subFundTypeLabel = sub4
-                }
-            }
-        }
-    }
-
+  const project = data?.project;
+  if (!project) {
     return (
-        <div>
-            <Pageheader title="ทุนโครงการวิจัย" />
-            {loading && <div className="p-6">Loading...</div>}
-            {error && <div className="p-6 text-red-600">โหลดข้อมูลผิดพลาด</div>}
-            {project && (
-                <div className='space-y-4'>
-                    <Block>
-                        <div className='mb-4 flex justify-end'>
-                            <Button variant="default" onClick={() => router.push(`/form/project/edit/${project.documentId}`)}>แก้ไข</Button>
-                        </div>
-                        <div className="inputGroup">
-                            <FieldView label="ปีงบประมาณ" value={project.fiscalYear} />
-                            <FieldView label="ประเภทโครงการ" value={project.projectType == '0' ? 'โครงการวิจัย' : 'โครงการพัฒนาวิชาการประเภทงานวิจัย'} />
-                            <FieldView label="ลักษณะโครงการวิจัย" value={project.projectMode == '0' ? 'โครงการวิจัยเดี่ยว' : 'แผนงานวิจัย หรือชุดโครงการวิจัย'} />
-                            <FieldView label="จำนวนโครงการย่อย" value={project.subProjectCount} />
-                            <FieldView label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)" value={project.nameTH} />
-                            <FieldView label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)" value={project.nameEN} />
-                            <FieldView label="เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืนหรือไม่" value={project.isEnvironmentallySustainable === 0 ? 'ใช่' : 'ไม่ใช่'} />
-                            <FieldView label="ระยะเวลาการทำวิจัย" value={`${project.durationStart} - ${project.durationEnd}`} />
-                            <FieldView label="ประเภทงานวิจัย" value={researchKindOptions.find(option => option.value === project.researchKind)?.label} />
-                            <FieldView label="ประเภทแหล่งทุน" value={fundTypeOptions.find(option => option.value === project.fundType)?.label + ' - ' + subFundTypeLabel} />
-                            <FieldView label="ชื่อแหล่งทุน" value={project.fundName} />
-                            <FieldView label="งบวิจัย" value={project.budget ? `฿${project.budget.toLocaleString()}` : '-'} />
-                            <FieldView label="คำสำคัญ" value={project.keywords} />
-                            <FieldView label="IC Types" value={project.ic_types?.map(ic => ic.name).join(', ') || '-'} />
-                            <FieldView label="Impact" value={project.impacts?.map(impact => impact.name).join(', ') || '-'} />
-                            <FieldView label="SDG" value={project.sdgs && project.sdgs.length > 0 ? project.sdgs.map(sdg => sdg.name).join(', ') : '-'} />
-                        </div>
-                    </Block>
-                    <Block>
-                        <h2 className="text-lg font-medium mb-3">ไฟล์แนบ</h2>
-                        <div className="space-y-2">
-                            {project.attachments && project.attachments.length > 0 ? (
-                                project.attachments.map((file) => (
-                                    <div key={file.documentId}>
-                                        <a href={`${process.env.NEXT_PUBLIC_API_BASE_URL}${file.url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                            {file.name} ({(file.size / 1024).toFixed(2)} KB)
-                                        </a>
-                                    </div>
-                                ))
-                            ) : (
-                                <div>ไม่มีไฟล์แนบ</div>
-                            )}
-                        </div>
-                    </Block>
-                    <Block>
-                        <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
-                        <PartnersView data={project.partners} />
-                    </Block>
-                </div>
-            )}
+      <div className="p-6">{loading ? "Loading..." : "ไม่พบข้อมูลโครงการ"}</div>
+    );
+  }
+
+  // ค้นหา subFundTypeLabel จากค่า fundSubType
+  let subFundTypeLabel = "";
+
+  const sub1 = subFundType1.find(
+    (option) => option.value == project.fundSubType
+  )?.label;
+  if (sub1) {
+    subFundTypeLabel = sub1;
+  } else {
+    const sub2 = subFundType2.find(
+      (option) => option.value == project.fundSubType
+    )?.label;
+    if (sub2) {
+      subFundTypeLabel = sub2;
+    } else {
+      const sub3 = subFundType3.find(
+        (option) => option.value == project.fundSubType
+      )?.label;
+      if (sub3) {
+        subFundTypeLabel = sub3;
+      } else {
+        const sub4 = subFundType4.find(
+          (option) => option.value == project.fundSubType
+        )?.label;
+        if (sub4) {
+          subFundTypeLabel = sub4;
+        }
+      }
+    }
+  }
+
+  return (
+    <div>
+      <Pageheader title="ทุนโครงการวิจัย" />
+      {loading && <div className="p-6">Loading...</div>}
+      {error && <div className="p-6 text-red-600">โหลดข้อมูลผิดพลาด</div>}
+      {project && (
+        <div className="space-y-4">
+          <Block>
+            <div className="mb-4 flex justify-end">
+              <Button
+                variant="default"
+                onClick={() =>
+                  router.push(`/form/project/edit/${project?.documentId ?? ""}`)
+                }
+              >
+                แก้ไข
+              </Button>
+            </div>
+            <div className="inputGroup">
+              <FieldView label="ปีงบประมาณ" value={project?.fiscalYear ?? ""} />
+              <FieldView
+                label="ประเภทโครงการ"
+                value={
+                  project?.projectType == "0"
+                    ? "โครงการวิจัย"
+                    : project?.projectType == "1"
+                    ? "โครงการพัฒนาวิชาการประเภทงานวิจัย"
+                    : ""
+                }
+              />
+              <FieldView
+                label="ลักษณะโครงการวิจัย"
+                value={
+                  project?.projectMode == "0"
+                    ? "โครงการวิจัยเดี่ยว"
+                    : project?.projectMode == "1"
+                    ? "แผนงานวิจัย หรือชุดโครงการวิจัย"
+                    : ""
+                }
+              />
+              <FieldView
+                label="จำนวนโครงการย่อย"
+                value={project?.subProjectCount ?? ""}
+              />
+              <FieldView
+                label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (ไทย)"
+                value={project?.nameTH ?? ""}
+              />
+              <FieldView
+                label="ชื่อแผนงานวิจัยหรือชุดโครงการวิจัย/โครงการวิจัย (อังกฤษ)"
+                value={project?.nameEN ?? ""}
+              />
+              <FieldView
+                label="เกี่ยวข้องกับสิ่งแวดล้อมและความยั่งยืนหรือไม่"
+                value={
+                  project?.isEnvironmentallySustainable === 0
+                    ? "ใช่"
+                    : project?.isEnvironmentallySustainable === 1
+                    ? "ไม่ใช่"
+                    : ""
+                }
+              />
+              <FieldView
+                label="ระยะเวลาการทำวิจัย"
+                value={`${project?.durationStart ?? ""} - ${
+                  project?.durationEnd ?? ""
+                }`}
+              />
+              <FieldView
+                label="ประเภทงานวิจัย"
+                value={
+                  researchKindOptions.find(
+                    (option) => option.value === project?.researchKind
+                  )?.label || ""
+                }
+              />
+              <FieldView
+                label="ประเภทแหล่งทุน"
+                value={
+                  (fundTypeOptions.find(
+                    (option) => option.value === project?.fundType
+                  )?.label || "") +
+                  (subFundTypeLabel ? " - " + subFundTypeLabel : "")
+                }
+              />
+              <FieldView label="ชื่อแหล่งทุน" value={project?.fundName ?? ""} />
+              <FieldView
+                label="งบวิจัย"
+                value={
+                  project?.budget != null && project?.budget !== ""
+                    ? `฿${Number(project.budget).toLocaleString()}`
+                    : ""
+                }
+              />
+              <FieldView label="คำสำคัญ" value={project?.keywords ?? ""} />
+              <FieldView
+                label="IC Types"
+                value={
+                  (project?.ic_types || []).map((ic) => ic.name).join(", ") ||
+                  ""
+                }
+              />
+              <FieldView
+                label="Impact"
+                value={
+                  (project?.impacts || [])
+                    .map((impact) => impact.name)
+                    .join(", ") || ""
+                }
+              />
+              <FieldView
+                label="SDG"
+                value={
+                  (project?.sdgs || []).map((sdg) => sdg.name).join(", ") || ""
+                }
+              />
+            </div>
+          </Block>
+          <Block>
+            <h2 className="text-lg font-medium mb-3">ไฟล์แนบ</h2>
+            <div className="space-y-2">
+              {project?.attachments && project.attachments.length > 0 ? (
+                project.attachments.map((file) => (
+                  <div key={file.documentId}>
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_API_BASE_URL ?? ""}${
+                        file?.url ?? ""
+                      }`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {file?.name ?? ""}{" "}
+                      {file?.size != null
+                        ? `(${(file.size / 1024).toFixed(2)} KB)`
+                        : ""}
+                    </a>
+                  </div>
+                ))
+              ) : (
+                <div>ไม่มีไฟล์แนบ</div>
+              )}
+            </div>
+          </Block>
+          <Block>
+            <h2 className="text-lg font-medium mb-3">ผู้ร่วมวิจัย</h2>
+            <PartnersView data={project?.partners || []} />
+          </Block>
         </div>
-    )
+      )}
+    </div>
+  );
 }
