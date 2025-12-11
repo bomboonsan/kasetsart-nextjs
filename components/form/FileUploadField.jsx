@@ -230,7 +230,7 @@ export default function FileUploadField({
         } finally {
             setUploading(false)
         }
-    }, [session?.jwt, normalize, dedupe, onFilesChange])
+    }, [session?.jwt, normalize, dedupe, onFilesChange]) 
 
     const removeAttachment = useCallback((idx) => {
         // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
