@@ -20,6 +20,13 @@ import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT
 import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+    BigInt.prototype.toJSON = function () {
+        return this.toString();
+    };
+}
+
 const PublicationForm = React.memo(function PublicationForm({ initialData, onSubmit, isEdit = false }) {
     const router = useRouter(); const { data: session } = useSession();
     const [isHydrated, setIsHydrated] = useState(false);

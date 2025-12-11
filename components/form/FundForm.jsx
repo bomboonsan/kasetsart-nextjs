@@ -16,6 +16,13 @@ import toast from 'react-hot-toast'
 
 import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners'
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+    BigInt.prototype.toJSON = function () {
+        return this.toString();
+    };
+}
+
 // Memoized Writer Form Component to prevent unnecessary re-renders
 const WriterForm = React.memo(({ index, writer, handlers }) => {
     const { updateWriterField, removeWriter } = handlers

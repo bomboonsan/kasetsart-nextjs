@@ -18,6 +18,13 @@ import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK, UPDATE_FUND_PARTNERS } from '@/grap
 import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+	BigInt.prototype.toJSON = function () {
+		return this.toString();
+	};
+}
+
 // Helper functions moved outside component to prevent recreation
 const hydrateBook = (b) => ({
 	...BOOK_FORM_INITIAL,

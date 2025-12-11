@@ -3,6 +3,11 @@ export const normalizeDocumentId = (value) => {
         return null;
     }
 
+    // Handle BigInt - convert to string immediately
+    if (typeof value === 'bigint') {
+        return value.toString();
+    }
+
     if (typeof value === 'object') {
         if (Array.isArray(value)) {
             for (const item of value) {

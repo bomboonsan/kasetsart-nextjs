@@ -22,6 +22,13 @@ import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQuerie
 import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+    BigInt.prototype.toJSON = function () {
+        return this.toString();
+    };
+}
+
 export default function ConferenceForm({ initialData, onSubmit, isEdit = false }) {
     const router = useRouter();
     const { data: session } = useSession();
