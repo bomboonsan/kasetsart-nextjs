@@ -16,7 +16,7 @@ export default function ProfileHeader({ data , other = false }) {
                 <div className="flex-shrink-0">
                     {data.avatar ? (
                         <div className="w-32 h-32 rounded-full overflow-hidden">
-                            <Image src={`${strapiUrl}${data.avatar.url}`} alt={data.firstNameTH || 'avatar'} width={96} height={96} className="object-cover w-32 h-32 rounded-full" />
+                            <img src={`${strapiUrl}${data.avatar.url}`} alt={data.firstNameTH || 'avatar'} width={96} height={96} className="object-cover w-32 h-32 rounded-full" />
                         </div>
                     ) : (
                         <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
