@@ -131,7 +131,7 @@ export default function ProfileEditPage() {
 
 
         if (profile.avatar && profile.avatar.url) {
-            const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1338';
+            const strapiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:1338';
             setPreviewUrl(strapiUrl + profile.avatar.url);
         }
 
