@@ -340,6 +340,9 @@ export default function ProfileEditPage() {
                         Upload Image
                     </Button>
                 </div>
+                <p className="text-center text-red-500 text-sm">
+                    under construction
+                </p>
                 <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FieldInput label="ชื่อ" value={formData.firstNameTH || ''} onChange={(e) => handleInputChange('firstNameTH', e.target.value)} placeholder="กรุณาระบุชื่อ" />
