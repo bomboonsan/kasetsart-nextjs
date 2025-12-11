@@ -238,15 +238,10 @@ export default function ProjectForm({ initialData, onSubmit, isEdit = false }) {
         new Set(extractAttachmentIds(formData.attachments))
       );
 
-      // When editing, merge original IDs with new IDs to ensure old files are preserved
-      const finalAttachmentIds = isEditing
-        ? Array.from(
-            new Set([
-              ...(originalAttachmentIdsRef.current || []),
-              ...attachmentIds,
-            ])
-          )
-        : attachmentIds;
+      // Use current attachments directly (FileUploadField manages state correctly)
+      // Don't merge with original to avoid sending deleted file IDs
+      const finalAttachmentIds = attachmentIds;
+
 
       const originalIdsSorted = [
         ...(originalAttachmentIdsRef.current || []),

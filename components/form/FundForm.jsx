@@ -161,10 +161,9 @@ export default function FundForm({ initialData, onSubmit, isEdit = false }) {
 
             const attachmentIds = extractAttachmentIds(formData.attachments)
 
-            // When editing, merge original IDs with new IDs to ensure old files are preserved
-            const finalAttachmentIds = initialData
-                ? Array.from(new Set([...originalAttachmentIdsRef.current, ...attachmentIds]))
-                : attachmentIds
+            // Use current attachments directly (FileUploadField manages state correctly)
+            // Don't merge with original to avoid sending deleted file IDs
+            const finalAttachmentIds = attachmentIds
 
             const currentIdsSorted = [...finalAttachmentIds].sort()
             const originalIdsSorted = [...originalAttachmentIdsRef.current].sort()

@@ -184,10 +184,9 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
                     .filter(id => id && id.length > 0 && id !== 'undefined' && id !== 'null')
                 : [];
 
-            // When editing, merge original IDs with new IDs to ensure old files are preserved
-            const finalAttachmentIds = isEdit
-                ? Array.from(new Set([...(originalAttachmentIdsRef.current || []), ...attachmentIds]))
-                : attachmentIds;
+            // Use current attachments directly (FileUploadField manages state correctly)
+            // Don't merge with original to avoid sending deleted file IDs
+            const finalAttachmentIds = attachmentIds;
 
             // ตรวจสอบรายการปัจจุบัน
             const originalIdsSorted = [...(originalAttachmentIdsRef.current || [])].sort((a, b) => a - b);
