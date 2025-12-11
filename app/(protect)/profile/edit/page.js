@@ -131,7 +131,7 @@ export default function ProfileEditPage() {
 
 
         if (profile.avatar && profile.avatar.url) {
-            const strapiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:1338';
+            const strapiUrl = process.env.NEXT_PUBLIC_API_BASE_URL == 'http://localhost:1338' ? 'https://fahsai.bus.ku.ac.th/strapi/' : process.env.NEXT_PUBLIC_API_BASE_URL;
             setPreviewUrl(strapiUrl + profile.avatar.url);
         }
 
