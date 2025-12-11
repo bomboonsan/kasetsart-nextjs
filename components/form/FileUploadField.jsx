@@ -147,6 +147,12 @@ export default function FileUploadField({
         }
     }, [])
 
+    // Use a ref to track the current attachments for synchronous access in upload
+    const attachmentsRef = useRef(attachments)
+    useEffect(() => {
+        attachmentsRef.current = attachments
+    }, [attachments])
+
     const doUpload = useCallback(async (fileList) => {
         const filesArray = Array.from(fileList)
         if (filesArray.length === 0) return
@@ -186,35 +192,37 @@ export default function FileUploadField({
             })
 
             // รวมไฟล์ใหม่กับไฟล์เดิม (incremental) และ dedupe
-            let mergedAttachments;
-            setAttachments(prevAttachments => {
-                console.log('🔄 Merging attachments:', {
-                    previous: prevAttachments.length,
-                    new: newAttachments.length,
-                    previousFiles: prevAttachments.map(a => a.documentId || a.id),
-                    newFiles: newAttachments.map(a => a.documentId || a.id)
-                });
-                mergedAttachments = dedupe([...prevAttachments, ...newAttachments])
-                console.log('✅ Merged result:', {
-                    count: mergedAttachments.length,
-                    files: mergedAttachments.map(a => a.documentId || a.id)
-                });
-                return mergedAttachments
-            })
+            // Use ref to get current attachments synchronously to avoid race conditions
+            const currentAttachments = attachmentsRef.current || []
+            console.log('🔄 Merging attachments:', {
+                previous: currentAttachments.length,
+                new: newAttachments.length,
+                previousFiles: currentAttachments.map(a => a.documentId || a.id),
+                newFiles: newAttachments.map(a => a.documentId || a.id)
+            });
+            
+            const mergedAttachments = dedupe([...currentAttachments, ...newAttachments])
+            console.log('✅ Merged result:', {
+                count: mergedAttachments.length,
+                files: mergedAttachments.map(a => a.documentId || a.id)
+            });
+            
+            // Update state with merged attachments
+            setAttachments(mergedAttachments)
+            // Update ref immediately for next upload
+            attachmentsRef.current = mergedAttachments
+            // Update lastAppliedRef to prevent sync effect from overwriting
+            lastAppliedRef.current = JSON.stringify(mergedAttachments)
 
-            // แจ้ง parent ด้วยรายการรวม (normalized) - เรียกหลัง setState เพื่อหลีกเลี่ยง warning
+            // แจ้ง parent ด้วยรายการรวม (normalized)
             try {
-                if (mergedAttachments) {
-                    console.log('📤 Calling onFilesChange with:', {
-                        count: mergedAttachments.length,
-                        hasCallback: !!onFilesChange,
-                        files: mergedAttachments
-                    });
-                    onFilesChange?.(mergedAttachments)
-                    console.log('✅ onFilesChange completed');
-                } else {
-                    console.warn('⚠️ mergedAttachments is undefined, not calling onFilesChange');
-                }
+                console.log('📤 Calling onFilesChange with:', {
+                    count: mergedAttachments.length,
+                    hasCallback: !!onFilesChange,
+                    files: mergedAttachments
+                });
+                onFilesChange?.(mergedAttachments)
+                console.log('✅ onFilesChange completed');
             } catch (e) {
                 console.error('❌ onFilesChange threw error:', e)
             }
@@ -229,23 +237,31 @@ export default function FileUploadField({
             toast.error('อัปโหลดไฟล์ไม่สำเร็จ: ' + errorMessage)
         } finally {
             setUploading(false)
+            // Reset file input to allow selecting the same file again
+            try {
+                const el = document.getElementById(`file-upload-field-input-${instanceIdRef.current}`)
+                if (el) el.value = ''
+            } catch (e) {
+                // Ignore reset errors
+            }
         }
     }, [session?.jwt, normalize, dedupe, onFilesChange]) 
 
     const removeAttachment = useCallback((idx) => {
         // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
-        let normalizedAttachments;
-        setAttachments(prevAttachments => {
-            const next = prevAttachments.filter((_, i) => i !== idx)
-            normalizedAttachments = dedupe(next.map(normalize).filter(Boolean))
-            return normalizedAttachments
-        })
+        const currentAttachments = attachmentsRef.current || []
+        const next = currentAttachments.filter((_, i) => i !== idx)
+        const normalizedAttachments = dedupe(next.map(normalize).filter(Boolean))
+        
+        // Update state and ref
+        setAttachments(normalizedAttachments)
+        attachmentsRef.current = normalizedAttachments
+        // Update lastAppliedRef to prevent sync effect from overwriting
+        lastAppliedRef.current = JSON.stringify(normalizedAttachments)
 
-        // แจ้ง parent หลัง setState เพื่อหลีกเลี่ยง warning
+        // แจ้ง parent
         try {
-            if (normalizedAttachments) {
-                onFilesChange?.(normalizedAttachments)
-            }
+            onFilesChange?.(normalizedAttachments)
         } catch (e) {
             console.warn('onFilesChange threw in removeAttachment', e)
         }
