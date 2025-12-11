@@ -273,9 +273,39 @@ export default function FileUploadField({
         }
     }, [session?.jwt, normalize, dedupe, onFilesChange]) 
 
-    const removeAttachment = useCallback((idx) => {
-        // ลบไฟล์เฉพาะในรายการที่อัปโหลดแล้ว (ไม่ยุ่งกับฝั่ง Strapi server เพื่อความง่าย)
+    const removeAttachment = useCallback(async (idx) => {
         const currentAttachments = attachmentsRef.current || []
+        const fileToDelete = currentAttachments[idx]
+        
+        // Delete from Strapi server if it has an ID
+        if (fileToDelete?.id || fileToDelete?.documentId) {
+            try {
+                const fileId = fileToDelete.documentId || fileToDelete.id
+                console.log('🗑️ Deleting file from server:', { idx, fileId, fileName: fileToDelete.name })
+                
+                const response = await fetch(`${API_BASE}/api/upload/files/${fileId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${session?.jwt}`
+                    }
+                })
+                
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => response.statusText)
+                    console.warn('Failed to delete file from server:', errorText)
+                    toast.error('ไม่สามารถลบไฟล์จาก server ได้: ' + errorText)
+                    return // Don't update local state if server deletion failed
+                }
+                
+                console.log('✅ File deleted from server successfully')
+            } catch (error) {
+                console.error('Error deleting file from server:', error)
+                toast.error('เกิดข้อผิดพลาดในการลบไฟล์: ' + (error.message || 'ไม่ทราบสาเหตุ'))
+                return // Don't update local state if server deletion failed
+            }
+        }
+        
+        // Update local state only after successful server deletion
         const next = currentAttachments.filter((_, i) => i !== idx)
         const normalizedAttachments = dedupe(next.map(normalize).filter(Boolean))
         
@@ -289,9 +319,9 @@ export default function FileUploadField({
         try {
             onFilesChange?.(normalizedAttachments)
         } catch (e) {
-            console.warn('onFilesChange threw in removeAttachment', e)
+            console.error('Error calling onFilesChange:', e)
         }
-    }, [dedupe, normalize, onFilesChange])
+    }, [session?.jwt, dedupe, normalize, onFilesChange, safeStringify])
 
     const handleDrag = useCallback((e) => {
         e.preventDefault()
