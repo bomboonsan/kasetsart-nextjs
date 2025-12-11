@@ -19,7 +19,7 @@ import { Button } from '../ui/button';
 import ProjectPicker from './ProjectPicker';
 import { CONFERENCE_FORM_INITIAL, COST_TYPE_OPTIONS } from '@/data/confernce';
 import { UPDATE_PROJECT_PARTNERS, CREATE_CONFERENCE } from '@/graphql/formQueries';
-import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
+import { extractInternalUserIds, normalizeDocumentId, sanitizeForGraphQL } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 // Add BigInt serialization support for JSON.stringify
@@ -172,11 +172,16 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
 
         try {
             // เตรียมข้อมูล attachments - ดึง ID ของไฟล์ที่อัปโหลดแล้ว with null safety
+            // Use String to handle both BigInt and UUID formats
             const attachmentIds = Array.isArray(formData.attachments)
                 ? formData.attachments
                     .filter(att => att && (att.id || att.documentId))
-                    .map(att => Number(att.documentId || att.id))
-                    .filter(id => Number.isFinite(id) && id > 0)
+                    .map(att => {
+                        const rawId = att.documentId || att.id;
+                        // Convert BigInt to string, or use String() for other types
+                        return typeof rawId === 'bigint' ? rawId.toString() : String(rawId);
+                    })
+                    .filter(id => id && id.length > 0 && id !== 'undefined' && id !== 'null')
                 : [];
 
             // When editing, merge original IDs with new IDs to ensure old files are preserved
@@ -245,15 +250,18 @@ export default function ConferenceForm({ initialData, onSubmit, isEdit = false }
             // ถ้าเป็นการแก้ไข ให้เรียก onSubmit ที่ส่งมาจาก parent
             let submissionResult;
 
+            // Sanitize data to remove any BigInt values before sending to GraphQL
+            const sanitizedData = sanitizeForGraphQL(conferenceData);
+
             if (isEdit && onSubmit) {
-                submissionResult = await onSubmit(conferenceData);
+                submissionResult = await onSubmit(sanitizedData);
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else {
                 // สร้าง conference ใหม่
                 const conferenceResult = await createConference({
                     variables: {
-                        data: conferenceData
+                        data: sanitizedData
                     }
                 });
                 submissionResult = conferenceResult?.data?.createConference;

@@ -17,7 +17,7 @@ import ProjectPicker from './ProjectPicker';
 import Partners from './Partners'; // reuse if path; fallback to parent path
 import { PUBLICATION_FORM_INITIAL, listsStandardScopus, listsStandardScopusSubset, listsStandardABDC, listsStandardAJG, listsStandardWebOfScience } from '@/data/publication';
 import { CREATE_PUBLICATION, UPDATE_PUBLICATION, GET_PUBLICATION, UPDATE_PROJECT_PARTNERS } from '@/graphql/formQueries';
-import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
+import { extractInternalUserIds, normalizeDocumentId, sanitizeForGraphQL } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 // Add BigInt serialization support for JSON.stringify
@@ -205,19 +205,21 @@ const PublicationForm = React.memo(function PublicationForm({ initialData, onSub
             // Object.keys(data).forEach(k => { if (data[k] === null || data[k] === '') delete data[k]; });
             if (isEdit && !attachmentsChanged) delete data.attachments;
 
+            // Sanitize data to remove any BigInt values before sending to GraphQL
+            const sanitizedData = sanitizeForGraphQL(data);
 
             if (isEdit && onSubmit) {
-                submissionResult = await onSubmit(data);
+                submissionResult = await onSubmit(sanitizedData);
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (isEdit) {
-                submissionResult = await updatePublication({ variables: { documentId: initialData.documentId, data } });
+                submissionResult = await updatePublication({ variables: { documentId: initialData.documentId, data: sanitizedData } });
                 // Update originalAttachmentIdsRef to reflect the new state after save
                 originalAttachmentIdsRef.current = finalAttachmentIds;
             } else if (onSubmit) {
-                submissionResult = await onSubmit(data);
+                submissionResult = await onSubmit(sanitizedData);
             } else {
-                submissionResult = await createPublication({ variables: { data } });
+                submissionResult = await createPublication({ variables: { data: sanitizedData } });
                 toast.success('บันทึกผลงานตีพิมพ์สำเร็จแล้ว!');
                 setFormData(PUBLICATION_FORM_INITIAL);
             }

@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 import { FUND_FORM_INITIAL } from '@/data/fund'
 import toast from 'react-hot-toast'
 
-import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners'
+import { extractInternalUserIds, normalizeDocumentId, sanitizeForGraphQL } from '@/utils/partners'
 
 // Add BigInt serialization support for JSON.stringify
 if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {

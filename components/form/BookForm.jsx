@@ -15,7 +15,7 @@ import FundPicker from './FundPicker';
 import { Button } from '@/components/ui/button';
 import { BOOK_FORM_INITIAL } from '@/data/book';
 import { CREATE_BOOK, UPDATE_BOOK, GET_BOOK, UPDATE_FUND_PARTNERS } from '@/graphql/formQueries';
-import { extractInternalUserIds, normalizeDocumentId } from '@/utils/partners';
+import { extractInternalUserIds, normalizeDocumentId, sanitizeForGraphQL } from '@/utils/partners';
 import toast from 'react-hot-toast';
 
 // Add BigInt serialization support for JSON.stringify
@@ -248,24 +248,28 @@ export default function BookForm({ documentId, isEdit = false, onSubmit, initial
 
 			let submissionResult;
 
+			// Sanitize data to remove any BigInt values before sending to GraphQL
+			const sanitizedBookData = sanitizeForGraphQL(bookData);
+
 			if (isEdit) {
 				if (onSubmit) {
-					submissionResult = await onSubmit(bookData);
+					submissionResult = await onSubmit(sanitizedBookData);
 				} else {
-					submissionResult = await updateBook({ variables: { documentId, data: bookData } });
+					submissionResult = await updateBook({ variables: { documentId, data: sanitizedBookData } });
 				}
 			} else {
-				submissionResult = await createBook({ variables: { data: bookData } });
+				submissionResult = await createBook({ variables: { data: sanitizedBookData } });
 			}
 
 			if (fundDocumentId) {
+				const sanitizedPartnersData = sanitizeForGraphQL({
+					partners: partnersForRelation,
+					users_permissions_users: usersPermissionsUsers
+				});
 				await updateFundPartners({
 					variables: {
 						documentId: fundDocumentId,
-						data: {
-							partners: partnersForRelation,
-							users_permissions_users: usersPermissionsUsers
-						}
+						data: sanitizedPartnersData
 					}
 				});
 			}

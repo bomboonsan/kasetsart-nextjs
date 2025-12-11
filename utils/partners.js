@@ -84,3 +84,40 @@ export const extractInternalUserIds = (partners) => {
 
     return Array.from(new Set(collected));
 };
+
+/**
+ * Sanitize an object/array for GraphQL by converting all BigInt values to strings.
+ * This recursively processes nested objects and arrays.
+ * @param {any} input - The value to sanitize
+ * @returns {any} - The sanitized value with BigInt converted to string
+ */
+export const sanitizeForGraphQL = (input) => {
+    // Handle null/undefined
+    if (input === null || input === undefined) {
+        return input;
+    }
+
+    // Handle BigInt - convert to string
+    if (typeof input === 'bigint') {
+        return input.toString();
+    }
+
+    // Handle arrays - recursively sanitize each element
+    if (Array.isArray(input)) {
+        return input.map(item => sanitizeForGraphQL(item));
+    }
+
+    // Handle objects - recursively sanitize each value
+    if (typeof input === 'object') {
+        const sanitized = {};
+        for (const key of Object.keys(input)) {
+            // Skip __typename fields
+            if (key === '__typename') continue;
+            sanitized[key] = sanitizeForGraphQL(input[key]);
+        }
+        return sanitized;
+    }
+
+    // Handle primitives (string, number, boolean) - return as-is
+    return input;
+};
