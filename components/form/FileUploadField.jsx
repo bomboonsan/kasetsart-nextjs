@@ -6,6 +6,13 @@ import { useSession } from "next-auth/react";
 import toast from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
 
+// Add BigInt serialization support for JSON.stringify
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+    BigInt.prototype.toJSON = function () {
+        return this.toString();
+    };
+}
+
 export default function FileUploadField({
     label,
     onFilesChange,
@@ -27,6 +34,21 @@ export default function FileUploadField({
     // ซิงค์ค่าจากภายนอก (กรณีแก้ไข/รีเฟรช state จาก parent)
     // ป้องกันการเรียก setAttachments ซ้ำๆ เมื่อ prop `value` มี reference ใหม่แต่ข้อมูลเดิม
     const lastAppliedRef = useRef(JSON.stringify(value || []))
+
+    // Helper function to safely stringify objects that may contain BigInt
+    const safeStringify = useCallback((obj) => {
+        try {
+            return JSON.stringify(obj, (key, value) => {
+                if (typeof value === 'bigint') {
+                    return value.toString()
+                }
+                return value
+            })
+        } catch (e) {
+            console.warn('safeStringify error:', e)
+            return '[]'
+        }
+    }, [])
 
     // Helper function to parse ID
     const parseId = useCallback((v) => {
@@ -62,13 +84,15 @@ export default function FileUploadField({
 
                 const idStr = parseId(file.id ?? file.documentId ?? file.document_id)
                 const docIdStr = parseId(file.documentId ?? file.document_id ?? file.id)
+                // Convert size to number if it's a BigInt
+                const size = typeof file.size === 'bigint' ? Number(file.size) : file.size
 
                 return {
                     id: idStr,
                     documentId: docIdStr,
                     name: file.name || file.filename || 'unnamed-file',
                     url: url,
-                    size: file.size,
+                    size,
                     mime: file.mime || file.mimetype,
                 }
             }).filter(Boolean)
@@ -80,7 +104,7 @@ export default function FileUploadField({
 
     useEffect(() => {
         try {
-            const incoming = JSON.stringify(normalizedIncomingValue)
+            const incoming = safeStringify(normalizedIncomingValue)
             if (incoming !== lastAppliedRef.current) {
                 console.log('📎 FileUploadField syncing from parent:', {
                     previous: lastAppliedRef.current?.length,
@@ -117,12 +141,14 @@ export default function FileUploadField({
             const name = file.name || file.filename || file.alternativeText || file.caption || 'unnamed-file'
             const idStr = parseId(file.id ?? file.documentId ?? file.document_id)
             const docIdStr = parseId(file.documentId ?? file.document_id ?? file.id)
+            // Convert size to number if it's a BigInt
+            const size = typeof file.size === 'bigint' ? Number(file.size) : file.size
             return {
                 id: idStr,
                 documentId: docIdStr,
                 name,
                 url,
-                size: file.size,
+                size,
                 mime: file.mime || file.mimetype,
             }
         } catch (error) {
@@ -136,7 +162,7 @@ export default function FileUploadField({
             const seen = new Map()
             for (const a of arr || []) {
                 if (!a) continue
-                const key = a?.documentId ?? a?.id ?? a?.url ?? a?.name ?? JSON.stringify(a)
+                const key = a?.documentId ?? a?.id ?? a?.url ?? a?.name ?? safeStringify(a)
                 if (!key) continue
                 if (!seen.has(key)) seen.set(key, a)
             }
@@ -212,7 +238,7 @@ export default function FileUploadField({
             // Update ref immediately for next upload
             attachmentsRef.current = mergedAttachments
             // Update lastAppliedRef to prevent sync effect from overwriting
-            lastAppliedRef.current = JSON.stringify(mergedAttachments)
+            lastAppliedRef.current = safeStringify(mergedAttachments)
 
             // แจ้ง parent ด้วยรายการรวม (normalized)
             try {
@@ -257,7 +283,7 @@ export default function FileUploadField({
         setAttachments(normalizedAttachments)
         attachmentsRef.current = normalizedAttachments
         // Update lastAppliedRef to prevent sync effect from overwriting
-        lastAppliedRef.current = JSON.stringify(normalizedAttachments)
+        lastAppliedRef.current = safeStringify(normalizedAttachments)
 
         // แจ้ง parent
         try {
